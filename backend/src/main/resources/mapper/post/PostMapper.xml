@@ -4,20 +4,22 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.project.api.v1.post.mapper.PostMapper">
 
-
-
-
-<resultMap id="PostMap" type="com.ssafy.project.api.v1.post.dto.PostDto">
-    <id property="postId" column="post_id"/>
-    <result property="boardId" column="board_id"/>
-    <result property="userId" column="user_id"/>
-    <result property="challengeId" column="challenge_id"/>
-    <result property="title" column="title"/>
-    <result property="contentMd" column="content_md"/>
-    <result property="likesCount" column="likes_count"/>
-    <result property="createdAt" column="created_at"/>
-    <result property="updatedAt" column="updated_at"/>
-    <result property="deletedAt" column="deleted_at"/>
-</resultMap>
+	<insert id="createPost" parameterType="map" useGeneratedKeys="true" keyProperty="dto.postId">
+	    INSERT INTO posts (board_id, user_id, challenge_id, title, content_md)
+	    VALUES (#{dto.boardId}, #{userId}, #{dto.challengeId}, #{dto.title}, #{dto.contentMd})
+	</insert>
+	
+	<resultMap id="PostMap" type="com.ssafy.project.api.v1.post.dto.PostDto">
+	    <id property="postId" column="post_id"/>
+	    <result property="boardId" column="board_id"/>
+	    <result property="userId" column="user_id"/>
+	    <result property="challengeId" column="challenge_id"/>
+	    <result property="title" column="title"/>
+	    <result property="contentMd" column="content_md"/>
+	    <result property="likesCount" column="likes_count"/>
+	    <result property="createdAt" column="created_at"/>
+	    <result property="updatedAt" column="updated_at"/>
+	    <result property="deletedAt" column="deleted_at"/>
+	</resultMap>
 
 </mapper>
