@@ -1,4 +1,4 @@
-package com.ssafy.project.domain.transaction.entity;
+package com.ssafy.project.api.v1.transaction.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionEntity {
+public class TransactionDto {
 	private Long transactionId;
     private Long userId;
 

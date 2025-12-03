@@ -1,4 +1,4 @@
-package com.ssafy.project.domain.userMonthlyAgg.entity;
+package com.ssafy.project.api.v1.userMonthlyAgg.dto;
 
 import java.math.BigDecimal;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserMonthlyAggEntity {
+public class UserMonthlyAggDto {
     private Long monthlyId;
     private Long userId;
     private Integer year;

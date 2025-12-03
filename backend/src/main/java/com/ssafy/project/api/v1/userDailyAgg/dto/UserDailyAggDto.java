@@ -1,4 +1,4 @@
-package com.ssafy.project.domain.DailyAgg.entity;
+package com.ssafy.project.api.v1.userDailyAgg.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDailyAggEntity {
+public class UserDailyAggDto {
     private Long reportId;
     private Long userId;
     private LocalDate day;
