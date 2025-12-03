@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "sass-embedded": "^1.93.3"
+  },
+  "dependencies": {
+    "pnpm": "^10.24.0"
   }
 }
