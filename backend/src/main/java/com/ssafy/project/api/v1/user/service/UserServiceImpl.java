@@ -1,6 +1,7 @@
 package com.ssafy.project.api.v1.user.service;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.project.api.v1.user.dto.UserDto;
@@ -10,9 +11,11 @@ import com.ssafy.project.api.v1.user.mapper.UserMapper;
 @Service
 public class UserServiceImpl implements UserService {
 	private final UserMapper uMapper;
+	private final PasswordEncoder passwordEncoder;
 	
-	public UserServiceImpl(UserMapper uMapper) {
+	public UserServiceImpl(UserMapper uMapper, PasswordEncoder passwordEncoder) {
 		this.uMapper = uMapper;
+		this.passwordEncoder = passwordEncoder;
 	}
 	
 	@Override
@@ -22,7 +25,7 @@ public class UserServiceImpl implements UserService {
 			return null; // 나중에 error로 바꾸기
 		}
 		
-		String hashedPw = "";
+		String hashedPw = passwordEncoder.encode(req.getPassword());
 		UserDto user = UserDto.builder()
 		        .loginId(req.getLoginId())
 		        .pwHash(hashedPw) // 비밀번호 해시처리해서 넣기 -> 나중에 추가
