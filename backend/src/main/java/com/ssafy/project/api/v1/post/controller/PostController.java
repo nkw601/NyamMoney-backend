@@ -1,11 +1,13 @@
 package com.ssafy.project.api.v1.post.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.project.api.v1.post.dto.PostDetailResponse;
 import com.ssafy.project.api.v1.post.dto.PostDto;
 import com.ssafy.project.api.v1.post.service.PostService;
 
@@ -13,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/post")
-@RequiredArgsConstructor
 public class PostController {
 	private final PostService postService;
+	public PostController(PostService postService) {
+		this.postService = postService;
+	}
 	
 	@PostMapping
     public Long createPost(
@@ -25,5 +29,11 @@ public class PostController {
         dto.setBoardId(boardId);
         return postService.createPost(dto, userId);
     }
+	
+	@GetMapping("/{postId}")
+	public PostDetailResponse getPostDetail(@PathVariable Long postId, @PathVariable Long boardId) {
+		return postService.getPostDetail(postId);
+		
+	}
 
 }
