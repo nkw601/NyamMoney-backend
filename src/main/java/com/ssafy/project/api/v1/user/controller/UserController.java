@@ -1,11 +1,14 @@
 package com.ssafy.project.api.v1.user.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.project.api.v1.user.dto.UserDetailResponse;
 import com.ssafy.project.api.v1.user.dto.UserDto;
 import com.ssafy.project.api.v1.user.dto.UserLoginRequest;
 import com.ssafy.project.api.v1.user.dto.UserLoginResponse;
@@ -33,5 +36,12 @@ public class UserController {
 		
 		return ResponseEntity.ok(res);
 	}
+	
+	@GetMapping("/{userId}")
+	public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable Long userId) {
+		UserDetailResponse res = uService.getUserDetail(userId);
+		return ResponseEntity.ok(res);
+	}
+	
 	
 }
