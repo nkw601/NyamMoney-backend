@@ -59,7 +59,7 @@
 			resultMap="UserResultMap">
 		SELECT *
 		FROM users
-		WHERE user_id = #{userId}} AND deleted_at IS NULL
+		WHERE user_id = #{userId} AND deleted_at IS NULL
 	</select>
 	
 </mapper>
