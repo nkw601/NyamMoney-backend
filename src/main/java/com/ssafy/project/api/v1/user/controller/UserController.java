@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.project.api.v1.user.dto.UserDto;
+import com.ssafy.project.api.v1.user.dto.UserLoginRequest;
+import com.ssafy.project.api.v1.user.dto.UserLoginResponse;
 import com.ssafy.project.api.v1.user.dto.UserSignupRequest;
 import com.ssafy.project.api.v1.user.dto.UserSignupResponse;
 import com.ssafy.project.api.v1.user.service.UserService;
@@ -28,6 +30,13 @@ public class UserController {
 		UserDto user = uService.signup(req);
 		
 		UserSignupResponse res = new UserSignupResponse(user.getUserId(), user.getNickname(), user.getCreatedAt());
+		
+		return ResponseEntity.ok(res);
+	}
+	
+	@PostMapping("login")
+	public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest req){
+		UserLoginResponse res = uService.login(req);
 		
 		return ResponseEntity.ok(res);
 	}
