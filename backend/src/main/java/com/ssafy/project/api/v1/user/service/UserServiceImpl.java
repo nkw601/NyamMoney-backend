@@ -76,7 +76,10 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getMonthlyBudget(),
                 user.getTriggerBudget(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getProfileVisibility(),
+                user.getShareLevel()
         );
 	}
 
