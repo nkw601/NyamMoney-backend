@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
   email              VARCHAR(255) NOT NULL,
   pw_hash            VARCHAR(255) NOT NULL,
   nickname           VARCHAR(40)  NOT NULL,
-  profile_visibility ENUM('public', 'protected') NOT NULL DEFAULT 'public',
-  share_level        ENUM('none', 'summary', 'detail') NOT NULL DEFAULT 'summary',
+  profile_visibility ENUM('PUBLIC', 'PROTECTED') NOT NULL DEFAULT 'PUBLIC',
+  share_level        ENUM('NONE', 'SUMMARY', 'DETAIL') NOT NULL DEFAULT 'SUMMARY',
   timezone           VARCHAR(40) DEFAULT 'Asia/Seoul',
   monthly_budget     BIGINT DEFAULT 0,
   trigger_budget     BIGINT DEFAULT 0,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
   occurred_at        DATETIME NOT NULL,  -- 거래일시
   amount             BIGINT NOT NULL,  -- 금액
-  tx_type            ENUM('income','expense','transfer') NOT NULL, -- 분류
+  tx_type            ENUM('INCOME','EXPENSE','TRANSFER') NOT NULL, -- 분류
 
   category_id        BIGINT UNSIGNED NULL,   -- 카테고리
   merchant_name_raw  VARCHAR(120) NULL,      -- 원본 가맹점명(AfstNm)
@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS user_follows (
   follow_id   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   follower_id BIGINT UNSIGNED NOT NULL,  -- 나 (팔로우 하는 사람)
   followee_id BIGINT UNSIGNED NOT NULL,  -- 상대 (팔로우 대상)
-  status      ENUM('pending', 'accepted', 'rejected', 'blocked') NOT NULL DEFAULT 'pending',
+  status      ENUM('PENDING', 'ACCEPTED', 'REJECTED', 'BLOCKED') NOT NULL DEFAULT 'PENDING',
   created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (follow_id),
