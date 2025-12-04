@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.project.api.v1.user.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.ssafy.project.api.v1.user.dto.UserDto" autoMapping="true">
+        <id     property="userId"            column="user_id" />
+        <result property="loginId"           column="login_id" />
+        <result property="pwHash"            column="pw_hash" />
+        <result property="profileVisibility" column="profile_visibility" />
+        <result property="shareLevel"        column="share_level" />
+        <result property="monthlyBudget"     column="monthly_budget" />
+        <result property="triggerBudget"     column="trigger_budget" />
+        <result property="createdAt"         column="created_at" />
+        <result property="updatedAt"         column="updated_at" />
+        <result property="deletedAt"         column="deleted_at" />
+    </resultMap>
+
+
+    <insert id="insertUser"
+            parameterType="com.ssafy.project.api.v1.user.dto.UserDto"
+            useGeneratedKeys="true"
+            keyProperty="userId">
+        INSERT INTO users (
+            login_id, email, pw_hash, nickname,
+            profile_visibility, share_level, timezone,
+            monthly_budget, trigger_budget
+        )
+        VALUES (
+            #{loginId}, #{email}, #{pwHash}, #{nickname},
+            #{profileVisibility}, #{shareLevel}, #{timezone},
+            #{monthlyBudget}, #{triggerBudget}
+        )
+    </insert>
+
+    <select id="findByLoginId"
+            resultMap="UserResultMap">
+        SELECT *
+        FROM users
+        WHERE login_id = #{loginId}
+    </select>
+
+</mapper>
