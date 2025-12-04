@@ -4,13 +4,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ssafy.project.api.v1.user.mapper.UserMapper">
-
-    <resultMap id="UserResultMap" type="com.ssafy.project.api.v1.user.dto.UserDto" autoMapping="true">
+	<resultMap id="UserResultMap" type="com.ssafy.project.api.v1.user.dto.UserDto">
         <id     property="userId"            column="user_id" />
         <result property="loginId"           column="login_id" />
+        <result property="email"             column="email" />
         <result property="pwHash"            column="pw_hash" />
+        <result property="nickname"          column="nickname" />
         <result property="profileVisibility" column="profile_visibility" />
         <result property="shareLevel"        column="share_level" />
+        <result property="timezone"          column="timezone" />
         <result property="monthlyBudget"     column="monthly_budget" />
         <result property="triggerBudget"     column="trigger_budget" />
         <result property="createdAt"         column="created_at" />
@@ -20,20 +22,28 @@
 
 
     <insert id="insertUser"
-            parameterType="com.ssafy.project.api.v1.user.dto.UserDto"
-            useGeneratedKeys="true"
-            keyProperty="userId">
-        INSERT INTO users (
-            login_id, email, pw_hash, nickname,
-            profile_visibility, share_level, timezone,
-            monthly_budget, trigger_budget
-        )
-        VALUES (
-            #{loginId}, #{email}, #{pwHash}, #{nickname},
-            #{profileVisibility}, #{shareLevel}, #{timezone},
-            #{monthlyBudget}, #{triggerBudget}
-        )
-    </insert>
+        parameterType="com.ssafy.project.api.v1.user.dto.UserDto"
+        useGeneratedKeys="true"
+        keyProperty="userId">
+
+    INSERT INTO users (
+        login_id,
+        email,
+        pw_hash,
+        nickname,
+        monthly_budget,
+        trigger_budget
+    )
+    VALUES (
+        #{loginId},
+        #{email},
+        #{pwHash},
+        #{nickname},
+        #{monthlyBudget},
+        #{triggerBudget}
+    )
+</insert>
+
 
     <select id="findByLoginId"
             resultMap="UserResultMap">
