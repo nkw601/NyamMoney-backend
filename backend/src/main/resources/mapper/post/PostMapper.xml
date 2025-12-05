@@ -54,6 +54,15 @@
 	<insert id="createPost" parameterType="com.ssafy.project.api.v1.post.dto.PostDto"
             useGeneratedKeys="true" keyProperty="postId">
 		INSERT INTO posts (board_id, user_id, challenge_id, title, content_md)
-		VALUES ( #{boardId}, #{userId}, #{challengeId}, #{title}, #{contentMd})
+		VALUES ( #{boardId}, #{userId},
+		<choose>
+		    <when test="challengeId != null and challengeId != 0">
+		        #{challengeId}
+		    </when>
+		    <otherwise>
+		        NULL
+		    </otherwise>
+		</choose>,
+		#{title}, #{contentMd})
 	</insert>
 	</mapper>

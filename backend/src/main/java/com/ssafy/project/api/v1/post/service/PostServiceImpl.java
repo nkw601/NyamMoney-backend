@@ -39,8 +39,9 @@ public class PostServiceImpl implements PostService {
 		dto.setContentMd(req.getContentMd());
 		
 		postMapper.createPost(dto);
+		PostDetailResponse detail = postMapper.getPostDetail(dto.getPostId());
 		
-		return new PostCreateResponse(dto.getPostId(), dto.getBoardId(), dto.getTitle(), dto.getCreatedAt());
+		return new PostCreateResponse(detail.getPostId(), detail.getBoardId(), detail.getTitle(), detail.getCreatedAt());
 	}
 
 }

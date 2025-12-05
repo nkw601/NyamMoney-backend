@@ -11,6 +11,7 @@ import com.ssafy.project.api.v1.post.dto.PostCreateRequest;
 import com.ssafy.project.api.v1.post.dto.PostCreateResponse;
 import com.ssafy.project.api.v1.post.dto.PostDetailResponse;
 import com.ssafy.project.api.v1.post.service.PostService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 
 import jakarta.validation.Valid;
