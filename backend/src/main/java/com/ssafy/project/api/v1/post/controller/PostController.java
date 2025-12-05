@@ -2,6 +2,7 @@ package com.ssafy.project.api.v1.post.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +46,14 @@ public class PostController {
 			@RequestParam Long userId, @RequestBody @Valid PostUpdateRequest req) {
 		PostDetailResponse updated = postService.updatePost(postId, userId, req);
 		return ResponseEntity.ok(updated);
+	}
+	
+	@DeleteMapping("/{postId}")
+	public ResponseEntity<Void> deletePost(@PathVariable Long boardId, @PathVariable Long postId,
+			@RequestParam Long userId){ 
+		// 로그인 했으면 security에서 userId 꺼내 써도 됨
+		postService.deletePost(boardId, postId, userId);
+		return ResponseEntity.noContent().build(); // 204 반환
 	}
 
 }
