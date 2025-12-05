@@ -1,5 +1,7 @@
 package com.ssafy.project.api.v1.post.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.Data;
 
 @Data
@@ -8,8 +10,8 @@ public class PostDetailResponse {
 	private Long boardId;
 	private String title;
 	private String content;
-	private String createdAt;
-	private String updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 	private int commentCount;
 	private int likeCount;
 	
