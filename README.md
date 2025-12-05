@@ -1,10 +1,8 @@
 # 1205
 - Post, User CURD 작성
 - login, singup 페이지 구현
-![alt text](/etc/img/1205_post.png)
-![alt text](/etc/img/1205_user.png)
-![alt text](/etc/img/1205_login.png)
-![alt text](/etc/img/1205_singup.png)
+![alt text](/etc/img/1205_post.png) ![alt text](/etc/img/1205_user.png)
+![alt text](/etc/img/1205_login.png) ![alt text](/etc/img/1205_singup.png)
 
 # 1128
 - DTO 설계 및 API 변경으로 인한 SQL, ERD 수정
