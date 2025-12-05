@@ -65,4 +65,15 @@
 		</choose>,
 		#{title}, #{contentMd})
 	</insert>
+	
+	<update id="updatePost" parameterType="com.ssafy.project.api.v1.post.dto.PostDto">
+		UPDATE posts
+		SET
+			title = #{title},
+			content_md = #{contentMd},
+			updated_at = CURRENT_TIMESTAMP
+		WEHRE post_id = #{postId} AND deleted_at IS NULL
+	</update>
+	
+	
 	</mapper>

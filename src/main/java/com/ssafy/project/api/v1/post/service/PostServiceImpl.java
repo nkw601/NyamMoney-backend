@@ -6,6 +6,7 @@ import com.ssafy.project.api.v1.post.dto.PostCreateRequest;
 import com.ssafy.project.api.v1.post.dto.PostCreateResponse;
 import com.ssafy.project.api.v1.post.dto.PostDetailResponse;
 import com.ssafy.project.api.v1.post.dto.PostDto;
+import com.ssafy.project.api.v1.post.dto.PostUpdateRequest;
 import com.ssafy.project.api.v1.post.mapper.PostMapper;
 
 import jakarta.validation.Valid;
@@ -16,13 +17,6 @@ public class PostServiceImpl implements PostService {
 	public PostServiceImpl(PostMapper postMapper) {
 		this.postMapper = postMapper;
 	}
-
-//	@Override
-//	public Long createPost(PostDto dto, Long userId) {
-//		dto.setUserId(userId);
-//		postMapper.createPost(dto, userId);
-//		return dto.getPostId(); // 생성된 PK 반환
-//	}
 
 	@Override
 	public PostDetailResponse getPostDetail(Long postId) {
@@ -42,6 +36,18 @@ public class PostServiceImpl implements PostService {
 		PostDetailResponse detail = postMapper.getPostDetail(dto.getPostId());
 		
 		return new PostCreateResponse(detail.getPostId(), detail.getBoardId(), detail.getTitle(), detail.getCreatedAt());
+	}
+
+	@Override
+	public PostDetailResponse updatePost(Long postId, Long userId, @Valid PostUpdateRequest req) {
+		PostDto dto = new PostDto();
+		dto.setPostId(postId);
+		dto.setTitle(req.getTitle());
+		dto.setContentMd(req.getContentMd());
+		
+		postMapper.updatePost(dto);
+		
+		return postMapper.getPostDetail(postId);
 	}
 
 }
