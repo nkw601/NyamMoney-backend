@@ -17,4 +17,6 @@ public interface PostMapper {
 
 	void updatePost(PostDto dto);
 
+	void deletePost(Long postId);
+
 }
