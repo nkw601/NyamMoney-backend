@@ -15,4 +15,6 @@ public interface PostMapper {
 
 	int createPost(PostDto dto);
 
+	void updatePost(PostDto dto);
+
 }
