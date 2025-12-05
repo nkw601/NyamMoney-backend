@@ -9,6 +9,7 @@ public class PostCreateRequest {
 	private String title;
 	@NotNull
 	private String contentMd;
+	
 	private Long challengeId;
 
 }
