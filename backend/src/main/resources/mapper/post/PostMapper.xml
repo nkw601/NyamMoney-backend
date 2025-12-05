@@ -31,11 +31,13 @@
 		</association>
 	</resultMap>
 
+<!--
 	<insert id="createPost" parameterType="map" useGeneratedKeys="true" keyProperty="dto.postId">
 	    INSERT INTO posts (board_id, user_id, challenge_id, title, content_md)
 	    VALUES (#{dto.boardId}, #{userId}, #{dto.challengeId}, #{dto.title}, #{dto.contentMd})
 	</insert>
-	
+  -->	
+  
 	<select id="getPostDetail" resultMap="PostDetailMap">
 		SELECT 
             p.post_id, p.board_id, p.title, p.content_md,
@@ -48,4 +50,10 @@
         JOIN users u ON p.user_id = u.user_id
         WHERE p.post_id = #{postId} AND p.deleted_at IS NULL
 	</select>
+	
+	<insert id="createPost" parameterType="com.ssafy.project.api.v1.post.dto.PostDto"
+            useGeneratedKeys="true" keyProperty="postId">
+		INSERT INTO posts (board_id, user_id, challenge_id, title, content_md)
+		VALUES ( #{boardId}, #{userId}, #{challengeId}, #{title}, #{contentMd})
+	</insert>
 	</mapper>
