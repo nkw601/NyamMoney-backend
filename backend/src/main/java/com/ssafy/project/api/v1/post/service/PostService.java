@@ -18,4 +18,6 @@ public interface PostService {
 
 	PostDetailResponse updatePost(Long postId, Long userId, @Valid PostUpdateRequest req);
 
+	void deletePost(Long boardId, Long postId, Long userId);
+
 }
