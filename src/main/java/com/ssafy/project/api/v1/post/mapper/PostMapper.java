@@ -9,8 +9,10 @@ import com.ssafy.project.api.v1.post.dto.PostDto;
 @Mapper
 public interface PostMapper {
 
-	Long createPost(@Param("dto")PostDto dto, @Param("userId")Long userId);
+	//Long createPost(@Param("dto")PostDto dto, @Param("userId")Long userId);
 
 	PostDetailResponse getPostDetail(Long postId);
+
+	int createPost(PostDto dto);
 
 }
