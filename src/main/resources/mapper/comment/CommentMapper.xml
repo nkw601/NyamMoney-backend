@@ -32,4 +32,11 @@
 	          AND c.post_id = #{postId}
 	          AND c.deleted_at IS NULL
     </select>
+    
+    <insert id="createComment" parameterType="com.ssafy.project.api.v1.comment.dto.CommentDto"
+    		useGeneratedKeys="true" keyProperty="commentId">
+    		INSERT INTO comments (post_id, user_id, content_md, created_at, updated_at)
+    		VALUES (#{postId}, #{userId}, #{contentMd}, NOW(), NOW())
+    </insert>
+    
 	</mapper>
