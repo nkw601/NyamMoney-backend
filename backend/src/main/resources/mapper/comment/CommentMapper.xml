@@ -2,8 +2,34 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssafy.project.api.v1.comment.mapper.CommnetMapper">
+<mapper namespace="com.ssafy.project.api.v1.comment.mapper.CommentMapper">
 
-	
-	
+	<resultMap id="CommentDetailMap" type="com.ssafy.project.api.v1.comment.dto.CommentDetailResponse">
+        <id property="commentId" column="comment_id" />
+        <result property="postId" column="post_id" />
+        <result property="content" column="content_md" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="update_at" />
+
+        <association property="author" javaType="com.ssafy.project.api.v1.comment.dto.CommentDetailResponse$AuthorInfo">
+            <id property="userId" column="user_id"/>
+            <result property="nickname" column="nickname"/>
+        </association>
+    </resultMap>
+    
+    <select id="getComment" resultMap="CommentDetailMap">
+	    SELECT
+	            c.comment_id,
+	            c.post_id,
+	            c.content_md,
+	            c.created_at,
+	            c.updated_at,
+	            u.user_id,
+	            u.nickname
+	        FROM comments c
+	        JOIN users u ON c.user_id = u.user_id
+	        WHERE c.comment_id = #{commentId}
+	          AND c.post_id = #{postId}
+	          AND c.deleted_at IS NULL
+    </select>
 	</mapper>
