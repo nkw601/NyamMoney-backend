@@ -2,9 +2,14 @@ package com.ssafy.project.api.v1.comment.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.project.api.v1.comment.dto.CommentCreateRequest;
+import com.ssafy.project.api.v1.comment.dto.CommentCreateResponse;
 import com.ssafy.project.api.v1.comment.dto.CommentDetailResponse;
 import com.ssafy.project.api.v1.comment.service.CommentService;
 
@@ -21,5 +26,12 @@ public class CommentController {
 											@PathVariable Long postId,
 											@PathVariable Long commentId) {
 		return commentService.getComment(boardId, postId, commentId);
+	}
+	
+	@PostMapping
+	public CommentCreateResponse createComment(@PathVariable Long postId, @RequestParam Long userId,
+											   @RequestBody CommentCreateRequest req) {
+		
+		return commentService.createComment(postId, userId, req);
 	}
 }
