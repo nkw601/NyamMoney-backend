@@ -11,4 +11,5 @@ public class UserLoginResponse {
     private String loginId;
     private String nickname;
     private String accessToken;
+    private String refreshToken;
 }
