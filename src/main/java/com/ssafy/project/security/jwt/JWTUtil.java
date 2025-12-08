@@ -38,35 +38,26 @@ public class JWTUtil {
     // ==== access / refresh 토큰 생성 메서드 ====
 
     public String createAccessToken(UserDto user) {
-        // 여기서는 role 개념이 없으니까 userId, loginId, nickname 정도만 넣자
-        return create(
-                "accessToken",
-                accessExpMin,
-                Map.of(
-                        "userId", user.getUserId(),
-                        "loginId", user.getLoginId(),
-                        "nickname", user.getNickname()
-                )
-        );
+        Map<String, Object> claims = Map.of(
+                "userId", user.getUserId(),
+                "loginId", user.getLoginId(),
+                "nickname", user.getNickname());
+        return create("accessToken", accessExpMin, claims);
     }
 
     public String createRefreshToken(UserDto user) {
-        return create(
-                "refreshToken",
-                refreshExpMin,
-                Map.of(
-                        "userId", user.getUserId(),
-                        "loginId", user.getLoginId()
-                )
-        );
+        Map<String, Object> claims = Map.of(
+                "userId", user.getUserId(),
+                "loginId", user.getLoginId());
+        return create("refreshToken", refreshExpMin, claims);
     }
 
     /**
      * JWT 생성
      *
-     * @param subject token의 제목(accessToken, refreshToken)
+     * @param subject   token의 제목(accessToken, refreshToken)
      * @param expireMin 만료 시간(분)
-     * @param claims 토큰에 담을 데이터
+     * @param claims    토큰에 담을 데이터
      */
     public String create(String subject, long expireMin, Map<String, Object> claims) {
 
@@ -74,11 +65,11 @@ public class JWTUtil {
         Date expireDate = new Date(now + 1000L * 60L * expireMin);
 
         String jwt = Jwts.builder()
-                .subject(subject)           // 토큰 용도
-                .issuedAt(new Date(now))    // 발급 시간
-                .expiration(expireDate)     // 만료 시간
-                .claims(claims)             // 커스텀 클레임
-                .signWith(key)              // HS256 + secret key
+                .subject(subject) // 토큰 용도
+                .issuedAt(new Date(now)) // 발급 시간
+                .expiration(expireDate) // 만료 시간
+                .claims(claims) // 커스텀 클레임
+                .signWith(key) // HS256 + secret key
                 .compact();
 
         log.debug("jwt 토큰 발행 (subject: {}): {}", subject, jwt);
@@ -95,7 +86,6 @@ public class JWTUtil {
 
         var jws = parser.parseSignedClaims(jwt);
 
-        // 여기서 만료/서명 오류 나면 예외 터지고, 성공하면 payload 반환
         return jws.getPayload();
     }
 }
