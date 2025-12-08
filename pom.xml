@@ -83,10 +83,19 @@
 		    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 		    <version>2.6.0</version>
 		</dependency>
+<<<<<<< HEAD
 		<dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-crypto</artifactId>
 		</dependency>
+=======
+		
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+>>>>>>> 3f6546ea4b2f6189974f911a157ae734f53ddf76
 
 	</dependencies>
 	<dependencyManagement>
