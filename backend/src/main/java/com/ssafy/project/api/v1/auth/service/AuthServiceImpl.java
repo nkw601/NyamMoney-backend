@@ -13,8 +13,10 @@ import com.ssafy.project.api.v1.user.mapper.UserMapper;
 import com.ssafy.project.security.jwt.JWTUtil;
 
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 	private final RefreshTokenMapper rMapper;
     private final UserMapper uMapper;
@@ -36,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	@Transactional
 	public TokenRefreshResponse refresh(String refreshToken) {
+	    log.debug("[AUTH] 요청으로 들어온 refreshToken: '{}'", refreshToken);
+
 		Claims claims  = jwtUtil.getClaims(refreshToken);
 		
 		Long userId = claims.get("userId", Long.class);
@@ -43,6 +47,13 @@ public class AuthServiceImpl implements AuthService {
         
         // 저장된 토큰인지 확인 
         RefreshTokenDto rToken = rMapper.findByTokenHash(refreshToken);
+		
+		log.debug("[AUTH] token userId = {}", userId);
+		log.debug("[AUTH] DB   userId = {}", rToken != null ? rToken.getUserId() : null);
+		log.debug("[AUTH] rToken == null ? {}", (rToken == null));
+        log.debug("[AUTH] DB에서 조회된 refreshToken: {}", rToken != null ? "'" + rToken.getTokenHash() + "'" : "null");
+        
+    
         if (rToken == null || !rToken.getUserId().equals(userId)) {
             throw new IllegalArgumentException("유효하지 않은 refresh token 입니다.");
         }
