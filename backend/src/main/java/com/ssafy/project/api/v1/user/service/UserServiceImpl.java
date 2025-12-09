@@ -1,11 +1,16 @@
 package com.ssafy.project.api.v1.user.service;
 
 import java.net.Authenticator.RequestorType;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ssafy.project.api.v1.auth.refreshToken.dto.RefreshTokenDto;
+import com.ssafy.project.api.v1.auth.refreshToken.mapper.RefreshTokenMapper;
 import com.ssafy.project.api.v1.user.dto.UserDetailResponse;
 import com.ssafy.project.api.v1.user.dto.UserDto;
 import com.ssafy.project.api.v1.user.dto.UserLoginRequest;
@@ -22,10 +27,13 @@ public class UserServiceImpl implements UserService {
 	private final UserMapper uMapper;
 	private final PasswordEncoder passwordEncoder;
 	private final JWTUtil jwtUtil;
-	public UserServiceImpl(UserMapper uMapper, PasswordEncoder passwordEncoder, JWTUtil jwtUtil) {
+	private final RefreshTokenMapper rMapper;
+	
+	public UserServiceImpl(UserMapper uMapper, PasswordEncoder passwordEncoder, JWTUtil jwtUtil, RefreshTokenMapper rMapper) {
 		this.uMapper = uMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
+		this.rMapper = rMapper;
 	}
 	
 	@Override
@@ -60,17 +68,34 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserLoginResponse login(UserLoginRequest req) {
 		UserDto user = uMapper.findByLoginId(req.getLoginId());
+		// 사용자 조회 
 		if(user == null) {
 			throw new IllegalArgumentException("아이디/비밀번호가 올바르지 않습니다.");
 		}
 		
 		boolean match = passwordEncoder.matches(req.getPassword(), user.getPwHash());
 		
+		// 비밀번호 확인 
 		if(!match) throw new IllegalArgumentException("아이디/비밀번호가 올바르지 않습니다.");
 		
-
+		// 토큰 생성 
         String accessToken = jwtUtil.createAccessToken(user);
         String refreshToken = jwtUtil.createRefreshToken(user);
+        
+        // 토큰 만료 시간 추출 
+        Date refreshExp = jwtUtil.getClaims(refreshToken).getExpiration();
+        LocalDateTime expiresAt = refreshExp.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+        
+        // db에 refresh token 저장 
+        RefreshTokenDto refreshTokenDto = RefreshTokenDto.builder()
+                .userId(user.getUserId())
+                .tokenHash(refreshToken)     // 일단 해싱 안하고 바로 저장  
+                .expiresAt(expiresAt)
+                .build();
+
+        rMapper.insertRefreshToken(refreshTokenDto);
         
 		return new UserLoginResponse(user.getUserId(), user.getLoginId(), user.getNickname(), accessToken, refreshToken);
 	}
