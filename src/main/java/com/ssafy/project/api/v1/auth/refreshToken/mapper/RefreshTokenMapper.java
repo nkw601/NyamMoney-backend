@@ -1,6 +1,7 @@
 package com.ssafy.project.api.v1.auth.refreshToken.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.ssafy.project.api.v1.auth.refreshToken.dto.RefreshTokenDto;
 
@@ -8,7 +9,8 @@ import com.ssafy.project.api.v1.auth.refreshToken.dto.RefreshTokenDto;
 public interface RefreshTokenMapper {
 	int insertRefreshToken(RefreshTokenDto token);
 	
-	int deleteByUserId(Long userId);
+	int deleteByUserId(@Param("userId") Long userId);
 	
-	RefreshTokenDto findByTokenHash(String tokenHash);
+    RefreshTokenDto findByTokenHash(@Param("tokenHash") String tokenHash);
+
 }
