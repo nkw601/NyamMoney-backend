@@ -21,4 +21,6 @@ public interface UserService {
 	void deleteUser(Long userId);
 	
     void updatePassword(Long userId, UserPasswordUpdateRequest req);
+
+	boolean checkNickname(String nickname);
 }

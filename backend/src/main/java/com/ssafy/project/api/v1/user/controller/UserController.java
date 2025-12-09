@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.project.api.v1.user.dto.DuplicateCheckResponse;
 import com.ssafy.project.api.v1.user.dto.UserDetailResponse;
 import com.ssafy.project.api.v1.user.dto.UserDto;
 import com.ssafy.project.api.v1.user.dto.UserLoginRequest;
@@ -68,5 +70,16 @@ public class UserController {
 	public ResponseEntity<Map<String, String>> updatePassword(@PathVariable Long userId, @RequestBody UserPasswordUpdateRequest req){
 		uService.updatePassword(userId, req);
 		return ResponseEntity.ok(Map.of("message", "비밀번호가 변경되었습니다."));
+	}
+	
+	@GetMapping("/check-nickname")
+	public DuplicateCheckResponse checkNickname(@RequestParam String nickname) {
+	    boolean exists = uService.checkNickname(nickname);
+
+	    return new DuplicateCheckResponse(
+	            !exists,        // available = 사용 가능 여부 (exists의 반대)
+	            "nickname",
+	            nickname
+	    );
 	}
 }

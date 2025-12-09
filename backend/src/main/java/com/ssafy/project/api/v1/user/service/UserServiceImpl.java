@@ -212,4 +212,9 @@ public class UserServiceImpl implements UserService {
 		if(updated == 0) throw new IllegalStateException("비밀번호 변경 실패");
 	}
 
+	@Override
+	public boolean checkNickname(String nickname) {
+		return uMapper.countNickname(nickname) > 0;
+	}
+
 }
