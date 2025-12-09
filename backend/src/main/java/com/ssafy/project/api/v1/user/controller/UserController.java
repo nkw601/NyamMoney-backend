@@ -82,4 +82,15 @@ public class UserController {
 	            nickname
 	    );
 	}
+	
+	@GetMapping("/check-loginId")
+	public DuplicateCheckResponse checkLoginId(@RequestParam String loginId) {
+	    boolean exists = uService.checkLoginId(loginId);
+
+	    return new DuplicateCheckResponse(
+	            !exists,
+	            "loginId",
+	            loginId
+	    );
+	}
 }
