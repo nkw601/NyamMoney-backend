@@ -17,4 +17,5 @@ public interface UserMapper {
 	// UserDto findByEmail(String email);
     // UserDto findByNickname(String nickname);
 	int countNickname(@Param("nickname") String nickname);
+	int countLoginId(@Param("loginId") String loginId);
 }
