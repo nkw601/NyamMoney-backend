@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean checkLoginId(String loginId) {
-		return uMapper.countLoginId(loginId);
+		return uMapper.countLoginId(loginId) > 0;
 	}
 
 }
