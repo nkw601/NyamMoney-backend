@@ -1,13 +1,13 @@
 package com.ssafy.project.api.v1.postLike.dto;
 
-import java.time.LocalDateTime;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class LikePostResponse {
-	private Long PostId;
-	private Long userId;
-	private LocalDateTime likedAt;
-
+    private Long postId;
+    private boolean likeState;
+    private int likesCount;
 }
+
