@@ -37,6 +37,7 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 	
+	@SecurityRequirement(name = "")
 	@PostMapping("login")
 	public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest req){
 		UserLoginResponse res = uService.login(req);

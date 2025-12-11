@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/posts/{postId}/like")
-@SecurityRequirement(name = "bearerAuth")
 public class PostLikeController {
 	private final PostLikeService postLikeService;
 	public PostLikeController(PostLikeService postLikeService) {

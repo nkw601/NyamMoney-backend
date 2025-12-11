@@ -2,6 +2,7 @@ package com.ssafy.project.api.v1.comment.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,12 +19,12 @@ import com.ssafy.project.api.v1.comment.dto.CommentDetailResponse;
 import com.ssafy.project.api.v1.comment.dto.CommentListResponse;
 import com.ssafy.project.api.v1.comment.dto.CommentUpdateRequest;
 import com.ssafy.project.api.v1.comment.service.CommentService;
+import com.ssafy.project.security.auth.UserPrincipal;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/posts/{postId}/comments")
-@SecurityRequirement(name = "bearerAuth")
 public class CommentController {
 	private final CommentService commentService;
 	public CommentController(CommentService commentService) {
@@ -49,30 +50,34 @@ public class CommentController {
 												@RequestParam Long userId) {
 		return commentService.updateComment(postId, commentId, req, userId);
 	}
+
+	@DeleteMapping("/{commentId}")
+	public ResponseEntity<Void> deleteComment(@PathVariable Long boardId, @PathVariable Long postId,
+												@PathVariable Long commentId) throws Exception{
+		UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		Long userId = principal.getUserId();
+		
+		commentService.deleteComment(boardId, postId, commentId, userId);
+		return ResponseEntity.noContent().build();
+	}
 	
 //	@DeleteMapping("/{commentId}")
-//	public ResponseEntity<Void> deleteComment(@PathVariable Long boardId, @PathVariable Long postId,
-//												@PathVariable Long commentId, @AuthenticationPrincipal String userIdStr) throws NotFoundException, Exception{
-//		Long userId = Long.parseLong(userIdStr);
-//		commentService.deleteComment(boardId, postId, commentId, userId);
-//		return ResponseEntity.noContent().build();
+//	public ResponseEntity<Void> deleteComment(
+//	        @PathVariable Long boardId,
+//	        @PathVariable Long postId,
+//	        @PathVariable Long commentId,
+//	        @AuthenticationPrincipal String userIdStr) throws Exception {
+//
+//	    if (userIdStr == null || userIdStr.equals("anonymousUser")) {
+//	        return ResponseEntity.status(401).build(); // Unauthorized
+//	    }
+//
+//	    Long userId = Long.parseLong(userIdStr);
+//	    commentService.deleteComment(boardId, postId, commentId, userId);
+//	    return ResponseEntity.noContent().build();
 //	}
-	
-	@DeleteMapping("/{commentId}")
-	public ResponseEntity<Void> deleteComment(
-	        @PathVariable Long boardId,
-	        @PathVariable Long postId,
-	        @PathVariable Long commentId,
-	        @AuthenticationPrincipal String userIdStr) throws Exception {
-
-	    if (userIdStr == null || userIdStr.equals("anonymousUser")) {
-	        return ResponseEntity.status(401).build(); // Unauthorized
-	    }
-
-	    Long userId = Long.parseLong(userIdStr);
-	    commentService.deleteComment(boardId, postId, commentId, userId);
-	    return ResponseEntity.noContent().build();
-	}
 	
 	@GetMapping
 	public CommentListResponse getCommentList(@PathVariable Long postId,
