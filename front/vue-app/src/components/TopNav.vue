@@ -1,9 +1,18 @@
 <template>
-  <header class="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-    <div class="container flex h-16 items-center justify-between px-4 md:px-6 max-w-6xl mx-auto">
-      <div class="hidden md:block">
+  <header
+    class="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60"
+  >
+    <div
+      class="container flex h-16 items-center justify-end lg:justify-between px-4 lg:px-6 max-w-6xl mx-auto pl-16 lg:pl-6"
+    >
+      <div class="hidden lg:block">
         <nav class="flex items-center space-x-2">
-          <RouterLink to="/" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Home</RouterLink>
+          <RouterLink
+            to="/"
+            class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Home
+          </RouterLink>
           <template v-for="(segment, index) in pathSegments" :key="segment">
             <span class="text-muted-foreground/50">•</span>
             <RouterLink
@@ -15,20 +24,30 @@
           </template>
         </nav>
       </div>
+
       <div class="flex items-center gap-3">
-        <!-- 알림 버튼 -->
-        <Notifications></Notifications>
-        <!-- 테마 토글 버튼 -->
+        <Notifications />
         <button class="p-2 rounded-md hover:bg-accent" aria-label="Toggle theme">🌓</button>
 
-        <!-- 사용자 드롭다운 -->
         <div class="relative">
           <details class="relative">
             <summary class="list-none">
-              <button class="relative h-9 w-9 rounded-full ring-offset-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+              <button
+                class="relative h-9 w-9 rounded-full ring-offset-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
                 <div class="h-9 w-9 rounded-full border-2 border-primary/20 overflow-hidden">
-                  <img v-if="settings.avatar" :src="settings.avatar" :alt="settings.fullName" class="w-full h-full object-cover" />
-                  <div v-else class="bg-primary text-primary-foreground font-semibold flex items-center justify-center h-full">{{ initials }}</div>
+                  <img
+                    v-if="settings.avatar"
+                    :src="settings.avatar"
+                    :alt="settings.fullName"
+                    class="w-full h-full object-cover"
+                  />
+                  <div
+                    v-else
+                    class="bg-primary text-primary-foreground font-semibold flex items-center justify-center h-full"
+                  >
+                    {{ initials }}
+                  </div>
                 </div>
               </button>
             </summary>

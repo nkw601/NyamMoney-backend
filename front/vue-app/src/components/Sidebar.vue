@@ -9,12 +9,26 @@
     </button>
 
     <div
-      :class="[
-        'fixed inset-y-0 z-20 flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out lg:static',
-        isCollapsed ? 'w-[72px]' : 'w-72',
-        isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
-      ]"
-    >
+      v-if="isMobileOpen"
+      class="fixed inset-0 z-10 bg-black/30 lg:hidden"
+      @click="isMobileOpen = false"
+    ></div>
+
+    <div
+  :class="[
+    // 공통 스타일
+    'flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out',
+
+    // 위치: 모바일에선 fixed, 데스크탑에선 sticky
+    'fixed inset-y-0 left-0 z-20 lg:sticky lg:top-0 lg:h-screen',
+
+    // 너비 (접힘/펼침)
+    isCollapsed ? 'w-[72px]' : 'w-72',
+
+    // 모바일에서 열고 닫기
+    isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+  ]"
+>
       <div class="border-b border-border bg-gradient-to-br from-primary/5 to-secondary/5">
         <div :class="['flex h-16 items-center gap-3 px-4', isCollapsed && 'justify-center px-2']">
           <template v-if="!isCollapsed">
