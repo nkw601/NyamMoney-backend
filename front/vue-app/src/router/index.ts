@@ -49,26 +49,21 @@ const router = createRouter({
 })
 
 // restore()를 한 번만 호출하기 위한 플래그
+
 let restored = false
 
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
-  // 앱 최초 라우팅 시에만 localStorage 복원
+  // 앱 최초 라우팅 시에만 쿠키에서 토큰 복원
   if (!restored) {
-    auth.restore()
+    auth.setAuthFromToken()   // ← 여기!
     restored = true
   }
 
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    // 보호된 페이지인데 로그인 안 된 상태면 항상 /login 으로
     return next({ path: '/login' })
   }
-
-  // 로그인 화면에 이미 로그인된 상태로 접근하면 /dashboard로 보내고 싶다면:
-  // if (to.path === '/login' && auth.isAuthenticated) {
-  //   return next({ path: '/dashboard' })
-  // }
 
   return next()
 })

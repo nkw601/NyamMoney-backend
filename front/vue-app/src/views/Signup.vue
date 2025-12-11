@@ -14,11 +14,25 @@
         <div class="grid md:grid-cols-2 gap-4">
           <div class="space-y-2">
             <label class="text-sm font-medium" for="loginId">Login ID *</label>
-            <input id="loginId" v-model="form.loginId" type="text" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Choose a login ID" />
+            <input id="loginId" v-model="form.loginId" @input="onLoginIdInput" type="text" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Choose a login ID" />
+            <p
+              v-if="loginIdCheck.message || loginIdCheck.loading"
+              class="text-xs mt-1"
+              :class="loginIdCheck.available ? 'text-green-600' : 'text-red-500'"
+            >
+              {{ loginIdCheck.loading ? 'ID 확인 중...' : loginIdCheck.message }}
+            </p>
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium" for="nickname">Nickname *</label>
-            <input id="nickname" v-model="form.nickname" type="text" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Your display name" />
+            <input id="nickname" v-model="form.nickname" @input="onNicknameInput" type="text" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Your display name" />
+            <p
+              v-if="nicknameCheck.message || nicknameCheck.loading"
+              class="text-xs mt-1"
+              :class="nicknameCheck.available ? 'text-green-600' : 'text-red-500'"
+            >
+              {{ nicknameCheck.loading ? '닉네임 확인 중...' : nicknameCheck.message }}
+            </p>
           </div>
         </div>
         <div class="space-y-2">
@@ -31,8 +45,15 @@
             <input id="password" v-model="form.password" type="password" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Create a password" />
           </div>
           <div class="space-y-2">
-            <label class="text-sm font-medium" for="confirmPassword">Confirm Password *</label>
-            <input id="confirmPassword" v-model="form.confirmPassword" type="password" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Confirm your password" />
+            <label class="text-sm font-medium" for="passwordConfirm">Confirm Password *</label>
+            <input id="passwordConfirm" v-model="form.passwordConfirm" type="password" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Confirm your password" />
+            <p
+              v-if="passwordsMatch !== null"
+              class="text-xs mt-1"
+              :class="passwordsMatch ? 'text-green-600' : 'text-red-500'"
+            >
+              {{ passwordsMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.' }}
+            </p>
           </div>
         </div>
         <div class="space-y-3 pt-2">
@@ -84,19 +105,53 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+<script>
+import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/api/axios'
 
-export default defineComponent({
+export default {
   name: 'SignupView',
+
   setup() {
     const router = useRouter()
+
     const loading = ref(false)
+    const errorMessage = ref('')
+
+    // ------------------------
+    // 디바운스 유틸
+    // ------------------------
+    function debounce(fn, delay) {
+      let timer = null
+      return (...args) => {
+        clearTimeout(timer)
+        timer = setTimeout(() => fn(...args), delay)
+      }
+    }
+
+    // ------------------------
+    // 중복 체크 상태
+    // ------------------------
+    const loginIdCheck = reactive({
+      loading: false,
+      available: null, // true | false | null
+      message: '',
+    })
+
+    const nicknameCheck = reactive({
+      loading: false,
+      available: null,
+      message: '',
+    })
+
+    // ------------------------
+    // 폼 데이터
+    // ------------------------
     const form = reactive({
       loginId: '',
       password: '',
-      confirmPassword: '',
+      passwordConfirm: '',
       nickname: '',
       email: '',
       monthlyBudget: '',
@@ -104,22 +159,151 @@ export default defineComponent({
       profileVisibility: 'PUBLIC',
     })
 
-    function submit() {
-      if (form.password !== form.confirmPassword) {
-        alert('Passwords do not match!')
+    // 🔥 여기! setup 안, form 아래에 두기
+    const passwordsMatch = computed(() => {
+      if (!form.password || !form.passwordConfirm) return null
+      return form.password === form.passwordConfirm
+    })
+
+    // ------------------------
+    // 로그인 ID 중복 체크 (실제 API 호출)
+    // ------------------------
+    const checkLoginId = async () => {
+      const value = form.loginId.trim()
+      if (!value) {
+        loginIdCheck.loading = false
+        loginIdCheck.available = null
+        loginIdCheck.message = ''
         return
       }
-      loading.value = true
-      setTimeout(() => {
-        loading.value = false
-        alert('Account created — please sign in')
-        router.push('/login')
-      }, 1000)
+
+      try {
+        const { data } = await api.get('/v1/users/check-loginId', {
+          params: { loginId: value },
+        })
+
+        loginIdCheck.available = data.available
+        loginIdCheck.message = data.available
+          ? '사용 가능한 ID입니다.'
+          : '이미 존재하는 ID입니다.'
+      } catch (e) {
+        loginIdCheck.available = null
+        loginIdCheck.message = 'ID 확인 중 오류가 발생했습니다.'
+      } finally {
+        loginIdCheck.loading = false
+      }
     }
 
-    return { form, loading, submit }
-  }
-})
+    const debouncedCheckLoginId = debounce(checkLoginId, 300)
+
+    const onLoginIdInput = () => {
+      loginIdCheck.loading = true
+      loginIdCheck.available = null
+      loginIdCheck.message = ''
+      debouncedCheckLoginId()
+    }
+
+    // ------------------------
+    // 닉네임 중복 체크
+    // ------------------------
+    const checkNickname = async () => {
+      const value = form.nickname.trim()
+      if (!value) {
+        nicknameCheck.loading = false
+        nicknameCheck.available = null
+        nicknameCheck.message = ''
+        return
+      }
+
+      try {
+        const { data } = await api.get('/v1/users/check-nickname', {
+          params: { nickname: value },
+        })
+
+        nicknameCheck.available = data.available
+        nicknameCheck.message = data.available
+          ? '사용 가능한 닉네임입니다.'
+          : '이미 존재하는 닉네임입니다.'
+      } catch (e) {
+        nicknameCheck.available = null
+        nicknameCheck.message = '닉네임 확인 중 오류가 발생했습니다.'
+      } finally {
+        nicknameCheck.loading = false
+      }
+    }
+
+    const debouncedCheckNickname = debounce(checkNickname, 400)
+
+    const onNicknameInput = () => {
+      nicknameCheck.loading = true
+      nicknameCheck.available = null
+      nicknameCheck.message = ''
+      debouncedCheckNickname()
+    }
+
+    // ------------------------
+    // 회원가입 요청
+    // ------------------------
+    const submit = async () => {
+      errorMessage.value = ''
+
+      // 비밀번호 일치 체크
+      if (passwordsMatch.value === false) {
+        alert('비밀번호가 일치하지 않습니다.')
+        return
+      }
+
+      if (loginIdCheck.available === false) {
+        alert('이미 사용 중인 로그인 ID입니다.')
+        return
+      }
+      if (nicknameCheck.available === false) {
+        alert('이미 사용 중인 닉네임입니다.')
+        return
+      }
+
+      loading.value = true
+      try {
+        const body = {
+          loginId: form.loginId,
+          password: form.password,
+          passwordConfirm: form.passwordConfirm,
+          nickname: form.nickname,
+          email: form.email || null,
+          monthlyBudget: form.monthlyBudget ? Number(form.monthlyBudget) : null,
+          triggerBudget: form.triggerBudget ? Number(form.triggerBudget) : null,
+          profileVisibility: form.profileVisibility,
+        }
+
+        console.log('[SIGNUP] request:', body)
+        await api.post('/v1/users/signup', body)
+
+        alert('회원가입이 완료되었습니다!')
+        router.push('/login')
+      } catch (err) {
+        console.error('[SIGNUP] error:', err)
+        const msg =
+          err?.response?.data?.message || '회원가입 실패. 입력값을 다시 확인해주세요.'
+        errorMessage.value = msg
+        alert(msg)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    return {
+      form,
+      loading,
+      errorMessage,
+      loginIdCheck,
+      nicknameCheck,
+      passwordsMatch,      // 🔥 이거 꼭 리턴
+      onLoginIdInput,
+      onNicknameInput,
+      submit,
+    }
+  },
+}
 </script>
 
 <style scoped></style>

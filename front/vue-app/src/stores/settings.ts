@@ -1,3 +1,4 @@
+// src/stores/settings.ts
 import { defineStore } from 'pinia'
 
 export interface UserSettings {
@@ -31,6 +32,7 @@ export interface UserSettings {
   }
 }
 
+// 디폴트 값 (초기 진입 시 / localStorage 실패 시 사용)
 const defaultSettings: UserSettings = {
   avatar: '',
   fullName: 'Dollar Singh',
@@ -62,24 +64,77 @@ const defaultSettings: UserSettings = {
   },
 }
 
+// 👉 localStorage에서 읽을 때 항상 try/catch + window 체크
+function loadSettings(): UserSettings {
+  if (typeof window === 'undefined') {
+    return defaultSettings
+  }
+
+  try {
+    const raw = localStorage.getItem('userSettings')
+    if (!raw) return defaultSettings
+
+    const parsed = JSON.parse(raw)
+
+    // 혹시 필드가 추가/변경돼도 기본값이랑 merge 되도록
+    return {
+      ...defaultSettings,
+      ...parsed,
+      notifications: {
+        ...defaultSettings.notifications,
+        ...(parsed.notifications || {}),
+      },
+      privacy: {
+        ...defaultSettings.privacy,
+        ...(parsed.privacy || {}),
+      },
+    }
+  } catch (e) {
+    console.warn('[settings] localStorage 읽기 실패:', e)
+    return defaultSettings
+  }
+}
+
+// 👉 저장도 마찬가지로 방어적으로
+function saveSettings(settings: UserSettings) {
+  if (typeof window === 'undefined') return
+
+  try {
+    localStorage.setItem('userSettings', JSON.stringify(settings))
+  } catch (e) {
+    console.warn('[settings] localStorage 저장 실패:', e)
+  }
+}
+
 export const useSettingsStore = defineStore('settings', {
   state: (): { settings: UserSettings } => ({
-    settings: (typeof window !== 'undefined' && localStorage.getItem('userSettings'))
-      ? JSON.parse(localStorage.getItem('userSettings') as string)
-      : defaultSettings,
+    settings: loadSettings(),
   }),
   actions: {
     updateSettings(newSettings: Partial<UserSettings>) {
-      this.settings = { ...this.settings, ...newSettings }
-      localStorage.setItem('userSettings', JSON.stringify(this.settings))
+      this.settings = {
+        ...this.settings,
+        ...newSettings,
+      }
+      saveSettings(this.settings)
     },
-    updateNotificationSettings(notificationSettings: Partial<UserSettings['notifications']>) {
-      this.settings.notifications = { ...this.settings.notifications, ...notificationSettings }
-      localStorage.setItem('userSettings', JSON.stringify(this.settings))
+    updateNotificationSettings(
+      notificationSettings: Partial<UserSettings['notifications']>,
+    ) {
+      this.settings.notifications = {
+        ...this.settings.notifications,
+        ...notificationSettings,
+      }
+      saveSettings(this.settings)
     },
-    updatePrivacySettings(privacySettings: Partial<UserSettings['privacy']>) {
-      this.settings.privacy = { ...this.settings.privacy, ...privacySettings }
-      localStorage.setItem('userSettings', JSON.stringify(this.settings))
+    updatePrivacySettings(
+      privacySettings: Partial<UserSettings['privacy']>,
+    ) {
+      this.settings.privacy = {
+        ...this.settings.privacy,
+        ...privacySettings,
+      }
+      saveSettings(this.settings)
     },
   },
 })
