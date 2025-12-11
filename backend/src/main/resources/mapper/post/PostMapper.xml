@@ -81,5 +81,23 @@
 		WHERE post_id = #{postId}
 	</update>
 	
+	<!-- 좋아요 관련 -->
+	<update id="increaseLike">
+        UPDATE posts
+        SET likes_count = likes_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <update id="decreaseLike">
+        UPDATE posts
+        SET likes_count = likes_count - 1
+        WHERE post_id = #{postId}
+          AND likes_count > 0
+    </update>
+
+    <select id="getLikesCount" resultType="int">
+        SELECT likes_count FROM posts WHERE post_id = #{postId}
+    </select>
+	
 	
 	</mapper>

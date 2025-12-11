@@ -19,4 +19,12 @@ public interface PostMapper {
 
 	void deletePost(Long postId);
 
+	// 좋아요 관련
+	void increaseLike(Long postId);
+
+	void decreaseLike(Long postId);
+
+	int getLikesCount(Long postId);
+
+
 }
