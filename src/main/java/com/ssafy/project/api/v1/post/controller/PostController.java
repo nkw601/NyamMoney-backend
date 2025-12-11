@@ -23,7 +23,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/post")
-@SecurityRequirement(name = "bearerAuth")
 public class PostController {
 	private final PostService postService;
 	public PostController(PostService postService) {
@@ -35,7 +34,7 @@ public class PostController {
 		return postService.getPostDetail(postId);
 		
 	}
-	
+
 	@PostMapping
 	public PostCreateResponse createPost(@PathVariable Long boardId, 
 			@Valid @RequestBody PostCreateRequest dto,
