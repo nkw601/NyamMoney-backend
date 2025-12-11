@@ -53,7 +53,7 @@ export const useAuthStore = defineStore('auth', {
     async login({ loginId, password }) {
       this.loading = true
       try {
-        const res = await api.post('/api/v1/auth/login', { loginId, password })
+        const res = await api.post('/v1/auth/login', { loginId, password })
 
         const data = res.data
         this.userId = data.userId
