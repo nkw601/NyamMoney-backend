@@ -98,6 +98,14 @@
     <select id="getLikesCount" resultType="int">
         SELECT likes_count FROM posts WHERE post_id = #{postId}
     </select>
-	
+    
+    <select id="existsPost" resultType="int">
+	    SELECT COUNT(*)
+	    FROM posts
+	    WHERE board_id = #{boardId}
+	      AND post_id = #{postId}
+	      AND deleted_at IS NULL
+	</select>
+		
 	
 	</mapper>

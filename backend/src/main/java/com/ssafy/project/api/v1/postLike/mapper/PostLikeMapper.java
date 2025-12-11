@@ -12,4 +12,7 @@ public interface PostLikeMapper {
 
 	void deleteLike(Long likedId);
 
+	// 사용자가 그 게시글 좋아요 눌렀는지 여부 확인
+	int existsUserLike(Long postId, Long userId);
+
 }

@@ -1,5 +1,6 @@
 package com.ssafy.project.api.v1.postLike.service;
 
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.project.api.v1.post.mapper.PostMapper;
@@ -40,6 +41,18 @@ public class PostLikeServiceImpl implements PostLikeService {
         likesCount = postMapper.getLikesCount(postId);
 
         return new LikePostResponse(postId, likeState, likesCount);
+	}
+
+	@Override
+	public LikePostResponse getLikeInfo(Long boardId, Long postId, Long userId) throws NotFoundException {
+		Integer exists = postMapper.existsPost(boardId, postId); // 게시글 존재 여부
+		if(exists==null || exists==0) {
+			throw new NotFoundException("게시글을 찾을 수 없습니다.");
+		}
+		int likeCount = postMapper.getLikesCount(postId); // 좋아요 총 개수
+		boolean likeState = postLikeMapper.existsUserLike(postId, userId)==1; // 내가 눌렀는지 여부
+		
+		return new LikePostResponse(postId, likeState, likeCount);
 	}
 
 
