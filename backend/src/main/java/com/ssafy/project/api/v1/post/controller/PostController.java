@@ -18,10 +18,12 @@ import com.ssafy.project.api.v1.post.dto.PostDetailResponse;
 import com.ssafy.project.api.v1.post.dto.PostUpdateRequest;
 import com.ssafy.project.api.v1.post.service.PostService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/post")
+@SecurityRequirement(name = "bearerAuth")
 public class PostController {
 	private final PostService postService;
 	public PostController(PostService postService) {
