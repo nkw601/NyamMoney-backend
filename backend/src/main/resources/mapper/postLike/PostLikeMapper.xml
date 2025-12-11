@@ -23,5 +23,13 @@
         DELETE FROM post_likes
         WHERE liked_id = #{likedId}
     </delete>
+    
+    <!-- 사용자가 그 게시글을 좋아요 눌렀는지 여부 -->
+	<select id="existsUserLike" resultType="int">
+	    SELECT COUNT(*)
+	    FROM post_likes
+	    WHERE post_id = #{postId}
+	      AND user_id = #{userId}
+	</select>
 	
 	</mapper>

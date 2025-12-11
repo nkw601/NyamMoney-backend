@@ -26,5 +26,8 @@ public interface PostMapper {
 
 	int getLikesCount(Long postId);
 
+	// 게시글 존재?
+	Integer existsPost(Long boardId, Long postId);
+
 
 }
