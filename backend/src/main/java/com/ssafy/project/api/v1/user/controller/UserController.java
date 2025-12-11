@@ -32,7 +32,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/users")
-@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 	
 	private final UserService uService;
@@ -41,6 +40,7 @@ public class UserController {
 		this.uService = uService;
 	}
 	
+	@SecurityRequirement(name = "")
 	@PostMapping("/signup")
 	public ResponseEntity<UserSignupResponse> signup(@Valid @RequestBody UserSignupRequest req){
 		UserDto user = uService.signup(req);
@@ -74,6 +74,7 @@ public class UserController {
 		return ResponseEntity.ok(Map.of("message", "비밀번호가 변경되었습니다."));
 	}
 	
+	@SecurityRequirement(name = "")
 	@GetMapping("/check-nickname")
 	public DuplicateCheckResponse checkNickname(@RequestParam String nickname) {
 	    boolean exists = uService.checkNickname(nickname);
@@ -85,6 +86,7 @@ public class UserController {
 	    );
 	}
 	
+	@SecurityRequirement(name = "")
 	@GetMapping("/check-loginId")
 	public DuplicateCheckResponse checkLoginId(@RequestParam String loginId) {
 	    boolean exists = uService.checkLoginId(loginId);
