@@ -3,6 +3,7 @@ package com.ssafy.project.api.v1.user.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +25,7 @@ import com.ssafy.project.api.v1.user.dto.UserSignupResponse;
 import com.ssafy.project.api.v1.user.dto.UserUpdateRequest;
 import com.ssafy.project.api.v1.user.dto.UserUpdateResponse;
 import com.ssafy.project.api.v1.user.service.UserService;
+import com.ssafy.project.security.auth.UserPrincipal;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -92,5 +94,12 @@ public class UserController {
 	            "loginId",
 	            loginId
 	    );
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<UserDetailResponse> getMyDetail(@AuthenticationPrincipal UserPrincipal principal) {
+		Long userId = principal.getUserId();
+		UserDetailResponse response = uService.getUserDetail(userId);
+		return ResponseEntity.ok(response);
 	}
 }
