@@ -1,13 +1,12 @@
 <template>
-  <!-- 화면 높이에 딱 맞게, 바깥은 스크롤 안 되게 고정 -->
-  <div class="h-screen bg-background text-foreground flex overflow-hidden">
-    <!-- 왼쪽 사이드바 -->
+  <div class="min-h-screen bg-background text-foreground flex">
+    <!-- 사이드바: 반응형/sticky는 Sidebar.vue 안에서 처리 -->
     <Sidebar />
 
-    <!-- 오른쪽 영역: 이 안에서만 스크롤 -->
+    <!-- 오른쪽 영역 -->
     <div class="flex-1 flex flex-col">
       <TopNav />
-      <main class="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+      <main class="flex-1 bg-background">
         <slot />
       </main>
     </div>

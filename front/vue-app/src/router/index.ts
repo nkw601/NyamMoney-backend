@@ -17,6 +17,7 @@ import Help from '../views/Help.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
+  { path: '', name: 'Login', component: Login },
   { path: '/', name: 'Login', component: Login },
   { path: '/login', name: 'Login', component: Login },
   { path: '/dashboard', name: 'Dashboard', component: Home, meta: { requiresAuth: true } },
