@@ -19,8 +19,11 @@ import com.ssafy.project.api.v1.comment.dto.CommentListResponse;
 import com.ssafy.project.api.v1.comment.dto.CommentUpdateRequest;
 import com.ssafy.project.api.v1.comment.service.CommentService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @RestController
 @RequestMapping("/api/v1/boards/{boardId}/posts/{postId}/comments")
+@SecurityRequirement(name = "bearerAuth")
 public class CommentController {
 	private final CommentService commentService;
 	public CommentController(CommentService commentService) {
