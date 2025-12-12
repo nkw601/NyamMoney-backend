@@ -1,16 +1,20 @@
 <template>
   <Layout>
     <div class="p-8">
-      <h1>Boards</h1>
-    <p>게시판 목록을 불러오는 중...</p>
-  </div>
+      <!-- 여기서 자유게시판을 보여준다 -->
+      <FreeBoard />
+    </div>
   </Layout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import Layout from '../components/Layout.vue'
-export default defineComponent({ components: { Layout } })
-</script>
+<script>
+import Layout from '@/components/Layout.vue'
+import FreeBoard from '@/views/boards/FreeBoard.vue'
 
-<style scoped></style>
+export default {
+  components: {
+    Layout,
+    FreeBoard,
+  },
+}
+</script>
