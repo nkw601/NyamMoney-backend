@@ -16,18 +16,20 @@
 
     <div
   :class="[
-    // 공통 스타일
-    'flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out',
+  // 공통 스타일
+  'flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out',
 
-    // 위치: 모바일에선 fixed, 데스크탑에선 sticky
-    'fixed inset-y-0 left-0 z-20 lg:sticky lg:top-0 lg:h-screen',
+  // 위치
+  'fixed inset-y-0 left-0 z-20 lg:sticky lg:top-0 lg:h-screen',
 
-    // 너비 (접힘/펼침)
-    isCollapsed ? 'w-[72px]' : 'w-72',
+  // 👉 기본은 항상 w-72 (모바일)
+  'w-72',
+  // 👉 접힘/펼침은 lg 이상에서만 적용
+  isCollapsed ? 'lg:w-[72px]' : 'lg:w-72',
 
-    // 모바일에서 열고 닫기
-    isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
-  ]"
+  // 모바일 열고 닫기
+  isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+]"
 >
       <div class="border-b border-border bg-gradient-to-br from-primary/5 to-secondary/5">
         <div :class="['flex h-16 items-center gap-3 px-4', isCollapsed && 'justify-center px-2']">
@@ -59,10 +61,19 @@
                 class="flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200"
                 :class="isActive(item.href) ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
               >
-                <span :class="['h-4 w-4', !isCollapsed && 'mr-3']">{{ item.icon }}</span>
-                <span v-if="!isCollapsed">{{ item.name }}</span>
+                <span :class="['h-4 w-4', (!isCollapsed || isMobileOpen) && 'mr-3']">
+                  {{ item.icon }}
+                </span>
+                <span v-if="!isCollapsed || isMobileOpen">
+                  {{ item.name }}
+                </span>
               </RouterLink>
-              <span v-if="isCollapsed" class="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-card border border-border rounded text-xs text-muted-foreground opacity-0 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">{{ item.name }}</span>
+              <span
+                v-if="isCollapsed && !isMobileOpen"
+                class="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-card border border-border rounded text-xs text-muted-foreground opacity-0 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap"
+              >
+                {{ item.name }}
+              </span>
             </div>
           </template>
         </nav>
