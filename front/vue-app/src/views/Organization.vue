@@ -1,9 +1,9 @@
 <template>
   <Layout>
     <div class="p-8">
-      <h1 class="text-2xl font-semibold mb-4">Organization</h1>
-      <p>Organization page content goes here.</p>
-    </div>
+      <h1>Boards</h1>
+    <p>게시판 목록을 불러오는 중...</p>
+  </div>
   </Layout>
 </template>
 
