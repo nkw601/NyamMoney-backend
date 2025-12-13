@@ -19,3 +19,7 @@ export function fetchMe() {
 export function updateUser(userId, body) {
   return api.patch(`/v1/users/${userId}`, body)
 }
+
+export function updatePassword(userId, body) {
+  return api.patch(`/v1/users/${userId}/password`, body)
+}
