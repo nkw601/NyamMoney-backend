@@ -39,9 +39,12 @@ public class CommentController {
 	}
 	
 	@PostMapping
-	public CommentCreateResponse createComment(@PathVariable Long postId, @RequestParam Long userId,
+	public CommentCreateResponse createComment(@PathVariable Long postId,
 											   @RequestBody CommentCreateRequest req) {
-		
+		UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		Long userId = principal.getUserId();
 		return commentService.createComment(postId, userId, req);
 	}
 	
