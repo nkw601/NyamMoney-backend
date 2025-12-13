@@ -15,3 +15,7 @@ export function checkNickname(nickname) {
 export function fetchMe() {
   return api.get('/v1/users/me')
 }
+
+export function updateUser(userId, body) {
+  return api.patch(`/v1/users/${userId}`, body)
+}

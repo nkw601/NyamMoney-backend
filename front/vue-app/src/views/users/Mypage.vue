@@ -22,7 +22,15 @@
       <!-- Nickname -->
       <div class="grid gap-2">
         <label class="text-sm">닉네임</label>
-        <UiInput v-model="local.nickname" />
+        <UiInput v-model="local.nickname" @input="onNicknameInput" />
+
+        <p
+          v-if="nicknameCheck.message || nicknameCheck.loading"
+          class="text-xs mt-1"
+          :class="nicknameCheck.available ? 'text-green-600' : 'text-red-500'"
+        >
+          {{ nicknameCheck.loading ? '닉네임 확인 중...' : nicknameCheck.message }}
+        </p>
       </div>
 
       <!-- Name -->
@@ -84,8 +92,9 @@
         <button
           @click="saveAccount"
           class="px-4 py-2 bg-primary text-primary-foreground rounded"
+          :disabled="saving"
         >
-          수정하기
+          {{ saving ? '저장 중...' : '수정하기' }}
         </button>
       </div>
     </div>
@@ -110,33 +119,6 @@
             </div>
             <div class="text-right">
               <button class="px-4 py-2 bg-primary text-primary-foreground rounded">Save Security Settings</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="tab==='preferences'">
-        <div class="border border-border rounded bg-card p-4">
-          <h2 class="text-lg font-medium">Preferences</h2>
-          <div class="space-y-4 mt-4">
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <label class="text-sm">Language</label>
-                <UiSelect v-model="local.language">
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                </UiSelect>
-              </div>
-              <div>
-                <label class="text-sm">Currency</label>
-                <UiSelect v-model="local.currency">
-                  <option value="usd">USD</option>
-                  <option value="eur">EUR</option>
-                </UiSelect>
-              </div>
-            </div>
-            <div class="text-right">
-              <button class="px-4 py-2 bg-primary text-primary-foreground rounded">Save Preferences</button>
             </div>
           </div>
         </div>
@@ -198,6 +180,7 @@
   </div>
   </Layout>
 </template>
+
 <script>
 import { defineComponent, reactive, ref, onMounted } from 'vue'
 import Layout from '../../components/Layout.vue'
@@ -205,13 +188,14 @@ import UiInput from '../../components/ui/Input.vue'
 import UiSelect from '../../components/ui/Select.vue'
 import UiSwitch from '../../components/ui/Switch.vue'
 import UiCheckbox from '../../components/ui/Checkbox.vue'
-import { fetchMe } from '@/services/user.service'
+import { fetchMe, updateUser, checkNickname } from '@/services/user.service'
 
 export default defineComponent({
   name: 'SettingsView',
   components: { Layout, UiInput, UiSelect, UiSwitch, UiCheckbox },
   setup() {
     const loading = ref(false)
+    const saving = ref(false)
 
     // ✅ UserDetailResponse 기준 local 상태
     const local = reactive({
@@ -233,13 +217,11 @@ export default defineComponent({
     const tabs = [
       { value: 'account', label: 'Account' },
       { value: 'security', label: 'Security' },
-      { value: 'preferences', label: 'Preferences' },
       { value: 'notifications', label: 'Notifications' },
       { value: 'privacy', label: 'Privacy' },
     ]
     const tab = ref('account')
 
-    // 알림/프라이버시 탭은 아직 백엔드 연동 전 → 로컬 유지
     const notif = reactive({
       email: false,
       push: false,
@@ -252,12 +234,103 @@ export default defineComponent({
       personalizedAds: false,
     })
 
-    // ✅ 내 정보 로드
+    // =========================
+    // 유틸
+    // =========================
+    function debounce(fn, delay) {
+      let timer = null
+      return (...args) => {
+        clearTimeout(timer)
+        timer = setTimeout(() => fn(...args), delay)
+      }
+    }
+
+    const toNumberOrNull = (v) => {
+      if (v === '' || v === null || v === undefined) return null
+      const n = Number(v)
+      return Number.isNaN(n) ? null : n
+    }
+
+    /**
+     * 전화번호 정규화:
+     * - 공백/하이픈/괄호 등 제거 → 숫자만 남김
+     * - 001-0231-1234 같은 입력도 일단 숫자만 추출
+     */
+    const normalizePhone = (raw) => {
+      if (raw === null || raw === undefined) return ''
+      return String(raw).replace(/\D/g, '') // 숫자만
+    }
+
+    /**
+     * 한국 휴대폰 번호 검증(정규화된 숫자 기준)
+     * - 01로 시작
+     * - 총 10~11자리
+     */
+    const isValidKoreanMobile = (digits) => {
+      return /^01\d{8,9}$/.test(digits)
+    }
+
+    // =========================
+    // 닉네임 중복 체크
+    // =========================
+    const originalNickname = ref('')
+
+    const nicknameCheck = reactive({
+      loading: false,
+      available: null, // true | false | null
+      message: '',
+    })
+
+    const checkNicknameDup = async () => {
+      const value = (local.nickname || '').trim()
+
+      // 원래 닉네임이면 통과
+      if (value && value === originalNickname.value) {
+        nicknameCheck.loading = false
+        nicknameCheck.available = true
+        nicknameCheck.message = '현재 사용 중인 닉네임입니다.'
+        return
+      }
+
+      if (!value) {
+        nicknameCheck.loading = false
+        nicknameCheck.available = null
+        nicknameCheck.message = ''
+        return
+      }
+
+      try {
+        const { data } = await checkNickname(value)
+        nicknameCheck.available = data.available
+        nicknameCheck.message = data.available
+          ? '사용 가능한 닉네임입니다.'
+          : '이미 존재하는 닉네임입니다.'
+      } catch (e) {
+        nicknameCheck.available = null
+        nicknameCheck.message = '닉네임 확인 중 오류가 발생했습니다.'
+      } finally {
+        nicknameCheck.loading = false
+      }
+    }
+
+    const debouncedCheckNickname = debounce(checkNicknameDup, 400)
+
+    const onNicknameInput = () => {
+      nicknameCheck.loading = true
+      nicknameCheck.available = null
+      nicknameCheck.message = ''
+      debouncedCheckNickname()
+    }
+
+    // =========================
+    // 내 정보 로드
+    // =========================
     const loadMe = async () => {
       loading.value = true
       try {
         const { data } = await fetchMe()
         Object.assign(local, data)
+        originalNickname.value = data.nickname
         console.log('[ME] data:', data)
       } catch (err) {
         console.log('status', err?.response?.status)
@@ -271,9 +344,60 @@ export default defineComponent({
       loadMe()
     })
 
-    // 아직 수정 API가 없으므로 임시 처리
-    function saveAccount() {
-      alert('계정 정보 수정 API가 아직 없습니다.')
+    // =========================
+    // 저장(PATCH)
+    // =========================
+    const saveAccount = async () => {
+      if (!local.userId) {
+        alert('userId가 없습니다. /me 응답을 확인해주세요.')
+        return
+      }
+
+      // 1) 닉네임 변경 시 중복확인 강제
+      const nextNickname = (local.nickname || '').trim()
+      if (nextNickname !== originalNickname.value) {
+        if (nicknameCheck.available !== true) {
+          alert('닉네임 중복 확인을 완료해주세요.')
+          return
+        }
+      }
+
+      // 2) 휴대폰 정규화 + 검증
+      const normalizedPhone = normalizePhone(local.phoneNumber)
+
+      // 입력창에 사용자가 001-0231-1234 같은 걸 넣어도
+      // 서버에는 숫자만 보내되, 한국 휴대폰 형식 아니면 저장 막기
+      if (!isValidKoreanMobile(normalizedPhone)) {
+        alert('휴대폰 번호 형식이 올바르지 않습니다. 예: 01012341234')
+        return
+      }
+
+      saving.value = true
+      try {
+        const body = {
+          nickname: nextNickname,
+          email: local.email,
+          monthlyBudget: toNumberOrNull(local.monthlyBudget),
+          triggerBudget: toNumberOrNull(local.triggerBudget),
+          profileVisibility: local.profileVisibility,
+          name: (local.name || '').trim(),
+          phoneNumber: normalizedPhone, // ✅ 숫자만 전달
+        }
+
+        console.log('[USER PATCH] request:', body)
+
+        await updateUser(local.userId, body)
+
+        alert('수정이 완료되었습니다.')
+        await loadMe()
+      } catch (err) {
+        console.log('status', err?.response?.status)
+        console.log('body', err?.response?.data)
+        const msg = err?.response?.data?.message || '수정에 실패했습니다.'
+        alert(msg)
+      } finally {
+        saving.value = false
+      }
     }
 
     function saveNotifications() {
@@ -286,11 +410,14 @@ export default defineComponent({
 
     return {
       loading,
+      saving,
       tabs,
       tab,
       local,
       notif,
       priv,
+      nicknameCheck,
+      onNicknameInput,
       saveAccount,
       saveNotifications,
       savePrivacy,
@@ -298,4 +425,5 @@ export default defineComponent({
   },
 })
 </script>
+
 <style scoped></style>
