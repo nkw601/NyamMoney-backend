@@ -1,20 +1,19 @@
 <template>
   <Layout>
     <div class="p-8">
-      <!-- 여기서 자유게시판을 보여준다 -->
-      <FreeBoard />
+      <BoardPosts :boardId="1" title="자유 게시판" />
     </div>
   </Layout>
 </template>
 
 <script>
 import Layout from '@/components/Layout.vue'
-import FreeBoard from '@/views/boards/FreeBoard.vue'
+import BoardPosts from '@/views/boards/BoardPosts.vue'
 
 export default {
   components: {
     Layout,
-    FreeBoard,
+    BoardPosts,
   },
 }
 </script>
