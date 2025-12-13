@@ -196,6 +196,7 @@ CREATE TABLE IF NOT EXISTS comments (
   user_id    BIGINT UNSIGNED NOT NULL,
   content_md TEXT NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at DATETIME NULL,
   PRIMARY KEY (comment_id),
   KEY idx_cm_post (post_id),
@@ -205,6 +206,7 @@ CREATE TABLE IF NOT EXISTS comments (
   CONSTRAINT fk_cm_user FOREIGN KEY (user_id)
     REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- 일별 집계
 CREATE TABLE IF NOT EXISTS user_daily_agg (
@@ -312,4 +314,3 @@ CREATE TABLE IF NOT EXISTS payments (
   CONSTRAINT fk_pay_ch FOREIGN KEY (challenge_id)
     REFERENCES challenges(challenge_id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
