@@ -22,7 +22,7 @@ import com.ssafy.project.api.v1.post.service.PostService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/boards/{boardId}/post")
+@RequestMapping("/api/v1/boards/{boardId}/posts")
 public class PostController {
 	private final PostService postService;
 	public PostController(PostService postService) {
