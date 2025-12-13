@@ -1,11 +1,13 @@
 import api from '@/api/axios'
 
-export const userService = {
-  checkLoginId: (loginId) =>
-    api.get('/v1/users/check-loginId', { params: { loginId } }),
+export function signup(body) {
+  return api.post('/v1/users/signup', body)
+}
 
-  checkNickname: (nickname) =>
-    api.get('/v1/users/check-nickname', { params: { nickname } }),
+export function checkLoginId(loginId) {
+  return api.get('/v1/users/check-loginId', { params: { loginId } })
+}
 
-  signup: (body) => api.post('/v1/users/signup', body),
+export function checkNickname(nickname) {
+  return api.get('/v1/users/check-nickname', { params: { nickname }})
 }
