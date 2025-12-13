@@ -84,9 +84,9 @@
   </header>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent, computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useSettingsStore } from '../stores/settings'
 import { useAuthStore } from '../stores/auth'
 import Notifications from './Notifications.vue'
@@ -96,19 +96,21 @@ export default defineComponent({
   components: { RouterLink, Notifications },
   setup() {
     const route = useRoute()
+    const router = useRouter()
     const pathSegments = computed(() => route.path.split('/').filter(Boolean))
 
     const settingsStore = useSettingsStore()
     const settings = settingsStore.settings
 
     const initials = computed(() =>
-      settings.fullName
+      (settings.fullName || '')
         .split(' ')
+        .filter(Boolean)
         .map((n) => n[0])
-        .join('')
+        .join(''),
     )
 
-    function capitalize(s: string) {
+    function capitalize(s) {
       return s.charAt(0).toUpperCase() + s.slice(1)
     }
 
@@ -119,10 +121,9 @@ export default defineComponent({
       isMenuOpen.value = false
     }
 
-    // 바깥 클릭 시 닫기 (선택사항이지만 있으면 UX 좋아짐)
-    const onClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      // .relative 래퍼 바깥 클릭이면 닫기
+    // 바깥 클릭 시 닫기
+    const onClickOutside = (event) => {
+      const target = event.target
       if (!target.closest('.relative')) {
         isMenuOpen.value = false
       }
@@ -137,15 +138,23 @@ export default defineComponent({
     })
 
     const auth = useAuthStore()
-    const handleLogout = () => {
+    const handleLogout = async () => {
       closeMenu()
-      auth.logout()
+      await auth.logout()
+      router.push('/')
     }
 
-    return { pathSegments, settings, initials, capitalize, isMenuOpen, closeMenu, handleLogout }
+    return {
+      pathSegments,
+      settings,
+      initials,
+      capitalize,
+      isMenuOpen,
+      closeMenu,
+      handleLogout,
+    }
   },
 })
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

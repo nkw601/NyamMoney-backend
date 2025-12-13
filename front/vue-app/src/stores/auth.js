@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
-import api from '@/api/axios'
+import { login as loginApi, logout as logoutApi } from '@/services/auth.service'
 
 // 안전한 JWT payload 디코딩 함수(atob 대체)
 function decodeJwtPayload(token) {
@@ -10,8 +10,8 @@ function decodeJwtPayload(token) {
     const json = decodeURIComponent(
       atob(padded)
         .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
     )
     return JSON.parse(json)
   } catch (e) {
@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', {
     userId: null,
     loginId: null,
     nickname: null,
+    role: null,
     isAuthenticated: false,
     loading: false,
   }),
@@ -48,18 +49,20 @@ export const useAuthStore = defineStore('auth', {
       this.loginId = payload.loginId
       this.nickname = payload.nickname
       this.isAuthenticated = true
+      this.role = payload.role
     },
 
     async login({ loginId, password }) {
       this.loading = true
       try {
-        const res = await api.post('/v1/auth/login', { loginId, password })
-
+        const res = await loginApi({ loginId, password })
         const data = res.data
+
         this.userId = data.userId
         this.loginId = data.loginId
         this.nickname = data.nickname
         this.isAuthenticated = true
+        this.role = data.role
 
         Cookies.set('accessToken', data.accessToken, {
           secure: true,
@@ -78,13 +81,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const refreshToken = Cookies.get('refreshToken')
         if (refreshToken) {
-          await api.post(
-            '/api/v1/auth/logout',
-            null,
-            {
-              headers: { 'Refresh-Token': refreshToken },
-            }
-          )
+          await logoutApi(refreshToken)
         }
       } catch (e) {
         console.warn('Server logout failed — ignored.')
@@ -101,6 +98,7 @@ export const useAuthStore = defineStore('auth', {
       this.nickname = null
       this.isAuthenticated = false
       this.loading = false
+      this.role = null
     },
   },
 })
