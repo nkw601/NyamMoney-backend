@@ -5,5 +5,5 @@ import api from '@/api/axios'
  * @param {number} boardId
  */
 export function fetchPostsByBoard(boardId) {
-  return api.get(`/v1/boards/${boardId}/post`)
+  return api.get(`/v1/boards/${boardId}/posts`)
 }

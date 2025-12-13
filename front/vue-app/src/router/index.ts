@@ -41,6 +41,7 @@ const routes = [
   { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true } },
   { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
   { path: '/meetings', name: 'Meetings', component: Meetings, meta: { requiresAuth: true } },
+  { path: '/boards/:boardId/posts/:postId', name:'PostDetail', component: ()=>import('../views/posts/PostDetailView.vue'), meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
