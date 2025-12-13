@@ -108,7 +108,11 @@
 <script>
 import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api/axios'
+import {
+  signup as signupApi,
+  checkLoginId as checkLoginIdApi,
+  checkNickname as checkNicknameApi,
+} from '@/services/user.service'
 
 export default {
   name: 'SignupView',
@@ -159,14 +163,13 @@ export default {
       profileVisibility: 'PUBLIC',
     })
 
-    // 🔥 여기! setup 안, form 아래에 두기
     const passwordsMatch = computed(() => {
       if (!form.password || !form.passwordConfirm) return null
       return form.password === form.passwordConfirm
     })
 
     // ------------------------
-    // 로그인 ID 중복 체크 (실제 API 호출)
+    // 로그인 ID 중복 체크 (서비스 호출로 변경)
     // ------------------------
     const checkLoginId = async () => {
       const value = form.loginId.trim()
@@ -178,9 +181,7 @@ export default {
       }
 
       try {
-        const { data } = await api.get('/v1/users/check-loginId', {
-          params: { loginId: value },
-        })
+        const { data } = await checkLoginIdApi(value)
 
         loginIdCheck.available = data.available
         loginIdCheck.message = data.available
@@ -204,7 +205,7 @@ export default {
     }
 
     // ------------------------
-    // 닉네임 중복 체크
+    // 닉네임 중복 체크 (서비스 호출로 변경)
     // ------------------------
     const checkNickname = async () => {
       const value = form.nickname.trim()
@@ -216,9 +217,7 @@ export default {
       }
 
       try {
-        const { data } = await api.get('/v1/users/check-nickname', {
-          params: { nickname: value },
-        })
+        const { data } = await checkNicknameApi(value)
 
         nicknameCheck.available = data.available
         nicknameCheck.message = data.available
@@ -242,12 +241,11 @@ export default {
     }
 
     // ------------------------
-    // 회원가입 요청
+    // 회원가입 요청 (서비스 호출로 변경)
     // ------------------------
     const submit = async () => {
       errorMessage.value = ''
 
-      // 비밀번호 일치 체크
       if (passwordsMatch.value === false) {
         alert('비밀번호가 일치하지 않습니다.')
         return
@@ -276,7 +274,8 @@ export default {
         }
 
         console.log('[SIGNUP] request:', body)
-        await api.post('/v1/users/signup', body)
+
+        await signupApi(body)
 
         alert('회원가입이 완료되었습니다!')
         router.push('/login')
@@ -297,7 +296,7 @@ export default {
       errorMessage,
       loginIdCheck,
       nicknameCheck,
-      passwordsMatch,      // 🔥 이거 꼭 리턴
+      passwordsMatch,
       onLoginIdInput,
       onNicknameInput,
       submit,
