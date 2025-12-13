@@ -8,7 +8,7 @@
 
 <script>
 import Layout from '@/components/Layout.vue'
-import BoardPosts from '@/views/boards/BoardPosts.vue'
+import BoardPosts from '@/views/boards/BoardPostsView.vue'
 
 export default {
   components: {
