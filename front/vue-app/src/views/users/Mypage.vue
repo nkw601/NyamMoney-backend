@@ -168,26 +168,37 @@
   </div>
   </Layout>
 </template>
-
-<script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+<script>
+import { defineComponent, reactive, ref, onMounted } from 'vue'
 import Layout from '../../components/Layout.vue'
 import UiInput from '../../components/ui/Input.vue'
 import UiSelect from '../../components/ui/Select.vue'
 import UiSwitch from '../../components/ui/Switch.vue'
 import UiCheckbox from '../../components/ui/Checkbox.vue'
 import UiAvatar from '../../components/ui/Avatar.vue'
-import { useSettingsStore } from '../../stores/settings'
+import { fetchMe } from '@/services/user.service'
 
 export default defineComponent({
   name: 'SettingsView',
   components: { Layout, UiInput, UiSelect, UiSwitch, UiCheckbox, UiAvatar },
   setup() {
-    const settingsStore = useSettingsStore()
-    const settings = settingsStore.settings
-    const local = reactive({ ...settings })
-    const notif = reactive({ ...settings.notifications })
-    const priv = reactive({ ...settings.privacy })
+    const loading = ref(false)
+
+    // ✅ UserDetailResponse 기준 로컬 상태
+    const local = reactive({
+      userId: null,
+      loginId: '',
+      nickname: '',
+      email: '',
+      monthlyBudget: null,
+      triggerBudget: null,
+      createdAt: null,
+      upDatedAt: null,
+      profileVisibility: 'PUBLIC',
+      shareLevel: null,
+      role: null,
+    })
+
     const tabs = [
       { value: 'account', label: 'Account' },
       { value: 'security', label: 'Security' },
@@ -198,34 +209,58 @@ export default defineComponent({
     const tab = ref('account')
     const twoFactor = ref(false)
 
+    // 기존 UI에서 쓰던 notif/priv가 필요하면 유지 (백엔드 연동 전까지는 로컬로)
+    const notif = reactive({ email: false, push: false, sms: false, frequency: 'real-time' })
+    const priv = reactive({ analyticsSharing: false, personalizedAds: false })
+
     const defaultAvatars = [
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9439775.jpg-4JVJWOjPksd3DtnBYJXoWHA5lc1DU9.jpeg',
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238645_11475210.jpg-lU8bOe6TLt5Rv51hgjg8NT8PsDBmvN.jpeg',
     ]
 
+    // ✅ 로그인 유저 상세정보 로드
+    const loadMe = async () => {
+      loading.value = true
+      try {
+        const { data } = await fetchMe()
+        Object.assign(local, data)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    onMounted(() => {
+      loadMe()
+    })
+
+    // 저장 버튼을 누를 때 백엔드 수정 API가 없다면 일단 alert만 (또는 버튼 숨김)
     function saveAccount() {
-      settingsStore.updateSettings({
-        avatar: local.avatar,
-        fullName: local.fullName,
-        email: local.email,
-        phone: local.phone,
-        timezone: local.timezone,
-      })
-      alert('Account settings saved')
+      // TODO: PUT/PATCH /v1/users/me 같은 API가 생기면 여기서 호출
+      alert('저장 API가 아직 없으면, 지금은 조회만 가능합니다.')
     }
 
     function saveNotifications() {
-      settingsStore.updateNotificationSettings({ ...notif })
       alert('Notification settings saved')
     }
 
     function savePrivacy() {
-      settingsStore.updatePrivacySettings({ ...priv })
       alert('Privacy settings saved')
     }
 
-    return { tabs, tab, local, notif, priv, defaultAvatars, saveAccount, saveNotifications, savePrivacy, twoFactor }
-  }
+    return {
+      loading,
+      tabs,
+      tab,
+      local,
+      notif,
+      priv,
+      defaultAvatars,
+      saveAccount,
+      saveNotifications,
+      savePrivacy,
+      twoFactor,
+    }
+  },
 })
 </script>
 
