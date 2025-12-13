@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-background text-foreground flex">
+  <div class="min-h-full bg-background text-foreground flex">
     <!-- 사이드바: 반응형/sticky는 Sidebar.vue 안에서 처리 -->
     <Sidebar />
 

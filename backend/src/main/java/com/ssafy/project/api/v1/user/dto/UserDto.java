@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.ssafy.project.domain.user.model.ProfileVisibility;
+import com.ssafy.project.domain.user.model.Role;
 import com.ssafy.project.domain.user.model.ShareLevel;
 
 import lombok.AllArgsConstructor;
@@ -29,4 +30,5 @@ public class UserDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+    private Role role;
 }

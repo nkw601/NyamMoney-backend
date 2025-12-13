@@ -1,5 +1,7 @@
 package com.ssafy.project.api.v1.user.dto;
 
+import com.ssafy.project.domain.user.model.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,4 +14,5 @@ public class UserLoginResponse {
     private String nickname;
     private String accessToken;
     private String refreshToken;
+    private Role role;
 }

@@ -3,6 +3,7 @@ package com.ssafy.project.api.v1.user.dto;
 import java.time.LocalDateTime;
 
 import com.ssafy.project.domain.user.model.ProfileVisibility;
+import com.ssafy.project.domain.user.model.Role;
 import com.ssafy.project.domain.user.model.ShareLevel;
 
 import lombok.AllArgsConstructor;
@@ -22,4 +23,5 @@ public class UserUpdateResponse {
     private LocalDateTime updatedAt;
     private ProfileVisibility profileVisibility;
     private ShareLevel shareLevel;
+    private Role role;
 }
