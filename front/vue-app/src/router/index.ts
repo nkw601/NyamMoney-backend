@@ -1,7 +1,7 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import Signup from '../views/Signup.vue'
+import Signup from '../views/users/Signup.vue'
 import Settings from '../views/Settings.vue'
 import Analytics from '../views/Analytics.vue'
 import Organization from '../views/Organization.vue'
@@ -15,7 +15,7 @@ import Chat from '../views/Chat.vue'
 import Meetings from '../views/Meetings.vue'
 import Help from '../views/Help.vue'
 import { useAuthStore } from '../stores/auth'
-import Login from '../views/Login.vue'
+import Login from '../views/users/Login.vue'
 
 const routes = [
   // 루트 → 로그인으로 리다이렉트
