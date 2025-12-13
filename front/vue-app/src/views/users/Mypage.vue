@@ -101,28 +101,53 @@
   </div>
 </div>
 
-      <div v-if="tab==='security'" class="space-y-4">
-        <div class="border border-border rounded bg-card p-4">
-          <h2 class="text-lg font-medium">Security Settings</h2>
-          <div class="space-y-4 mt-4">
-            <div class="grid gap-2">
-              <label class="text-sm">Current Password</label>
-              <UiInput type="password" />
-            </div>
-            <div class="grid gap-2">
-              <label class="text-sm">New Password</label>
-              <UiInput type="password" />
-            </div>
-            <div class="flex items-center space-x-2">
-              <UiSwitch v-model:modelValue="twoFactor" />
-              <label class="text-sm">Enable Two-Factor Authentication</label>
-            </div>
-            <div class="text-right">
-              <button class="px-4 py-2 bg-primary text-primary-foreground rounded">Save Security Settings</button>
-            </div>
-          </div>
-        </div>
+<div v-if="tab==='security'" class="space-y-4">
+  <div class="border border-border rounded bg-card p-4">
+    <h2 class="text-lg font-medium">비밀번호 변경</h2>
+
+    <form class="space-y-4 mt-4" @submit.prevent="savePassword">
+      <div class="grid gap-2">
+        <label class="text-sm">현재 비밀번호</label>
+        <UiInput v-model="pw.currentPassword" type="password" autocomplete="current-password" />
       </div>
+
+      <div class="grid gap-2">
+        <label class="text-sm">새 비밀번호</label>
+        <UiInput v-model="pw.newPassword" type="password" autocomplete="new-password" />
+      </div>
+
+      <div class="grid gap-2">
+        <label class="text-sm">새 비밀번호 확인</label>
+        <UiInput
+          v-model="pw.newPasswordConfirm"
+          type="password"
+          autocomplete="new-password"
+        />
+
+        <p
+          v-if="passwordsMatch !== null"
+          class="text-xs mt-1"
+          :class="passwordsMatch ? 'text-green-600' : 'text-red-500'"
+        >
+          {{ passwordsMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.' }}
+        </p>
+      </div>
+
+      <p v-if="pwError" class="text-sm text-red-500">{{ pwError }}</p>
+
+      <div class="text-right">
+        <button
+          type="submit"
+          class="px-4 py-2 bg-primary text-primary-foreground rounded"
+          :disabled="pwSaving"
+        >
+          {{ pwSaving ? '저장 중...' : '저장하기' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
       <div v-if="tab==='notifications'">
         <div class="border border-border rounded bg-card p-4">
@@ -182,13 +207,13 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref, onMounted } from 'vue'
+import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
 import Layout from '../../components/Layout.vue'
 import UiInput from '../../components/ui/Input.vue'
 import UiSelect from '../../components/ui/Select.vue'
 import UiSwitch from '../../components/ui/Switch.vue'
 import UiCheckbox from '../../components/ui/Checkbox.vue'
-import { fetchMe, updateUser, checkNickname } from '@/services/user.service'
+import { fetchMe, updateUser, checkNickname, updatePassword } from '@/services/user.service'
 
 export default defineComponent({
   name: 'SettingsView',
@@ -215,9 +240,9 @@ export default defineComponent({
     })
 
     const tabs = [
-      { value: 'account', label: 'Account' },
-      { value: 'security', label: 'Security' },
-      { value: 'notifications', label: 'Notifications' },
+      { value: 'account', label: '계정 정보' },
+      { value: 'security', label: '비밀번호' },
+      { value: 'notifications', label: '알림' },
       { value: 'privacy', label: 'Privacy' },
     ]
     const tab = ref('account')
@@ -408,6 +433,90 @@ export default defineComponent({
       alert('Privacy settings saved')
     }
 
+    
+    // =========================
+    // 비밀번호 변경 상태
+    // =========================
+
+    const pw = reactive({
+      currentPassword: '',
+      newPassword: '',
+      newPasswordConfirm: '',
+    })
+
+    const passwordsMatch = computed(() => {
+      if (!pw.newPassword || !pw.newPasswordConfirm) return null
+      return pw.newPassword === pw.newPasswordConfirm
+    })
+
+    const pwSaving = ref(false)
+    const pwError = ref('')
+
+    // 비밀번호 간단 검증(원하시면 규칙 더 강하게 가능)
+    const validatePassword = () => {
+      pwError.value = ''
+
+      if (passwordsMatch.value === false) {
+        pwError.value = '새 비밀번호와 확인 값이 일치하지 않습니다.'
+        return false
+      }
+
+      // if (pw.newPassword.length < 8) {
+      //   pwError.value = '새 비밀번호는 8자 이상이어야 합니다.'
+      //   return false
+      // }
+
+      if (pw.newPassword !== pw.newPasswordConfirm) {
+        pwError.value = '새 비밀번호와 확인 값이 일치하지 않습니다.'
+        return false
+      }
+
+      if (pw.currentPassword === pw.newPassword) {
+        pwError.value = '현재 비밀번호와 새 비밀번호가 같습니다.'
+        return false
+      }
+
+      return true
+    }
+
+    const resetPwForm = () => {
+      pw.currentPassword = ''
+      pw.newPassword = ''
+      pw.newPasswordConfirm = ''
+      pwError.value = ''
+    }
+
+    const savePassword = async () => {
+      if (!local.userId) {
+        alert('userId가 없습니다. /me 응답을 확인해주세요.')
+        return
+      }
+
+      if (!validatePassword()) return
+
+      pwSaving.value = true
+      try {
+        const body = {
+          currentPassword: pw.currentPassword,
+          newPassword: pw.newPassword,
+          newPasswordConfirm: pw.newPasswordConfirm,
+        }
+
+        console.log('[PASSWORD PATCH] request:', { userId: local.userId })
+
+        await updatePassword(local.userId, body)
+
+        alert('비밀번호가 변경되었습니다.')
+        resetPwForm()
+      } catch (err) {
+        console.log('status', err?.response?.status)
+        console.log('body', err?.response?.data)
+        pwError.value = err?.response?.data?.message || '비밀번호 변경에 실패했습니다.'
+      } finally {
+        pwSaving.value = false
+      }
+    }
+
     return {
       loading,
       saving,
@@ -421,6 +530,11 @@ export default defineComponent({
       saveAccount,
       saveNotifications,
       savePrivacy,
+      pw,
+      pwSaving,
+      pwError,
+      savePassword,
+      passwordsMatch,
     }
   },
 })
