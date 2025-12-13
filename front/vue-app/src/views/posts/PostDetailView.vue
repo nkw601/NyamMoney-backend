@@ -30,6 +30,7 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePostStore } from '@/stores/post.store'
 import { storeToRefs } from 'pinia'
+import { useCommentStore } from '@/stores/comment.store'
 import Layout from '@/components/Layout.vue'
 import CommentListView from '../comments/CommentListView.vue'
 import CommentForm from '../../components/comments/CommentForm.vue'
@@ -40,6 +41,7 @@ export default {
   setup() {
     const route = useRoute()
     const postStore = usePostStore()
+    const commentStore = useCommentStore()
     const { post, loading } = storeToRefs(postStore)
 
     const boardId = route.params.boardId
@@ -49,6 +51,10 @@ export default {
         const { boardId, postId } = route.params
         postStore.loadPostDetail(boardId, postId)
         console.log('params', route.params)
+    })
+
+    onMounted(()=>{
+      commentStore.loadComments(boardId, postId, 0)
     })
 
     return {
