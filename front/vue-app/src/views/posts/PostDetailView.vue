@@ -18,8 +18,13 @@
           댓글 {{ post.commentCount }} · 좋아요 {{ post.likeCount }}
         </p>
       </div>
+      <CommentListView
+        :boardId="boardId"
+        :postId="postId"
+      />
     </div>
   </Layout>
+
 </template>
 
 <script>
@@ -28,14 +33,18 @@ import { useRoute } from 'vue-router'
 import { usePostStore } from '@/stores/post.store'
 import { storeToRefs } from 'pinia'
 import Layout from '@/components/Layout.vue'
+import CommentListView from '../comments/CommentListView.vue'
 
 export default {
-  components: { Layout },
+  components: { Layout, CommentListView },
 
   setup() {
     const route = useRoute()
     const postStore = usePostStore()
     const { post, loading } = storeToRefs(postStore)
+
+    const boardId = route.params.boardId
+    const postId = route.params.postId
 
     onMounted(() => {
         const { boardId, postId } = route.params
@@ -46,6 +55,8 @@ export default {
     return {
       post,
       loading,
+      boardId,
+      postId,
     }
   },
 }
