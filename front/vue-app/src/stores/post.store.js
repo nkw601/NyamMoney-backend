@@ -10,6 +10,7 @@ export const usePostStore = defineStore('post', {
   actions: {
     async loadPostDetail(boardId, postId) {
       this.loading = true
+      this.post = null
       try {
         const response = await fetchPostDetail(boardId, postId)
         this.post = response.data

@@ -3,7 +3,7 @@
     <div class="p-8">
       <p v-if="loading">불러오는 중...</p>
 
-      <div v-else-if="post">
+      <div v-if="post">
         <h1 class="text-2xl font-bold mb-2">{{ post.title }}</h1>
 
         <p class="text-sm text-gray-500 mb-4">
@@ -38,7 +38,9 @@ export default {
     const { post, loading } = storeToRefs(postStore)
 
     onMounted(() => {
-      postStore.loadPostDetail(route.params.postId)
+        const { boardId, postId } = route.params
+        postStore.loadPostDetail(boardId, postId)
+        console.log('params', route.params)
     })
 
     return {
