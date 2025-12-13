@@ -16,6 +16,7 @@ import Meetings from '../views/Meetings.vue'
 import Help from '../views/Help.vue'
 import { useAuthStore } from '../stores/auth'
 import Login from '../views/Login.vue'
+import PostDetailView from '../views/posts/PostDetailView.vue'
 
 const routes = [
   // 루트 → 로그인으로 리다이렉트
@@ -41,6 +42,7 @@ const routes = [
   { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true } },
   { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
   { path: '/meetings', name: 'Meetings', component: Meetings, meta: { requiresAuth: true } },
+  { path: '/boards/:boardId/posts/:postId', name:'PostDetail', component: PostDetailView, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
