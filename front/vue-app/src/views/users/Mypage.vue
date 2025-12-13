@@ -1,7 +1,7 @@
 <template>
   <Layout>
   <div class="container mx-auto py-10">
-    <h1 class="text-3xl font-bold mb-6">Settings</h1>
+    <h1 class="text-3xl font-bold mb-6">My Page</h1>
 
     <div>
       <div class="flex gap-2 mb-4">
@@ -171,13 +171,13 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue'
-import Layout from '../components/Layout.vue'
-import UiInput from '../components/ui/Input.vue'
-import UiSelect from '../components/ui/Select.vue'
-import UiSwitch from '../components/ui/Switch.vue'
-import UiCheckbox from '../components/ui/Checkbox.vue'
-import UiAvatar from '../components/ui/Avatar.vue'
-import { useSettingsStore } from '../stores/settings'
+import Layout from '../../components/Layout.vue'
+import UiInput from '../../components/ui/Input.vue'
+import UiSelect from '../../components/ui/Select.vue'
+import UiSwitch from '../../components/ui/Switch.vue'
+import UiCheckbox from '../../components/ui/Checkbox.vue'
+import UiAvatar from '../../components/ui/Avatar.vue'
+import { useSettingsStore } from '../../stores/settings'
 
 export default defineComponent({
   name: 'SettingsView',

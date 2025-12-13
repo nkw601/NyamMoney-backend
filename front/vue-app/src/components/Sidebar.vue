@@ -117,7 +117,7 @@ export default defineComponent({
       { name: 'Permissions', href: '/permissions', icon: '🛡️' },
       { name: 'Chat', href: '/chat', icon: '💬' },
       { name: 'Meetings', href: '/meetings', icon: '🎥' },
-      { name: 'Settings', href: '/settings', icon: '⚙️' }
+      { name: 'MyPage', href: '/me', icon: '👤' }
     ]
 
     const bottomNavigation = [

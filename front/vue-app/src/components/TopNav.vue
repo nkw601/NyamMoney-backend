@@ -5,7 +5,7 @@
     <div
       class="container flex h-16 items-center justify-end lg:justify-between px-4 lg:px-6 max-w-6xl mx-auto pl-16 lg:pl-6"
     >
-      <!-- 브레드크럼: lg 이상에서만 보이게 -->
+      <!-- 브레드크럼 -->
       <div class="hidden lg:block">
         <nav class="flex items-center space-x-2">
           <RouterLink
@@ -33,16 +33,15 @@
 
         <!-- 아바타 + 드롭다운 -->
         <div class="relative">
-          <!-- 아바타 버튼 -->
           <button
             class="relative h-9 w-9 rounded-full ring-offset-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             @click="isMenuOpen = !isMenuOpen"
           >
             <div class="h-9 w-9 rounded-full border-2 border-primary/20 overflow-hidden">
               <img
-                v-if="settings.avatar"
-                :src="settings.avatar"
-                :alt="settings.fullName"
+                v-if="avatar"
+                :src="avatar"
+                :alt="displayName"
                 class="w-full h-full object-cover"
               />
               <div
@@ -54,21 +53,19 @@
             </div>
           </button>
 
-          <!-- 드롭다운 메뉴 -->
           <div
             v-if="isMenuOpen"
             class="absolute right-0 mt-2 w-56 bg-card border border-border rounded-md shadow-md p-3 z-50"
           >
             <div class="flex flex-col space-y-1 mb-2">
-              <p class="text-sm font-semibold leading-none">{{ settings.fullName }}</p>
-              <p class="text-xs leading-none text-muted-foreground">{{ settings.email }}</p>
+              <p class="text-sm font-semibold leading-none">{{ displayName }}님, 안녕하세요.</p>
+              <p class="text-xs leading-none text-muted-foreground">
+                {{ email || ' ' }}
+              </p>
             </div>
             <div class="border-t border-border mt-2 pt-2 space-y-1">
-              <RouterLink to="/settings" class="block px-2 py-1 hover:bg-accent rounded" @click="closeMenu">
-                Profile
-              </RouterLink>
-              <RouterLink to="/settings" class="block px-2 py-1 hover:bg-accent rounded" @click="closeMenu">
-                Settings
+              <RouterLink to="/me" class="block px-2 py-1 hover:bg-accent rounded" @click="closeMenu">
+                My Page
               </RouterLink>
               <button
                 class="w-full text-left px-2 py-1 hover:bg-accent rounded"
@@ -83,11 +80,9 @@
     </div>
   </header>
 </template>
-
 <script>
 import { defineComponent, computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { useSettingsStore } from '../stores/settings'
 import { useAuthStore } from '../stores/auth'
 import Notifications from './Notifications.vue'
 
@@ -99,29 +94,23 @@ export default defineComponent({
     const router = useRouter()
     const pathSegments = computed(() => route.path.split('/').filter(Boolean))
 
-    const settingsStore = useSettingsStore()
-    const settings = settingsStore.settings
+    const auth = useAuthStore()
 
-    const initials = computed(() =>
-      (settings.fullName || '')
-        .split(' ')
-        .filter(Boolean)
-        .map((n) => n[0])
-        .join(''),
-    )
+    const displayName = computed(() => `${auth.nickname} (${auth.loginId})`)
+
+    // ✅ 이니셜은 닉네임 앞 2글자
+    const initials = computed(() => auth.nickname.slice(0, 2).toUpperCase())
 
     function capitalize(s) {
       return s.charAt(0).toUpperCase() + s.slice(1)
     }
 
-    // 드롭다운 열고 닫기
     const isMenuOpen = ref(false)
 
     const closeMenu = () => {
       isMenuOpen.value = false
     }
 
-    // 바깥 클릭 시 닫기
     const onClickOutside = (event) => {
       const target = event.target
       if (!target.closest('.relative')) {
@@ -137,7 +126,6 @@ export default defineComponent({
       window.removeEventListener('click', onClickOutside)
     })
 
-    const auth = useAuthStore()
     const handleLogout = async () => {
       closeMenu()
       await auth.logout()
@@ -146,15 +134,13 @@ export default defineComponent({
 
     return {
       pathSegments,
-      settings,
-      initials,
       capitalize,
       isMenuOpen,
       closeMenu,
       handleLogout,
+      displayName,
+      initials,
     }
   },
 })
 </script>
-
-<style scoped></style>
