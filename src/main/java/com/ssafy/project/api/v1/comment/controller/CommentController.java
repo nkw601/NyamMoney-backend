@@ -39,15 +39,21 @@ public class CommentController {
 	}
 	
 	@PostMapping
-	public CommentCreateResponse createComment(@PathVariable Long postId, @RequestParam Long userId,
+	public CommentCreateResponse createComment(@PathVariable Long postId,
 											   @RequestBody CommentCreateRequest req) {
-		
+		UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		Long userId = principal.getUserId();
 		return commentService.createComment(postId, userId, req);
 	}
 	
 	@PatchMapping("/{commentId}")
-	public CommentDetailResponse updateComment(@PathVariable Long postId, @PathVariable Long commentId, @RequestBody CommentUpdateRequest req,
-												@RequestParam Long userId) {
+	public CommentDetailResponse updateComment(@PathVariable Long postId, @PathVariable Long commentId, @RequestBody CommentUpdateRequest req) {
+		UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getPrincipal();
+		Long userId = principal.getUserId();
 		return commentService.updateComment(postId, commentId, req, userId);
 	}
 
