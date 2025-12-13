@@ -1,7 +1,7 @@
 <template>
   <div class="mt-8">
     <h2 class="font-semibold mb-4">
-      댓글 {{ comments.length }}
+      댓글 {{ totalElements }}개  ·  {{ page + 1 }} / {{ totalPages }} 페이지
     </h2>
 
     <p v-if="loading">댓글을 불러오는 중...</p>
@@ -21,6 +21,22 @@
         </p>
       </li>
     </ul>
+
+    <!-- ⭐ 페이지네이션 -->
+    <div
+      v-if="totalPages > 1"
+      class="flex justify-center gap-2 mt-6">
+      <button v-for="p in totalPages" :key="p"
+        @click="goPage(p - 1)"
+        :disabled="loading"
+        class="px-3 py-1 border rounded"
+        :class="{
+          'bg-orange-500 text-white': page === p - 1,
+        }"
+      >
+        {{ p }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -43,16 +59,24 @@ export default {
 
   setup(props) {
     const commentStore = useCommentStore()
-    const { comments, loading } = storeToRefs(commentStore)
+    const { comments, loading, page, totalPages, totalElements } = storeToRefs(commentStore)
 
     onMounted(() => {
       commentStore.loadComments(props.boardId, props.postId)
       console.log('CommentList props', props.boardId, props.postId)
     })
 
+    const goPage = (p)=>{
+      commentStore.loadComments(props.boardId, props.postId, p)
+    }
+
     return {
       comments,
       loading,
+      page,
+      totalPages,
+      totalElements,
+      goPage,
     }
   },
 }

@@ -6,15 +6,24 @@ export const useCommentStore = defineStore('comment', {
     comments: [],
     loading: false,
     creating: false,
+
+    page: 0,
+    size: 10,
+    totalPages: 0,
+    totalElements: 0,
   }),
 
   actions: {
-    async loadComments(boardId, postId) {
+    async loadComments(boardId, postId, page=0) {
       this.loading = true
       try {
-        const response = await fetchComments(boardId, postId)
+        const response = await fetchComments(boardId, postId, page, this.size)
         this.comments = response.data.content
-  console.log('comments response', response.data)
+        this.page = response.data.page
+        this.totalPages = response.data.totalPages
+        this.totalElements = response.data.totalElements
+        //console.log('comments response', response.data)
+        //console.log('댓글 조회 응답 전체', response.data)
       } catch (error) {
         console.error('댓글 조회 실패', error)
       } finally {
