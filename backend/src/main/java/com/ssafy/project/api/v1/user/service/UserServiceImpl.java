@@ -45,13 +45,15 @@ public class UserServiceImpl implements UserService {
 		String hashedPw = passwordEncoder.encode(req.getPassword());
 		UserDto user = UserDto.builder()
 		        .loginId(req.getLoginId())
-		        .pwHash(hashedPw) // 비밀번호 해시처리해서 넣기 -> 나중에 추가
+		        .pwHash(hashedPw)
 		        .nickname(req.getNickname())
 		        .email(req.getEmail())
 		        .monthlyBudget(req.getMonthlyBudget())
 		        .triggerBudget(req.getTriggerBudget())
 		        .profileVisibility(req.getProfileVisibility())
 		        .shareLevel(req.getShareLevel())
+		        .name(req.getName())
+		        .phoneNumber(req.getPhoneNumber())
 		        .build();
 		
 		try {
@@ -96,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
         rMapper.insertRefreshToken(refreshTokenDto);
         
-		return new UserLoginResponse(user.getUserId(), user.getLoginId(), user.getNickname(), accessToken, refreshToken, user.getRole());
+		return new UserLoginResponse(user.getUserId(), user.getLoginId(), user.getNickname(), accessToken, refreshToken, user.getRole(), user.getName());
 	}
 
 	@Override
@@ -115,7 +117,9 @@ public class UserServiceImpl implements UserService {
                 user.getUpdatedAt(),
                 user.getProfileVisibility(),
                 user.getShareLevel(),
-                user.getRole()
+                user.getRole(),
+                user.getName(),
+                user.getPhoneNumber()
         );
 	}
 
@@ -164,8 +168,9 @@ public class UserServiceImpl implements UserService {
                     user.getUpdatedAt(),
                     user.getProfileVisibility(),
                     user.getShareLevel(),
-                    user.getRole()
-                    
+                    user.getRole(),
+                    user.getName(),
+                    user.getPhoneNumber()
             );
         }
         
@@ -183,7 +188,9 @@ public class UserServiceImpl implements UserService {
                 updated.getUpdatedAt(),
                 updated.getProfileVisibility(),
                 updated.getShareLevel(),
-                updated.getRole()
+                updated.getRole(),
+                updated.getName(),
+                updated.getPhoneNumber()
         );
 	}
 

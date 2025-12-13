@@ -11,3 +11,7 @@ export function checkLoginId(loginId) {
 export function checkNickname(nickname) {
   return api.get('/v1/users/check-nickname', { params: { nickname }})
 }
+
+export function fetchMe() {
+  return api.get('/v1/users/me')
+}

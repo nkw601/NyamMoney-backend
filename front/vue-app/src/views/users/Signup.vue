@@ -10,11 +10,14 @@
         <div class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Join YumMoney</div>
         <div class="text-base text-muted-foreground">Create your account and start managing your finances with ease</div>
       </div>
+
       <form @submit.prevent="submit" class="space-y-5 px-8 pb-8">
+        <!-- loginId / nickname -->
         <div class="grid md:grid-cols-2 gap-4">
           <div class="space-y-2">
             <label class="text-sm font-medium" for="loginId">Login ID *</label>
-            <input id="loginId" v-model="form.loginId" @input="onLoginIdInput" type="text" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Choose a login ID" />
+            <input id="loginId" v-model="form.loginId" @input="onLoginIdInput" type="text" required
+              class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Choose a login ID" />
             <p
               v-if="loginIdCheck.message || loginIdCheck.loading"
               class="text-xs mt-1"
@@ -23,9 +26,11 @@
               {{ loginIdCheck.loading ? 'ID 확인 중...' : loginIdCheck.message }}
             </p>
           </div>
+
           <div class="space-y-2">
             <label class="text-sm font-medium" for="nickname">Nickname *</label>
-            <input id="nickname" v-model="form.nickname" @input="onNicknameInput" type="text" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Your display name" />
+            <input id="nickname" v-model="form.nickname" @input="onNicknameInput" type="text" required
+              class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Your display name" />
             <p
               v-if="nicknameCheck.message || nicknameCheck.loading"
               class="text-xs mt-1"
@@ -35,18 +40,39 @@
             </p>
           </div>
         </div>
+
+        <!-- ✅ 추가: name / phoneNumber -->
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium" for="name">Name *</label>
+            <input id="name" v-model="form.name" type="text" required
+              class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Your name" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium" for="phoneNumber">Phone Number *</label>
+            <input id="phoneNumber" v-model="form.phoneNumber" type="tel" required
+              class="h-11 w-full border border-border rounded px-2 py-1" placeholder="01012345678" />
+          </div>
+        </div>
+
+        <!-- email -->
         <div class="space-y-2">
           <label class="text-sm font-medium" for="email">Email Address *</label>
-          <input id="email" v-model="form.email" type="email" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="your@email.com" />
+          <input id="email" v-model="form.email" type="email" required
+            class="h-11 w-full border border-border rounded px-2 py-1" placeholder="your@email.com" />
         </div>
+
+        <!-- password / confirm -->
         <div class="grid md:grid-cols-2 gap-4">
           <div class="space-y-2">
             <label class="text-sm font-medium" for="password">Password *</label>
-            <input id="password" v-model="form.password" type="password" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Create a password" />
+            <input id="password" v-model="form.password" type="password" required
+              class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Create a password" />
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium" for="passwordConfirm">Confirm Password *</label>
-            <input id="passwordConfirm" v-model="form.passwordConfirm" type="password" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Confirm your password" />
+            <input id="passwordConfirm" v-model="form.passwordConfirm" type="password" required
+              class="h-11 w-full border border-border rounded px-2 py-1" placeholder="Confirm your password" />
             <p
               v-if="passwordsMatch !== null"
               class="text-xs mt-1"
@@ -56,6 +82,8 @@
             </p>
           </div>
         </div>
+
+        <!-- profileVisibility -->
         <div class="space-y-3 pt-2">
           <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
             <span class="text-primary">👤</span>
@@ -63,16 +91,22 @@
           </h3>
           <div class="flex gap-4">
             <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="radio" value="PUBLIC" v-model="form.profileVisibility" class="w-4 h-4 text-primary focus:ring-primary" />
+              <input type="radio" value="PUBLIC" v-model="form.profileVisibility"
+                class="w-4 h-4 text-primary focus:ring-primary" />
               <span class="text-sm font-medium">Public</span>
             </label>
             <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="radio" value="PROTECTED" v-model="form.profileVisibility" class="w-4 h-4 text-primary focus:ring-primary" />
+              <input type="radio" value="PROTECTED" v-model="form.profileVisibility"
+                class="w-4 h-4 text-primary focus:ring-primary" />
               <span class="text-sm font-medium">Protected</span>
             </label>
           </div>
-          <p class="text-xs text-muted-foreground">Public profiles can be viewed by anyone, protected profiles are only visible to approved connections</p>
+          <p class="text-xs text-muted-foreground">
+            Public profiles can be viewed by anyone, protected profiles are only visible to approved connections
+          </p>
         </div>
+
+        <!-- budget -->
         <div class="pt-2 pb-1">
           <h3 class="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <span class="text-primary">💰</span>
@@ -81,18 +115,24 @@
           <div class="grid md:grid-cols-2 gap-4">
             <div class="space-y-2">
               <label class="text-sm font-medium" for="monthlyBudget">Monthly Budget *</label>
-              <input id="monthlyBudget" v-model="form.monthlyBudget" type="number" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="500000" />
+              <input id="monthlyBudget" v-model="form.monthlyBudget" type="number" required
+                class="h-11 w-full border border-border rounded px-2 py-1" placeholder="500000" />
               <p class="text-xs text-muted-foreground">Your total monthly spending limit</p>
             </div>
             <div class="space-y-2">
               <label class="text-sm font-medium" for="triggerBudget">Alert Threshold *</label>
-              <input id="triggerBudget" v-model="form.triggerBudget" type="number" required class="h-11 w-full border border-border rounded px-2 py-1" placeholder="100000" />
+              <input id="triggerBudget" v-model="form.triggerBudget" type="number" required
+                class="h-11 w-full border border-border rounded px-2 py-1" placeholder="100000" />
               <p class="text-xs text-muted-foreground">Get notified when spending exceeds this amount</p>
             </div>
           </div>
         </div>
+
         <div class="flex flex-col space-y-4 pt-4">
-          <button type="submit" class="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-shadow bg-primary text-primary-foreground rounded" :disabled="loading">
+          <button type="submit"
+            class="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-shadow bg-primary text-primary-foreground rounded"
+            :disabled="loading"
+          >
             {{ loading ? 'Creating Account...' : 'Create Account' }}
           </button>
           <div class="text-center text-sm text-muted-foreground">
@@ -116,16 +156,12 @@ import {
 
 export default {
   name: 'SignupView',
-
   setup() {
     const router = useRouter()
 
     const loading = ref(false)
     const errorMessage = ref('')
 
-    // ------------------------
-    // 디바운스 유틸
-    // ------------------------
     function debounce(fn, delay) {
       let timer = null
       return (...args) => {
@@ -134,33 +170,29 @@ export default {
       }
     }
 
-    // ------------------------
-    // 중복 체크 상태
-    // ------------------------
-    const loginIdCheck = reactive({
-      loading: false,
-      available: null, // true | false | null
-      message: '',
-    })
+    function normalizePhoneNumber(value) {
+      return value.replace(/[^0-9]/g, '')
+    }
 
-    const nicknameCheck = reactive({
-      loading: false,
-      available: null,
-      message: '',
-    })
+    function isValidKoreanMobile(phoneDigits) {
+      return /^010\d{8}$/.test(phoneDigits)
+    }
 
-    // ------------------------
-    // 폼 데이터
-    // ------------------------
+    const loginIdCheck = reactive({ loading: false, available: null, message: '' })
+    const nicknameCheck = reactive({ loading: false, available: null, message: '' })
+
+    // ✅ UserSignupRequest에 맞춘 폼
     const form = reactive({
       loginId: '',
       password: '',
       passwordConfirm: '',
       nickname: '',
       email: '',
+      name: '',
+      phoneNumber: '',
+      profileVisibility: 'PUBLIC',
       monthlyBudget: '',
       triggerBudget: '',
-      profileVisibility: 'PUBLIC',
     })
 
     const passwordsMatch = computed(() => {
@@ -168,9 +200,6 @@ export default {
       return form.password === form.passwordConfirm
     })
 
-    // ------------------------
-    // 로그인 ID 중복 체크 (서비스 호출로 변경)
-    // ------------------------
     const checkLoginId = async () => {
       const value = form.loginId.trim()
       if (!value) {
@@ -182,11 +211,8 @@ export default {
 
       try {
         const { data } = await checkLoginIdApi(value)
-
         loginIdCheck.available = data.available
-        loginIdCheck.message = data.available
-          ? '사용 가능한 ID입니다.'
-          : '이미 존재하는 ID입니다.'
+        loginIdCheck.message = data.available ? '사용 가능한 ID입니다.' : '이미 존재하는 ID입니다.'
       } catch (e) {
         loginIdCheck.available = null
         loginIdCheck.message = 'ID 확인 중 오류가 발생했습니다.'
@@ -204,9 +230,6 @@ export default {
       debouncedCheckLoginId()
     }
 
-    // ------------------------
-    // 닉네임 중복 체크 (서비스 호출로 변경)
-    // ------------------------
     const checkNickname = async () => {
       const value = form.nickname.trim()
       if (!value) {
@@ -218,11 +241,8 @@ export default {
 
       try {
         const { data } = await checkNicknameApi(value)
-
         nicknameCheck.available = data.available
-        nicknameCheck.message = data.available
-          ? '사용 가능한 닉네임입니다.'
-          : '이미 존재하는 닉네임입니다.'
+        nicknameCheck.message = data.available ? '사용 가능한 닉네임입니다.' : '이미 존재하는 닉네임입니다.'
       } catch (e) {
         nicknameCheck.available = null
         nicknameCheck.message = '닉네임 확인 중 오류가 발생했습니다.'
@@ -240,17 +260,18 @@ export default {
       debouncedCheckNickname()
     }
 
-    // ------------------------
-    // 회원가입 요청 (서비스 호출로 변경)
-    // ------------------------
     const submit = async () => {
       errorMessage.value = ''
+      const phoneDigits = normalizePhoneNumber(form.phoneNumber)
 
+      if (!isValidKoreanMobile(phoneDigits)) {
+        alert('전화번호 형식이 올바르지 않습니다. 예) 010-1234-1234')
+        return
+      }
       if (passwordsMatch.value === false) {
         alert('비밀번호가 일치하지 않습니다.')
         return
       }
-
       if (loginIdCheck.available === false) {
         alert('이미 사용 중인 로그인 ID입니다.')
         return
@@ -267,22 +288,20 @@ export default {
           password: form.password,
           passwordConfirm: form.passwordConfirm,
           nickname: form.nickname,
-          email: form.email || null,
-          monthlyBudget: form.monthlyBudget ? Number(form.monthlyBudget) : null,
-          triggerBudget: form.triggerBudget ? Number(form.triggerBudget) : null,
+          email: form.email,
           profileVisibility: form.profileVisibility,
+          monthlyBudget: Number(form.monthlyBudget),
+          triggerBudget: Number(form.triggerBudget),
+          name: form.name,
+          phoneNumber: phoneDigits,
         }
-
-        console.log('[SIGNUP] request:', body)
 
         await signupApi(body)
 
         alert('회원가입이 완료되었습니다!')
         router.push('/login')
       } catch (err) {
-        console.error('[SIGNUP] error:', err)
-        const msg =
-          err?.response?.data?.message || '회원가입 실패. 입력값을 다시 확인해주세요.'
+        const msg = err?.response?.data?.message || '회원가입 실패. 입력값을 다시 확인해주세요.'
         errorMessage.value = msg
         alert(msg)
       } finally {

@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Signup from '../views/users/Signup.vue'
-import Settings from '../views/Settings.vue'
+import Me from '../views/users/Mypage.vue'
 import Analytics from '../views/Analytics.vue'
 import Organization from '../views/Organization.vue'
 import Projects from '../views/Projects.vue'
@@ -30,7 +30,7 @@ const routes = [
 
   // 인증 필요한 라우트들
   { path: '/dashboard', name: 'Dashboard', component: Home, meta: { requiresAuth: true } },
-  { path: '/settings', name: 'Settings', component: Settings, meta: { requiresAuth: true } },
+  { path: '/me', name: 'Me', component: Me, meta: { requiresAuth: true } },
   { path: '/analytics', name: 'Analytics', component: Analytics, meta: { requiresAuth: true } },
   { path: '/organization', name: 'Organization', component: Organization, meta: { requiresAuth: true } },
   { path: '/projects', name: 'Projects', component: Projects, meta: { requiresAuth: true } },
