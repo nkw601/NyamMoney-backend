@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
 
         rMapper.insertRefreshToken(refreshTokenDto);
         
-		return new UserLoginResponse(user.getUserId(), user.getLoginId(), user.getNickname(), accessToken, refreshToken, user.getRole());
+		return new UserLoginResponse(user.getUserId(), user.getLoginId(), user.getNickname(), accessToken, refreshToken, user.getRole(), user.getName());
 	}
 
 	@Override
@@ -164,8 +164,9 @@ public class UserServiceImpl implements UserService {
                     user.getUpdatedAt(),
                     user.getProfileVisibility(),
                     user.getShareLevel(),
-                    user.getRole()
-                    
+                    user.getRole(),
+                    user.getName(),
+                    user.getPhoneNumber()
             );
         }
         
@@ -183,7 +184,9 @@ public class UserServiceImpl implements UserService {
                 updated.getUpdatedAt(),
                 updated.getProfileVisibility(),
                 updated.getShareLevel(),
-                updated.getRole()
+                updated.getRole(),
+                updated.getName(),
+                updated.getPhoneNumber()
         );
 	}
 
