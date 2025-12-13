@@ -8,6 +8,7 @@
       <li
         v-for="post in posts"
         :key="post.postId"
+        @click="goDetail(post.postId)"
         class="mb-3 p-4 rounded bg-white shadow"
       >
         <h2 class="font-semibold">{{ post.title }}</h2>
@@ -26,6 +27,7 @@
 import { watch } from 'vue'
 import { useBoardStore } from '@/stores/board.store'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 export default {
@@ -43,6 +45,7 @@ export default {
   setup(props) {
     const boardStore = useBoardStore()
     const authStore = useAuthStore()
+    const router = useRouter()
 
     const { posts, loading } = storeToRefs(boardStore)
     const { isAuthenticated } = storeToRefs(authStore)
@@ -57,9 +60,14 @@ export default {
       { immediate: true }
     )
 
+    const goDetail = (postId)=>{
+      router.push(`/boards/${props.boardId}/posts/${postId}`)
+    }
+
     return {
       posts,
       loading,
+      goDetail,
     }
   },
 }
