@@ -1,16 +1,19 @@
 <template>
   <Layout>
     <div class="p-8">
-      <h1 class="text-2xl font-semibold mb-4">Invoices</h1>
-      <p>Invoices page content goes here.</p>
+      <BoardPosts :boardId="4" title="공지 게시판" />
     </div>
   </Layout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import Layout from '../components/Layout.vue'
-export default defineComponent({ components: { Layout } })
-</script>
+<script>
+import Layout from '@/components/Layout.vue'
+import BoardPosts from '@/views/boards/BoardPosts.vue'
 
-<style scoped></style>
+export default {
+  components: {
+    Layout,
+    BoardPosts,
+  },
+}
+</script>
