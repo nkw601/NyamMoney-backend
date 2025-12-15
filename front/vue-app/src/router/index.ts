@@ -42,7 +42,6 @@ const routes = [
   { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true } },
   { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
   { path: '/meetings', name: 'Meetings', component: Meetings, meta: { requiresAuth: true } },
-
   // { path: '/organization', name: 'Organization', component: Organization, meta: { requiresAuth: true } },
 
   {
@@ -74,7 +73,7 @@ const routes = [
     {
       path: 'boards/:boardId/posts/:postId',
       name: 'postDetail',
-      component: () => import('@/views/boards/PostDetailView.vue'),
+      component: () => import('@/views/posts/PostDetailView.vue'),
       props: true,
     },
   ],
