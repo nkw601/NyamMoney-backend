@@ -65,6 +65,11 @@ export const useCommentStore = defineStore('comment', {
       try {
         await deleteComment(boardId, postId, commentId)
 
+        // 모든 댓글 삭제했을 경우 페이지 보정
+        if(this.page>0 && this.comments.length===1){
+          this.page -= 1
+        }
+
         await this.loadComments(boardId, postId, this.page)
       } catch (error) {
         console.error('댓글 삭제 실패', error)
