@@ -1,6 +1,6 @@
 <template>
   <Layout>
-    <div class="p-8 max-w-3xl mx-auto">
+    <div>
       <h1 class="text-xl font-bold mb-6">{{ boardTitle }} 글쓰기</h1>
 
       <!-- 제목 -->
@@ -52,7 +52,6 @@ import { storeToRefs } from 'pinia'
 import Layout from '@/components/Layout.vue'
 
 export default {
-  components: { Layout },
 
   props: {
     boardId: {

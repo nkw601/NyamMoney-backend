@@ -1,6 +1,6 @@
 <template>
   <Layout>
-    <div class="p-8 max-w-3xl mx-auto">
+    <div>
       <!-- 목록으로 -->
       <button
         class="mb-4 px-3 py-1 border rounded hover:bg-gray-100"
@@ -50,7 +50,6 @@ import CommentListView from '@/views/comments/CommentListView.vue'
 
 export default {
   components: {
-    Layout,
     CommentListView,
   },
 

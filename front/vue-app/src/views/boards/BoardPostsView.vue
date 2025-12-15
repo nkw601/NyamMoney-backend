@@ -66,6 +66,14 @@ export default {
       },
       { immediate: true }
     )
+    
+    watch(
+      () => props.boardId,
+      (newBoardId) => {
+        boardStore.loadBoardPosts(newBoardId)
+      },
+      { immediate: true }
+    )
 
     const goDetail = (postId) => {
       router.push({
