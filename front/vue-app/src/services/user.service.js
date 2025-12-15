@@ -23,3 +23,7 @@ export function updateUser(userId, body) {
 export function updatePassword(userId, body) {
   return api.patch(`/v1/users/${userId}/password`, body)
 }
+
+export function deleteUser(userId) {
+  return api.delete(`/v1/users/${userId}`)
+}
