@@ -16,6 +16,8 @@ import Meetings from '../views/Meetings.vue'
 import Help from '../views/Help.vue'
 import { useAuthStore } from '../stores/auth'
 import Login from '../views/users/Login.vue'
+import BoardPostsView from '../views/boards/BoardPostsView.vue'
+import PostCreateView from '../views/boards/PostCreateView.vue'
 
 const routes = [
   // 루트 → 로그인으로 리다이렉트
@@ -32,7 +34,6 @@ const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Home, meta: { requiresAuth: true } },
   { path: '/me', name: 'Me', component: Me, meta: { requiresAuth: true } },
   { path: '/analytics', name: 'Analytics', component: Analytics, meta: { requiresAuth: true } },
-  { path: '/organization', name: 'Organization', component: Organization, meta: { requiresAuth: true } },
   { path: '/projects', name: 'Projects', component: Projects, meta: { requiresAuth: true } },
   { path: '/transactions', name: 'Transactions', component: Transactions, meta: { requiresAuth: true } },
   { path: '/invoices', name: 'Invoices', component: Invoices, meta: { requiresAuth: true } },
@@ -41,7 +42,45 @@ const routes = [
   { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true } },
   { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
   { path: '/meetings', name: 'Meetings', component: Meetings, meta: { requiresAuth: true } },
-  { path: '/boards/:boardId/posts/:postId', name:'PostDetail', component: ()=>import('../views/posts/PostDetailView.vue'), meta: { requiresAuth: true } },
+
+  // { path: '/organization', name: 'Organization', component: Organization, meta: { requiresAuth: true } },
+
+  {
+  path: '/organization',
+  name:'Organization',
+  component: Organization,
+  meta: { requiresAuth: true },
+  children: [
+    {
+      path: 'boards/:boardId',
+      name: 'boardPosts',
+      component: () => import('@/views/boards/BoardPostsView.vue'),
+      props: route => ({
+        boardId: Number(route.params.boardId),
+        titleMap: {
+          1: '자유게시판',
+          2: '질문 게시판',
+          3: '팁 게시판',
+          4: '공지 게시판',
+        }[route.params.boardId],
+      }),
+    },
+    {
+      path: 'boards/:boardId/posts/new',
+      name: 'newPost',
+      component: () => import('@/views/boards/PostCreateView.vue'),
+      props: true,
+    },
+    {
+      path: 'boards/:boardId/posts/:postId',
+      name: 'postDetail',
+      component: () => import('@/views/boards/PostDetailView.vue'),
+      props: true,
+    },
+  ],
+}
+
+
 ]
 
 const router = createRouter({

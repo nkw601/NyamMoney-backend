@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { fetchPostDetail } from '@/services/post.service'
+import { fetchPostDetail, createPost, } from '@/services/post.service'
 
 export const usePostStore = defineStore('post', {
   state: () => ({
     post: null,
     loading: false,
+    creating: false,
   }),
 
   actions: {
@@ -20,5 +21,27 @@ export const usePostStore = defineStore('post', {
         this.loading = false
       }
     },
+
+    // 게시물 작성
+    async submitPost(boardId, title, content) {
+      if (!title.trim() || !content.trim()) return
+
+      this.creating = true
+      try {
+        const response = await createPost(boardId, title, content)
+
+        // response 명세 그대로 반환
+        return response.data
+      } catch (error) {
+        console.error('게시글 작성 실패', error)
+        throw error
+      } finally {
+        this.creating = false
+      }
+    },
+
+
+
   },
+
 })
