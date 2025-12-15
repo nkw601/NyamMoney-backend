@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { fetchComments, createComment, updateComment} from '@/services/comment.service'
+import { fetchComments, createComment, updateComment, deleteComment, } from '@/services/comment.service'
 
 export const useCommentStore = defineStore('comment', {
   state: () => ({
@@ -60,6 +60,16 @@ export const useCommentStore = defineStore('comment', {
       }
     },
 
+    // 댓글 삭제
+    async deleteComment(boardId, postId, commentId) {
+      try {
+        await deleteComment(boardId, postId, commentId)
+
+        await this.loadComments(boardId, postId, this.page)
+      } catch (error) {
+        console.error('댓글 삭제 실패', error)
+      }
+    },
 
 
   },
