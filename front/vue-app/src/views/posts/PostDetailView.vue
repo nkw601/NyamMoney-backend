@@ -4,6 +4,9 @@
       <p v-if="loading">불러오는 중...</p>
 
       <div v-if="post">
+        <div class="mb-4">
+          <button class="px-3 py-1 border rounded" @click="goList">목록으로</button>
+        </div>
         <h1 class="text-2xl font-bold mb-2">{{ post.title }}</h1>
 
         <p class="text-sm text-gray-500 mb-4">
@@ -27,7 +30,7 @@
 
 <script>
 import { onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post.store'
 import { storeToRefs } from 'pinia'
 import { useCommentStore } from '@/stores/comment.store'
@@ -40,6 +43,7 @@ export default {
 
   setup() {
     const route = useRoute()
+    const router = useRouter()
     const postStore = usePostStore()
     const commentStore = useCommentStore()
     const { post, loading } = storeToRefs(postStore)
@@ -57,11 +61,13 @@ export default {
       commentStore.loadComments(boardId, postId, 0)
     })
 
+    // 목록으로
+    const goList = ()=>{
+      router.push(`/boards/${route.params.boardId}`)
+    }
+
     return {
-      post,
-      loading,
-      boardId,
-      postId,
+      post, loading, boardId, postId, goList,
     }
   },
 }
