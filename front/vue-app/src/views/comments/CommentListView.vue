@@ -35,7 +35,7 @@
           <button v-if="isMyComment(comment) && editingCommentIf !== comment.commentId"
           class="text-xs text-gray-400" @click="deleteComment(comment.commentId)"> 삭제</button>
           <p class="text-xs text-gray-400">
-            {{ comment.createdAt }}
+            {{ comment.updatedAt }}
           </p>
         </div>
       </li>
