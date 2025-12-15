@@ -19,8 +19,7 @@
           v-model="content"
           rows="10"
           placeholder="내용을 입력하세요"
-          class="w-full p-3 border rounded resize-none"
-        />
+          class="w-full p-3 border rounded resize-none" />
       </div>
 
       <!-- 버튼 영역 -->

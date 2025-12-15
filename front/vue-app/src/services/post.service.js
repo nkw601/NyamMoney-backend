@@ -6,6 +6,6 @@ export function fetchPostDetail(boardId, postId) {
 
 export function createPost(boardId, title, content) {
   return api.post(`/v1/boards/${boardId}/posts`, {
-    title, content,
+    title, contentMd: content,
   })
 }
