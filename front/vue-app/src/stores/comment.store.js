@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { fetchComments, createComment } from '@/services/comment.service'
+import { fetchComments, createComment, updateComment} from '@/services/comment.service'
 
 export const useCommentStore = defineStore('comment', {
   state: () => ({
@@ -46,6 +46,21 @@ export const useCommentStore = defineStore('comment', {
           this.creating = false
         }
       },
+
+      // 댓글 수정
+      async updateComment(boardId, postId, commentId, content) {
+      if (!content.trim()) return
+
+      try {
+        await updateComment(boardId, postId, commentId, content)
+
+        await this.loadComments(boardId, postId, this.page)
+      } catch (error) {
+        console.error('댓글 수정 실패', error)
+      }
+    },
+
+
 
   },
 })

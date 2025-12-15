@@ -13,3 +13,13 @@ export function createComment(boardId, postId, content) {
     content,
   })
 }
+
+// 댓글 수정
+export function updateComment(boardId, postId, commentId, content) {
+  return api.patch(`/v1/boards/${boardId}/posts/${postId}/comments/${commentId}`, { content })
+}
+
+// 댓글 삭제
+export function deleteComment(boardId, postId, commentId) {
+    return api.delete(`/v1/boards/${boardId}/posts/${postId}/comments/${commentId}`)
+}
