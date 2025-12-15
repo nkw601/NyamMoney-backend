@@ -29,8 +29,11 @@
             {{ comment.author?.nickname || '익명' }}
           </p>
           <p class="text-sm">{{ comment.content }}</p>
+          <!-- 권한 확인해서 수정,삭제 버튼 조회하도록 -->
           <button v-if="isMyComment(comment) && editingCommentIf !== comment.commentId"
-          class="text-xs text-gray-400" @click="startEdit(comment)">수정</button>
+          class="text-xs text-gray-400" @click="startEdit(comment)">수정 | </button>
+          <button v-if="isMyComment(comment) && editingCommentIf !== comment.commentId"
+          class="text-xs text-gray-400" @click="deleteComment(comment.commentId)"> 삭제</button>
           <p class="text-xs text-gray-400">
             {{ comment.createdAt }}
           </p>
@@ -78,7 +81,6 @@ export default {
     const authStore = useAuthStore()
     const commentStore = useCommentStore()
     const { comments, loading, page, totalPages, totalElements } = storeToRefs(commentStore)
-
     
     // 수정 중인 댓글 누구? 뭐?
     const editingCommentId = ref(null)
@@ -116,11 +118,20 @@ export default {
       cancelEdit()
     }
 
+    const deleteComment = async (commentId)=>{
+      if(!confirm('댓글을 삭제하시겠습니까?')) return
+      await commentStore.deleteComment(
+        props.boardId, props.postId, commentId
+      )
+    }
+
     return {
       comments, loading, page, totalPages, totalElements, goPage,
       startEdit, cancelEdit, saveEdit,
-      editingCommentId, editingContent, isMyComment,
+      editingCommentId, editingContent, isMyComment, deleteComment,
     }
+
+
   },
 }
 </script>
