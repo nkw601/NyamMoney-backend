@@ -85,5 +85,12 @@ public class FollowController {
 	}
 	
 
+	@DeleteMapping("/{targetUserId}")
+	public ResponseEntity<FollowOperationResponse> unfollow(@PathVariable long targetUserId, @AuthenticationPrincipal UserPrincipal principal) {
+	    Long userId = principal.getUserId();
+	    FollowOperationResponse res = followService.unfollow(userId, targetUserId);
+	    return ResponseEntity.ok(res);
+	}
+
 	
 }
