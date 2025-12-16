@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @NoArgsConstructor
-public class FollowRequestCancelResponse {
+public class FollowOperationResponse {
     private Long requestId;
     private String status; // "CANCELED"
 }
