@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ssafy.project.api.v1.follow.dto.FollowCreateResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowDto;
+import com.ssafy.project.api.v1.follow.dto.FollowOperationResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestApproveResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestCancelResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestItem;
@@ -134,7 +135,7 @@ public class FollowServiceImpl implements FollowService{
 	}
 
 	@Override
-	public FollowRequestCancelResponse deleteFollowRequest(Long userId, long requestId) {
+	public FollowOperationResponse deleteFollowRequest(Long userId, long requestId) {
 		FollowDto follow = followMapper.getFollowRequest(requestId);
 		
 		if (follow == null) {
@@ -153,7 +154,7 @@ public class FollowServiceImpl implements FollowService{
 
 	    int deleted = followMapper.deletePendingFollowRequest(requestId, userId); // pending 중만 취소 가능
 		
-	    return new FollowRequestCancelResponse(requestId, "CANCELED");
+	    return new FollowOperationResponse(requestId, "CANCELED");
 	}
 
 
