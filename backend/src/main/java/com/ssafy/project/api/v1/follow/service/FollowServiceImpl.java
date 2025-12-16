@@ -156,5 +156,25 @@ public class FollowServiceImpl implements FollowService{
 	    return new FollowOperationResponse(requestId, "CANCELED");
 	}
 
+	@Override
+	@Transactional
+	public FollowOperationResponse unfollow(Long userId, long targetUserId) {
+
+	    // 403: 자기 자신
+	    if (userId.equals(targetUserId)) {
+	        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "자기 자신을 언팔로우할 수 없습니다.");
+	    }
+
+	    int deleted = followMapper.deleteAcceptedFollow(userId, targetUserId);
+
+	    // 404: 팔로우 중이 아님
+	    if (deleted == 0) {
+	        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "언팔로우할 대상이 존재하지 않습니다.");
+	    }
+
+	    return new FollowOperationResponse(targetUserId, "UNFOLLOWED");
+	}
+
+
 
 }

@@ -18,4 +18,6 @@ public interface FollowService {
 
 	FollowOperationResponse deleteFollowRequest(Long userId, long requestId);
 
+	FollowOperationResponse unfollow(Long userId, long targetUserId);
+
 }
