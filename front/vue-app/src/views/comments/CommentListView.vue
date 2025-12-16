@@ -60,7 +60,7 @@
       </li>
     </ul>
 
-    <!-- ✅ 댓글 입력 폼 (댓글 0개여도 항상 노출) -->
+    <!-- 댓글 입력 폼 (댓글 0개여도 항상 노출) -->
     <div class="mt-6">
       <CommentCreateForm
         v-if="isAuthenticated"
