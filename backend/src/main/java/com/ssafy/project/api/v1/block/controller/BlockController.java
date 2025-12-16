@@ -3,6 +3,7 @@ package com.ssafy.project.api.v1.block.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.project.api.v1.block.service.BlockService;
 import com.ssafy.project.api.v1.follow.dto.FollowOperationResponse;
+import com.ssafy.project.api.v1.follow.dto.UserListResponse;
 import com.ssafy.project.security.auth.UserPrincipal;
 
 @RestController
@@ -38,5 +40,12 @@ public class BlockController {
 		FollowOperationResponse res = blockService.unblock(userId, targetUserId);
 		
 		return ResponseEntity.ok(res);
+	}
+	
+	@GetMapping("/blocks")
+	public ResponseEntity<UserListResponse> getFollowings(@AuthenticationPrincipal UserPrincipal principal) {
+	    Long userId = principal.getUserId();
+	    UserListResponse res = blockService.getBlocks(userId);
+	    return ResponseEntity.ok(res);
 	}
 }
