@@ -47,4 +47,6 @@ public interface FollowMapper {
 	List<UserDetailResponse> selectFollowings(@Param("userId") Long userId);
 	
 	List<UserDetailResponse> selectFollowers(@Param("userId") Long userId);
+	
+	List<UserDetailResponse> selectBlocks(@Param("userId") Long userId);
 }

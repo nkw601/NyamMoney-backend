@@ -164,7 +164,7 @@
 	    WHERE uf.follower_id = #{userId}
 	      AND uf.status = 'ACCEPTED'
 	      AND u.deleted_at IS NULL
-	    ORDER BY u.nickname ASC
+	    ORDER BY uf.updated_at DESC
 	</select>
 	
 	<select id="selectFollowers"
@@ -190,7 +190,7 @@
 	    WHERE uf.followee_id = #{userId}
 	      AND uf.status = 'ACCEPTED'
 	      AND u.deleted_at IS NULL
-	    ORDER BY u.nickname ASC
+	    ORDER BY uf.updated_at DESC
 	</select>
 	
 	<!-- Block -->		
@@ -224,4 +224,30 @@
 	      AND status = 'BLOCKED'
 	</delete>
 	
+	<select id="selectBlocks"
+	        parameterType="long"
+	        resultMap="UserDetailResponseMap">
+	
+	    SELECT
+	      u.user_id,
+	      u.login_id,
+	      u.nickname,
+	      u.email,
+	      u.monthly_budget,
+	      u.trigger_budget,
+	      u.created_at,
+	      u.updated_at,
+	      u.profile_visibility,
+	      u.share_level,
+	      u.role,
+	      u.name,
+	      u.phone_number
+	    FROM user_follows uf
+	    JOIN users u ON u.user_id = uf.followee_id
+	    WHERE uf.follower_id = #{userId}
+	      AND uf.status = 'BLOCKED'
+	      AND u.deleted_at IS NULL
+	    ORDER BY uf.updated_at DESC
+	</select>
+
 </mapper>
