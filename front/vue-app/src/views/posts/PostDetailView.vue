@@ -2,18 +2,17 @@
   <Layout>
     <div>
       <!-- 목록으로 -->
-      <button
-        class="mb-4 px-3 py-1 border rounded hover:bg-gray-100"
-        @click="goList"
-      >
-        목록으로
-      </button>
+      <button class="mb-4 px-3 py-1 border rounded hover:bg-gray-100"
+        @click="goList">목록으로</button>
 
-      <!-- 로딩 -->
-      <p v-if="loading">불러오는 중...</p>
-
-      <!-- 게시글 -->
-      <div v-else-if="post">
+        
+        <!-- 로딩 -->
+        <p v-if="loading">불러오는 중...</p>
+        
+        <!-- 게시글 -->
+        <div v-else-if="post">
+        <button v-if="post.author?.userId === authStore.userId"
+        class="text-sm text-gray-400" @click="goEdit">수정</button>
         <h1 class="text-2xl font-bold mb-2">
           {{ post.title }}
         </h1>
@@ -44,6 +43,7 @@ import { usePostStore } from '@/stores/post.store'
 import { storeToRefs } from 'pinia'
 import Layout from '@/components/Layout.vue'
 import CommentListView from '@/views/comments/CommentListView.vue'
+import { useAuthStore } from '../../stores/auth'
 
 export default {
   components: {
@@ -66,6 +66,7 @@ export default {
     const route = useRoute()
     const postStore = usePostStore()
     const { post, loading } = storeToRefs(postStore)
+    const authStore = useAuthStore()
 
     // 게시글 상세 조회
     onMounted(() => {
@@ -82,10 +83,21 @@ export default {
       })
     }
 
+    const goEdit = () => {
+      router.push({
+        name: 'postEdit',
+        params: {
+          boardId: props.boardId,
+          postId: props.postId,
+        },
+      })
+    }
+
+
     return {
       post,
       loading,
-      goList,
+      goList, goEdit, authStore,
     }
   },
 }

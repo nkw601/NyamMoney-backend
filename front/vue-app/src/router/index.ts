@@ -43,7 +43,12 @@ const routes = [
   { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
   { path: '/meetings', name: 'Meetings', component: Meetings, meta: { requiresAuth: true } },
   // { path: '/organization', name: 'Organization', component: Organization, meta: { requiresAuth: true } },
-
+  { path: '/boards/:boardId/posts/:postId/edit', name: 'postEdit', component: ()=>import('@/views/posts/PostEditView.vue'),
+    props: route => ({
+    boardId: Number(route.params.boardId),
+    postId: Number(route.params.postId),
+    }),
+  },
   {
   path: '/organization',
   name:'Organization',

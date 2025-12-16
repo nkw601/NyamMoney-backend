@@ -9,3 +9,8 @@ export function createPost(boardId, title, content) {
     title, contentMd: content,
   })
 }
+
+// 수정
+export const updatePost = (boardId, postId, data) => {
+  return api.patch(`/v1/boards/${boardId}/posts/${postId}`, data)
+}

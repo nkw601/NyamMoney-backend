@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
-import { fetchPostDetail, createPost, } from '@/services/post.service'
+import { fetchPostDetail, createPost, updatePost } from '@/services/post.service'
 
 export const usePostStore = defineStore('post', {
   state: () => ({
     post: null,
     loading: false,
     creating: false,
+    updating: false,
   }),
 
   actions: {
@@ -40,6 +41,20 @@ export const usePostStore = defineStore('post', {
       }
     },
 
+    // 게시글 수정
+    async updatePost(boardId, postId, title, content) {
+      this.updating = true
+      try {
+        const res = await updatePost(boardId, postId, { 
+          title,
+          content,
+        })
+        this.post = res.data
+        return res.data
+      } finally {
+        this.updating = false
+      }
+    },
 
 
   },
