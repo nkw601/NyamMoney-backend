@@ -11,4 +11,6 @@ public interface BlockService {
      */
 	FollowOperationResponse block(Long userId, long targetUserId);
 
+	FollowOperationResponse unblock(Long userId, long targetUserId);
+
 }

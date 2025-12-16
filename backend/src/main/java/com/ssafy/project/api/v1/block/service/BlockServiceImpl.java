@@ -37,4 +37,17 @@ public class BlockServiceImpl implements BlockService {
         return new FollowOperationResponse(targetUserId, "BLOCKED");
 	}
 
+	@Override
+	@Transactional
+	public FollowOperationResponse unblock(Long userId, long targetUserId) {
+		if(userId.equals(targetUserId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "자기 자신을 차단 해제할 수 없습니다.");
+		
+		UserDto targetUser = userMapper.findById(targetUserId);
+		if(targetUser == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다.");
+		
+		int deleted = followMapper.deleteBlocked(userId, targetUserId);
+		
+        return new FollowOperationResponse(targetUserId, "UNBLOCKED");
+	}
+
 }
