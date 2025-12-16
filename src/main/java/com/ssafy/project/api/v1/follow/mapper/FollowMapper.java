@@ -45,5 +45,6 @@ public interface FollowMapper {
 	int deleteBlocked(@Param("userId") Long userId, @Param("targetUserId") long targetUserId);
 	
 	List<UserDetailResponse> selectFollowings(@Param("userId") Long userId);
-
+	
+	List<UserDetailResponse> selectFollowers(@Param("userId") Long userId);
 }
