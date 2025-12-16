@@ -13,7 +13,6 @@ import com.ssafy.project.api.v1.follow.dto.FollowCreateResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowDto;
 import com.ssafy.project.api.v1.follow.dto.FollowOperationResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestApproveResponse;
-import com.ssafy.project.api.v1.follow.dto.FollowRequestCancelResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestItem;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestsResponse;
 import com.ssafy.project.api.v1.follow.mapper.FollowMapper;
