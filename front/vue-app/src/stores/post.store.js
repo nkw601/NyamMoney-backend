@@ -47,7 +47,7 @@ export const usePostStore = defineStore('post', {
       try {
         const res = await updatePost(boardId, postId, { 
           title,
-          content,
+          contentMd: content,
         })
         this.post = res.data
         return res.data

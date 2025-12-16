@@ -44,6 +44,7 @@ import { storeToRefs } from 'pinia'
 import Layout from '@/components/Layout.vue'
 import CommentListView from '@/views/comments/CommentListView.vue'
 import { useAuthStore } from '../../stores/auth'
+import { watch } from 'vue'
 
 export default {
   components: {
@@ -93,6 +94,13 @@ export default {
       })
     }
 
+    // watch(
+    //   ()=>props.postId,
+    //   ()=>{
+    //     postStore.loadPostDetail(props.boardId, props.postId)
+    //   },
+    //   {immediate: true}
+    // )
 
     return {
       post,
