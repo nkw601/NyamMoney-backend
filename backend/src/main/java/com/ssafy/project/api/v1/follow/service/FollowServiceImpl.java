@@ -11,8 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ssafy.project.api.v1.follow.dto.FollowCreateResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowDto;
+import com.ssafy.project.api.v1.follow.dto.FollowOperationResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestApproveResponse;
-import com.ssafy.project.api.v1.follow.dto.FollowRequestCancelResponse;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestItem;
 import com.ssafy.project.api.v1.follow.dto.FollowRequestsResponse;
 import com.ssafy.project.api.v1.follow.mapper.FollowMapper;
@@ -134,7 +134,7 @@ public class FollowServiceImpl implements FollowService{
 	}
 
 	@Override
-	public FollowRequestCancelResponse deleteFollowRequest(Long userId, long requestId) {
+	public FollowOperationResponse deleteFollowRequest(Long userId, long requestId) {
 		FollowDto follow = followMapper.getFollowRequest(requestId);
 		
 		if (follow == null) {
@@ -153,8 +153,28 @@ public class FollowServiceImpl implements FollowService{
 
 	    int deleted = followMapper.deletePendingFollowRequest(requestId, userId); // pending 중만 취소 가능
 		
-	    return new FollowRequestCancelResponse(requestId, "CANCELED");
+	    return new FollowOperationResponse(requestId, "CANCELED");
 	}
+
+	@Override
+	@Transactional
+	public FollowOperationResponse unfollow(Long userId, long targetUserId) {
+
+	    // 403: 자기 자신
+	    if (userId.equals(targetUserId)) {
+	        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "자기 자신을 언팔로우할 수 없습니다.");
+	    }
+
+	    int deleted = followMapper.deleteAcceptedFollow(userId, targetUserId);
+
+	    // 404: 팔로우 중이 아님
+	    if (deleted == 0) {
+	        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "언팔로우할 대상이 존재하지 않습니다.");
+	    }
+
+	    return new FollowOperationResponse(targetUserId, "UNFOLLOWED");
+	}
+
 
 
 }
