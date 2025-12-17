@@ -64,7 +64,11 @@
               </p>
             </div>
             <div class="border-t border-border mt-2 pt-2 space-y-1">
-              <RouterLink to="/profile" class="block px-2 py-1 hover:bg-accent rounded" @click="closeMenu">
+              <RouterLink
+                :to="{ name: 'UserProfile', query: { userId: userId } }"
+                class="block px-2 py-1 hover:bg-accent rounded"
+                @click="closeMenu"
+              >
                 My Page
               </RouterLink>
               <button
@@ -97,6 +101,7 @@ export default defineComponent({
     const auth = useAuthStore()
 
     const displayName = computed(() => `${auth.nickname} (${auth.loginId})`)
+    const userId = computed(() => auth.userId)
 
     // ✅ 이니셜은 닉네임 앞 2글자
     const initials = computed(() => auth.nickname.slice(0, 2).toUpperCase())
@@ -140,6 +145,7 @@ export default defineComponent({
       handleLogout,
       displayName,
       initials,
+      userId,
     }
   },
 })

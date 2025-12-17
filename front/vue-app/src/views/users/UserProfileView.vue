@@ -1,6 +1,6 @@
 ﻿<template>
   <Layout>
-    <div class=" min-h-screen">
+    <div class="min-h-screen">
       <div class="max-w-6xl mx-auto p-8 space-y-8">
         <div class="grid gap-8 lg:grid-cols-[320px_1fr]">
           <!-- Profile column -->
@@ -18,28 +18,37 @@
                   <p class="text-sm text-gray-500">@{{ profile.userId }}</p>
                   <h1 class="text-2xl font-bold leading-tight">{{ profile.nickname }}</h1>
                 </div>
+
                 <div class="flex flex-col md:flex-row w-full gap-2 mt-2">
-                  <UiButton
-                    class="w-full md:w-auto"
-                    :variant="profile.isFollowing ? 'outline' : 'default'"
-                    @click="toggleFollow"
-                  >
-                    {{ profile.isFollowing ? '팔로잉 중' : '팔로우' }}
-                  </UiButton>
-                  <UiButton
-                    class="w-full md:w-auto bg-gray-100 text-gray-700"
-                    variant="outline"
-                    @click="toggleBlock"
-                  >
-                    {{ profile.isBlocked ? '차단 해제' : '차단' }}
-                  </UiButton>
-                  <UiButton
-                    class="w-full md:w-auto bg-white text-gray-700 border border-border"
-                    variant="outline"
-                    @click="goEdit"
-                  >
-                    내 정보 수정
-                  </UiButton>
+                  <template v-if="isMyProfile">
+                    <UiButton
+                      class="w-full md:w-auto bg-white text-gray-700 border border-border"
+                      variant="outline"
+                      @click="goEdit"
+                    >
+                      내 정보 수정
+                    </UiButton>
+                  </template>
+
+                  <template v-else>
+                    <UiButton
+                      class="w-full md:w-auto"
+                      :variant="followButtonVariant"
+                      :disabled="profile.isBlocked || loadingFollow"
+                      @click="toggleFollow"
+                    >
+                      {{ followButtonLabel }}
+                    </UiButton>
+
+                    <UiButton
+                      class="w-full md:w-auto bg-gray-100 text-gray-700"
+                      variant="outline"
+                      :disabled="loadingBlock"
+                      @click="toggleBlock"
+                    >
+                      {{ profile.isBlocked ? '차단 해제' : '차단' }}
+                    </UiButton>
+                  </template>
                 </div>
               </div>
             </UiCard>
@@ -48,11 +57,7 @@
               <div class="space-y-3">
                 <p class="text-sm font-semibold text-gray-600">활동 통계</p>
                 <div class="grid grid-cols-3 gap-2 text-center">
-                  <div
-                    v-for="stat in stats"
-                    :key="stat.label"
-                    class="rounded-md bg-gray-50 py-3"
-                  >
+                  <div v-for="stat in stats" :key="stat.label" class="rounded-md bg-gray-50 py-3">
                     <p class="text-xl font-bold">{{ stat.value }}</p>
                     <p class="text-xs text-gray-500">{{ stat.label }}</p>
                   </div>
@@ -86,10 +91,7 @@
                   <p class="text-sm font-semibold text-gray-700">게시판 활동</p>
                   <div class="flex items-center gap-4">
                     <div class="relative w-36 h-36">
-                      <div
-                        class="w-full h-full rounded-full"
-                        :style="{ background: boardGradient }"
-                      ></div>
+                      <div class="w-full h-full rounded-full" :style="{ background: boardGradient }"></div>
                       <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
                         <div>
                           <p class="text-xs text-gray-500">총 게시글</p>
@@ -111,10 +113,7 @@
                   <p class="text-sm font-semibold text-gray-700">반응 요약</p>
                   <div class="flex items-center gap-4">
                     <div class="relative w-36 h-36">
-                      <div
-                        class="w-full h-full rounded-full"
-                        :style="{ background: engagementGradient }"
-                      ></div>
+                      <div class="w-full h-full rounded-full" :style="{ background: engagementGradient }"></div>
                       <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
                         <div>
                           <p class="text-xs text-gray-500">총 반응</p>
@@ -163,11 +162,7 @@
               </div>
 
               <div class="space-y-3">
-                <UiCard
-                  v-for="post in filteredPosts"
-                  :key="post.id"
-                  wrapperClass="border border-border bg-white shadow-sm"
-                >
+                <UiCard v-for="post in filteredPosts" :key="post.id" wrapperClass="border border-border bg-white shadow-sm">
                   <div class="space-y-2">
                     <div class="flex items-center justify-between text-sm text-gray-500">
                       <div class="flex items-center gap-2">
@@ -186,7 +181,10 @@
                   </div>
                 </UiCard>
 
-                <UiCard v-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
+                <UiCard v-if="loadingPosts" wrapperClass="border border-dashed border-border bg-white">
+                  <div class="text-center text-gray-500 py-6">불러오는 중...</div>
+                </UiCard>
+                <UiCard v-else-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
                   <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
                 </UiCard>
               </div>
@@ -198,116 +196,216 @@
   </Layout>
 </template>
 
-<script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+<script setup>
+import { computed, reactive, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { fetchUser } from '@/services/user.service'
+import {
+  requestFollow,
+  unfollow,
+  cancelFollowRequest,
+  fetchFollowStatus,
+  block,
+  unblock
+} from '@/services/follow.service'
+import { fetchBoards, fetchPostsByBoard } from '@/services/board.service'
+import { useAuthStore } from '@/stores/auth'
 import Layout from '../../components/Layout.vue'
 import UiAvatar from '../../components/ui/Avatar.vue'
 import UiButton from '../../components/ui/Button.vue'
 import UiCard from '../../components/ui/Card.vue'
 
-type Post = {
-  id: number
-  board: string
-  boardName: string
-  title: string
-  excerpt: string
-  date: string
-  likes: number
-  comments: number
-}
-
-type Stat = {
-  label: string
-  value: string | number
-}
+const toStr = (v) => (v === null || v === undefined ? '' : String(v))
 
 const profile = reactive({
-  nickname: 'user_nickname',
-  userId: 'user_id_123',
-  avatarUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=vue-user',
-  bio: 'Just sharing my thoughts and experiences. Coffee enthusiast. Tech lover.',
-  location: 'Seoul, South Korea',
-  joinedDate: '2024년 3월 합류',
-  isFollowing: false,
-  isBlocked: false,
+  nickname: '',
+  userId: '',
+  avatarUrl: '',
+  bio: '',
+  location: '',
+  joinedDate: '',
+  followStatus: 'NONE',     // 'NONE' | 'PENDING' | 'ACCEPTED'
+  followRequestId: '',      // PENDING일 때 취소용
+  isBlocked: false
 })
 
-const stats: Stat[] = [
-  { label: 'Posts', value: 42 },
-  { label: 'Followers', value: '1.2K' },
-  { label: 'Following', value: 328 },
-]
+const auth = useAuthStore()
+const { userId: myUserId } = storeToRefs(auth)
+const route = useRoute()
+const router = useRouter()
 
-const posts = ref<Post[]>([
-  {
-    id: 1,
-    board: 'general',
-    boardName: '자유',
-    title: '프로필을 열었습니다!',
-    excerpt: '방금 새 프로필을 설정했어요. 앞으로 이곳에서 일상과 생각들을 공유할게요.',
-    date: '2024-03-15',
-    likes: 24,
-    comments: 5,
+const targetUserId = computed(() => {
+  const fromRoute = route.query.userId
+  const own = myUserId.value ? String(myUserId.value) : ''
+  return (fromRoute ? String(fromRoute) : '') || own || profile.userId
+})
+
+const isMyProfile = computed(() => {
+  if (!profile.userId || !myUserId.value) return false
+  return String(profile.userId) === String(myUserId.value)
+})
+
+const followButtonLabel = computed(() => {
+  if (profile.isBlocked) return '차단됨'
+  if (profile.followStatus === 'PENDING') return '신청 중'
+  if (profile.followStatus === 'ACCEPTED') return '팔로잉'
+  return '팔로우'
+})
+
+const followButtonVariant = computed(() => {
+  if (profile.followStatus === 'PENDING' || profile.followStatus === 'ACCEPTED') return 'outline'
+  return 'default'
+})
+
+const loadingFollow = ref(false)
+const loadingBlock = ref(false)
+
+// --- Profile & Relationship loaders ---
+const loadProfile = async () => {
+  if (!targetUserId.value) return
+  try {
+    const res = await fetchUser(String(targetUserId.value))
+    const data = res?.data ?? res
+
+    profile.userId = toStr(data?.userId ?? targetUserId.value)
+    profile.nickname = data?.nickname ?? ''
+    profile.avatarUrl = data?.profileImageUrl ?? data?.avatarUrl ?? ''
+    profile.bio = data?.bio ?? ''
+    profile.location = data?.location ?? ''
+    profile.joinedDate = data?.createdAt ?? data?.joinedDate ?? ''
+  } catch (err) {
+    console.error('Failed to load profile', err)
+  }
+}
+
+const loadRelationship = async () => {
+  if (!targetUserId.value) return
+  // 내 프로필이면 관계 조회 의미 없음
+  if (String(targetUserId.value) === String(myUserId.value || '')) {
+    profile.followStatus = 'NONE'
+    profile.followRequestId = ''
+    profile.isBlocked = false
+    return
+  }
+
+  try {
+    const res = await fetchFollowStatus(String(targetUserId.value))
+    const data = res?.data ?? res
+
+    // ✅ 백엔드 응답을 이렇게 기대:
+    // { status: "NONE"|"PENDING"|"ACCEPTED"|"BLOCKED", requestId: 123 }
+    const status = (data?.status ?? 'NONE').toUpperCase()
+
+    profile.isBlocked = status === 'BLOCKED'
+    profile.followStatus = status === 'PENDING' || status === 'ACCEPTED' ? status : 'NONE'
+    profile.followRequestId = data?.requestId ? String(data.requestId) : ''
+  } catch (err) {
+    console.error('Failed to load follow status', err)
+    profile.isBlocked = false
+    profile.followStatus = 'NONE'
+    profile.followRequestId = ''
+  }
+}
+
+watch(
+  targetUserId,
+  async (id) => {
+    if (!id) return
+    profile.userId = String(id)
+    await loadProfile()
+    await loadRelationship()
+    await loadBoards()
   },
-  {
-    id: 2,
-    board: 'tech',
-    boardName: '기술',
-    title: 'Next.js 15 후기',
-    excerpt: '새로 나온 Next.js 15 기능들을 살펴봤는데, 성능과 DX 모두 괜찮네요.',
-    date: '2024-03-14',
-    likes: 89,
-    comments: 12,
-  },
-  {
-    id: 3,
-    board: 'tech',
-    boardName: '기술',
-    title: '스케일에 강한 앱 만들기',
-    excerpt: '규모가 커져도 유지보수 가능한 패턴을 정리해봤습니다.',
-    date: '2024-03-12',
-    likes: 156,
-    comments: 23,
-  },
-  {
-    id: 4,
-    board: 'life',
-    boardName: '라이프',
-    title: '강남 카페 추천',
-    excerpt: '원격 근무하기 좋은 분위기의 카페를 발견했어요. 추천합니다.',
-    date: '2024-03-10',
-    likes: 45,
-    comments: 8,
-  },
-  {
-    id: 5,
-    board: 'general',
-    boardName: '자유',
-    title: '주말 계획',
-    excerpt: '이번 주말에 한강 나들이 갈 예정입니다. 같이 가실 분?',
-    date: '2024-03-08',
-    likes: 32,
-    comments: 15,
-  },
-  {
-    id: 6,
-    board: 'tech',
-    boardName: '기술',
-    title: 'TypeScript 팁',
-    excerpt: '코드가 훨씬 깔끔해지는 타입스크립트 팁 몇 가지를 공유합니다.',
-    date: '2024-03-05',
-    likes: 203,
-    comments: 31,
-  },
+  { immediate: true }
+)
+
+// --- Follow / Block actions ---
+const toggleFollow = async () => {
+  if (loadingFollow.value) return
+  if (profile.isBlocked) return
+  if (!profile.userId || isMyProfile.value) return
+
+  loadingFollow.value = true
+  try {
+    if (profile.followStatus === 'NONE') {
+      // 팔로우 신청
+      const res = await requestFollow(profile.userId)
+      const data = res?.data ?? res
+
+      // createFollow 응답: { followId, status: "PENDING"|"ACCEPTED", ... }
+      const next = (data?.status ?? 'PENDING').toUpperCase()
+      profile.followStatus = next === 'ACCEPTED' ? 'ACCEPTED' : 'PENDING'
+      profile.followRequestId = data?.followId ? String(data.followId) : ''
+
+      // 서버가 requestId를 followId로 주면 여기로 충분
+    } else if (profile.followStatus === 'PENDING') {
+      // 신청 취소
+      if (!profile.followRequestId) {
+        await loadRelationship()
+        return
+      }
+      await cancelFollowRequest(profile.followRequestId)
+      profile.followStatus = 'NONE'
+      profile.followRequestId = ''
+    } else if (profile.followStatus === 'ACCEPTED') {
+      // 언팔
+      await unfollow(profile.userId)
+      profile.followStatus = 'NONE'
+      profile.followRequestId = ''
+    }
+  } catch (err) {
+    console.error('follow toggle failed', err)
+    await loadRelationship()
+  } finally {
+    loadingFollow.value = false
+  }
+}
+
+const toggleBlock = async () => {
+  if (loadingBlock.value) return
+  if (!profile.userId || isMyProfile.value) return
+
+  loadingBlock.value = true
+  try {
+    if (profile.isBlocked) {
+      await unblock(profile.userId)
+      profile.isBlocked = false
+      await loadRelationship()
+    } else {
+      await block(profile.userId)
+      profile.isBlocked = true
+      // 차단하면 팔로우 관계는 끊긴다고 했으니 프론트도 정리
+      profile.followStatus = 'NONE'
+      profile.followRequestId = ''
+    }
+  } catch (err) {
+    console.error('block toggle failed', err)
+    await loadRelationship()
+  } finally {
+    loadingBlock.value = false
+  }
+}
+
+const goEdit = () => {
+  router.push('/me')
+}
+
+// --- Stats / posts (기존 로직 유지) ---
+const stats = reactive([
+  { label: 'Posts', value: 0 },
+  { label: 'Followers', value: 0 },
+  { label: 'Following', value: 0 }
 ])
 
-const tabs = [
+const posts = ref([])
+const boards = ref([])
+const loadingPosts = ref(false)
+
+const tabs = computed(() => [
   { key: 'all', label: '전체' },
-  { key: 'general', label: '자유' },
-  { key: 'tech', label: '기술' },
-  { key: 'life', label: '라이프' },
-]
+  ...boards.value.map((b) => ({ key: String(b.boardId), label: b.name }))
+])
 
 const activeTab = ref('all')
 
@@ -315,52 +413,28 @@ const totalPosts = computed(() => posts.value.length)
 
 const filteredPosts = computed(() => {
   if (activeTab.value === 'all') return posts.value
-  return posts.value.filter((post) => post.board === activeTab.value)
+  return posts.value.filter((post) => String(post.board) === String(activeTab.value))
 })
-
-const boardActivity = computed(() => {
-  const total = posts.value.length || 1
-  return tabs
-    .filter((tab) => tab.key !== 'all')
-    .map((tab) => {
-      const count = posts.value.filter((post) => post.board === tab.key).length
-      return {
-        label: tab.label,
-        percent: Math.round((count / total) * 100),
-      }
-    })
-})
-
-const engagement = computed(() => {
-  const totals = posts.value.reduce(
-    (acc, post) => {
-      acc.likes += post.likes
-      acc.comments += post.comments
-      return acc
-    },
-    { likes: 0, comments: 0 }
-  )
-
-  return [
-    { label: '좋아요', value: totals.likes, percent: 0 },
-    { label: '댓글', value: totals.comments, percent: 0 },
-  ]
-})
-
-const toggleFollow = () => {
-  profile.isFollowing = !profile.isFollowing
-}
-
-const toggleBlock = () => {
-  profile.isBlocked = !profile.isBlocked
-}
-
-const router = useRouter()
-const goEdit = () => {
-  router.push('/me')
-}
 
 const donutColors = ['#f97316', '#3b82f6', '#10b981', '#a855f7', '#f59e0b']
+
+const boardActivity = computed(() => {
+  const total = totalPosts.value || 1
+  const source =
+    boards.value.length > 0
+      ? boards.value.map((b) => ({ label: b.name, count: b.postCount || 0 }))
+      : tabs.value
+          .filter((tab) => tab.key !== 'all')
+          .map((tab) => ({
+            label: tab.label,
+            count: posts.value.filter((post) => post.board === tab.key).length
+          }))
+
+  return source.map((item) => ({
+    label: item.label,
+    percent: Math.round(((item.count || 0) / total) * 100)
+  }))
+})
 
 const boardSegments = computed(() => {
   let acc = 0
@@ -379,15 +453,15 @@ const boardGradient = computed(() => {
 })
 
 const totalEngagement = computed(() => {
-  return posts.value.reduce((acc, post) => acc + post.likes + post.comments, 0)
+  return posts.value.reduce((acc, post) => acc + (post.likes || 0) + (post.comments || 0), 0)
 })
 
 const engagementSegments = computed(() => {
   const total = totalEngagement.value || 1
   let acc = 0
   const base = [
-    { label: '좋아요', value: posts.value.reduce((sum, p) => sum + p.likes, 0) },
-    { label: '댓글', value: posts.value.reduce((sum, p) => sum + p.comments, 0) },
+    { label: '좋아요', value: posts.value.reduce((sum, p) => sum + (p.likes || 0), 0) },
+    { label: '댓글', value: posts.value.reduce((sum, p) => sum + (p.comments || 0), 0) }
   ]
   return base.map((item, idx) => {
     const percent = Math.round((item.value / total) * 100)
@@ -402,5 +476,62 @@ const engagementSegments = computed(() => {
 const engagementGradient = computed(() => {
   if (!engagementSegments.value.length) return '#e5e7eb 0deg 360deg'
   return engagementSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
+})
+
+const loadPosts = async () => {
+  loadingPosts.value = true
+  try {
+    if (activeTab.value === 'all') {
+      const results = await Promise.all(boards.value.map((b) => fetchPostsByBoard(b.boardId)))
+      const merged = results.flatMap((res, idx) =>
+        (res?.data ?? []).map((p) => ({
+          id: p.postId ?? p.id,
+          board: String(boards.value[idx].boardId),
+          boardName: boards.value[idx].name,
+          title: p.title ?? '',
+          excerpt: p.content ?? '',
+          date: p.createdAt ?? '',
+          likes: p.likeCount ?? 0,
+          comments: p.commentCount ?? 0
+        }))
+      )
+      posts.value = merged
+    } else {
+      const boardId = Number(activeTab.value)
+      const res = await fetchPostsByBoard(boardId)
+      posts.value =
+        ((res?.data ?? [])).map((p) => ({
+          id: p.postId ?? p.id,
+          board: String(boardId),
+          boardName: boards.value.find((b) => b.boardId === boardId)?.name ?? '',
+          title: p.title ?? '',
+          excerpt: p.content ?? '',
+          date: p.createdAt ?? '',
+          likes: p.likeCount ?? 0,
+          comments: p.commentCount ?? 0
+        })) ?? []
+    }
+    stats[0].value = posts.value.length
+  } catch (err) {
+    console.error('Failed to load posts', err)
+    posts.value = []
+    stats[0].value = 0
+  } finally {
+    loadingPosts.value = false
+  }
+}
+
+const loadBoards = async () => {
+  try {
+    const res = await fetchBoards()
+    boards.value = res?.data?.items ?? []
+    await loadPosts()
+  } catch (err) {
+    console.error('Failed to load boards', err)
+  }
+}
+
+watch(activeTab, () => {
+  loadPosts()
 })
 </script>

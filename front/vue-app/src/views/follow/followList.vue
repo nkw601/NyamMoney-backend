@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Layout>
     <div class="p-8 min-h-screen">
       <h1 class="text-2xl font-bold mb-6">Follows</h1>
@@ -6,15 +6,13 @@
       <div class="grid gap-8 lg:grid-cols-1">
         <section class="space-y-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">팔로우 요청</h2>
-            <span class="text-sm text-gray-500">요청 수: {{ followRequests.length }}개</span>
+            <h2 class="text-lg font-semibold">Follow Requests</h2>
+            <span class="text-sm text-gray-500">Pending {{ followRequests.length }}</span>
           </div>
 
-          <p
-            v-if="!followRequests.length"
-            class="text-sm text-gray-500 bg-white rounded p-4 shadow"
-          >
-            팔로우 요청이 없습니다.
+          <p v-if="loading" class="text-sm text-gray-500 bg-white rounded p-4 shadow">Loading...</p>
+          <p v-else-if="!followRequests.length" class="text-sm text-gray-500 bg-white rounded p-4 shadow">
+            No follow requests.
           </p>
 
           <ul v-else>
@@ -36,7 +34,7 @@
                 <div>
                   <p class="font-semibold">{{ request.nickname }}</p>
                   <p class="text-sm text-gray-500">@{{ request.id }}</p>
-                  <p class="text-xs text-gray-400">요청 시간 {{ request.requestedAt }}</p>
+                  <p class="text-xs text-gray-400">Requested at {{ request.requestedAt }}</p>
                 </div>
               </div>
 
@@ -45,13 +43,17 @@
                   class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
                   @click="declineRequest(request.id)"
                 >
-                  거절
+                  Decline
                 </button>
                 <button
                   class="px-3 py-1 rounded bg-orange-500 text-white text-sm hover:bg-orange-600"
                   @click="acceptRequest(request.id)"
                 >
-                  수락
+                  Accept
+                </button>
+
+                <button class="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50">
+                  View profile
                 </button>
               </div>
             </li>
@@ -60,15 +62,13 @@
 
         <section class="space-y-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">팔로워</h2>
-            <span class="text-sm text-gray-500">{{ followers.length }}명</span>
+            <h2 class="text-lg font-semibold">Followers</h2>
+            <span class="text-sm text-gray-500">{{ followers.length }} people</span>
           </div>
 
-          <p
-            v-if="!followers.length"
-            class="text-sm text-gray-500 bg-white rounded p-4 shadow"
-          >
-            팔로워가 존재하지 않습니다.
+          <p v-if="loading" class="text-sm text-gray-500 bg-white rounded p-4 shadow">Loading...</p>
+          <p v-else-if="!followers.length" class="text-sm text-gray-500 bg-white rounded p-4 shadow">
+            No followers yet.
           </p>
 
           <ul v-else>
@@ -93,8 +93,11 @@
                 </div>
               </div>
 
-              <button class="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50">
-                차단하기
+              <button
+                class="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50"
+                @click="goProfile(follower.id)"
+              >
+                View profile
               </button>
             </li>
           </ul>
@@ -106,83 +109,103 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Layout from '../../components/Layout.vue'
+import {
+  fetchFollowers,
+  fetchFollowRequests,
+  acceptFollowRequest,
+  declineFollowRequest,
+} from '@/services/follow.service'
 
 type UserCard = {
   id: string
   nickname: string
   profileUrl?: string
   requestedAt?: string
-  daysFollowing?: number
 }
 
 export default defineComponent({
-  name: 'Meetings',
+  name: 'FollowList',
   components: { Layout },
   setup() {
-    const followRequests = ref<UserCard[]>([
-      {
-        id: 'minsu_92',
-        nickname: '123',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=minsu',
-        requestedAt: '12:34',
-      },
-      {
-        id: 'hanna.dev',
-        nickname: 'ㅁㄴㅇㄹ',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=hanna',
-        requestedAt: '123:12',
-      },
-      {
-        id: 'travel_woo',
-        nickname: 'travel_woo',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=woo',
-        requestedAt: '12:12',
-      },
-    ])
+    const router = useRouter()
+    const followRequests = ref<UserCard[]>([])
+    const followers = ref<UserCard[]>([])
+    const loading = ref(false)
 
-    const followers = ref<UserCard[]>([
-      {
-        id: 'cafe_latte',
-        nickname: 'cafe_latte',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=latte',
-      },
-      {
-        id: 'runner_june',
-        nickname: 'runner_june',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=june',
-      },
-      {
-        id: 'coding_dobi',
-        nickname: 'coding_dobi',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=dobi',
-      },
-    ])
+    const normalizeRequest = (item: any): UserCard => ({
+      id: item?.requestId ?? item?.userId ?? item?.id ?? '',
+      nickname: item?.nickname ?? item?.name ?? 'User',
+      profileUrl: item?.profileImageUrl ?? item?.profileUrl ?? item?.avatarUrl ?? '',
+      requestedAt: item?.requestedAt ?? item?.createdAt ?? '',
+    })
 
-    const acceptRequest = (id: string) => {
-      const accepted = followRequests.value.find((req) => req.id === id)
-      if (!accepted) return
+    const normalizeFollower = (item: any): UserCard => ({
+      id: item?.userId ?? item?.id ?? '',
+      nickname: item?.nickname ?? item?.name ?? 'User',
+      profileUrl: item?.profileImageUrl ?? item?.profileUrl ?? item?.avatarUrl ?? '',
+    })
 
-      followRequests.value = followRequests.value.filter((req) => req.id !== id)
-      followers.value = [
-        {
-          id: accepted.id,
-          nickname: accepted.nickname,
-          profileUrl: accepted.profileUrl,
-        },
-        ...followers.value,
-      ]
+    const loadData = async () => {
+      loading.value = true
+      try {
+        const [reqRes, followerRes] = await Promise.all([
+          fetchFollowRequests('incoming'),
+          fetchFollowers(),
+        ])
+
+
+        const reqData = reqRes?.data ?? reqRes
+        const followerData = followerRes?.data ?? followerRes
+
+        followRequests.value = (reqData?.requests ?? reqData?.items ?? []).map(normalizeRequest)
+        followers.value = (followerData?.items ?? []).map(normalizeFollower)
+
+        console.log('reqData', reqData)
+        console.log('followerData', followerData)
+      } catch (err) {
+        console.error('Failed to load follow lists', err)
+      } finally {
+        loading.value = false
+      }
     }
 
-    const declineRequest = (id: string) => {
-      followRequests.value = followRequests.value.filter((req) => req.id !== id)
+
+    const acceptRequest = async (id: string) => {
+      if (!id) return
+      try {
+        await acceptFollowRequest(id)
+        await loadData()
+      } catch (err) {
+        console.error('Accept follow request failed', err)
+      }
     }
+
+    const declineRequest = async (id: string) => {
+      if (!id) return
+      try {
+        await declineFollowRequest(id)
+        followRequests.value = followRequests.value.filter((req) => req.id !== id)
+      } catch (err) {
+        console.error('Decline follow request failed', err)
+      }
+    }
+
+    const goProfile = (userId: string) => {
+      if (!userId) return
+      router.push({ name: 'UserProfile', query: { userId } })
+    }
+
+    loadData()
 
     return {
       followRequests,
       followers,
+      loading,
       acceptRequest,
       declineRequest,
+      goProfile,
     }
   },
 })

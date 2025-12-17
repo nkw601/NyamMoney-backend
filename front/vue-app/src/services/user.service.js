@@ -27,3 +27,7 @@ export function updatePassword(userId, body) {
 export function deleteUser(userId) {
   return api.delete(`/v1/users/${userId}`)
 }
+
+export function fetchUser(userId) {
+  return api.get(`v1/users/${userId}`)
+}
