@@ -44,7 +44,7 @@ export function unblock(targetUserId) {
   return api.delete(`/v1/blocks/${targetUserId}`)
 }
 export function fetchBlocks() {
-  return api.get('/v1/blocks')
+  return api.get('/v1/blocks/blocks')
 }
 
 // 팔로우 상태 조회

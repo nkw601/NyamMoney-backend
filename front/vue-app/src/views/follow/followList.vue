@@ -44,9 +44,7 @@
             class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
           >
             <div class="flex items-center gap-3">
-              <div
-                class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
-              >
+              <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden">
                 <span>{{ (req.nickname || 'U').charAt(0) }}</span>
               </div>
 
@@ -58,7 +56,7 @@
 
             <div class="flex items-center gap-2">
               <button
-                class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
+                class="px-3 py-1 rounded bg-orange-100 text-gray-700 text-sm"
                 type="button"
                 @click="declineIncoming(req.requestId)"
               >
@@ -72,7 +70,7 @@
                 수락
               </button>
               <button
-                class="px-3 py-1 rounded border border-border text-sm hover:bg-gray-50"
+                class="px-3 py-1 rounded border border-border text-sm"
                 type="button"
                 @click="goProfile(req.userId)"
               >
@@ -103,9 +101,7 @@
             class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
           >
             <div class="flex items-center gap-3">
-              <div
-                class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
-              >
+              <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden">
                 <span>{{ (u.nickname || 'U').charAt(0) }}</span>
               </div>
               <div>
@@ -115,7 +111,7 @@
             </div>
 
             <button
-              class="px-3 py-1 rounded border border-border text-sm hover:bg-gray-50"
+              class="px-3 py-1 rounded border border-border text-sm hover:bg-orange-50"
               type="button"
               @click="goProfile(u.userId)"
             >
@@ -128,7 +124,7 @@
       <!-- =======================
            Followings (OUTGOING PENDING + ACCEPTED)
       ======================== -->
-      <div v-else class="border border-border rounded bg-card p-4 space-y-8">
+      <div v-else-if="tab === 'followings'" class="border border-border rounded bg-card p-4 space-y-8">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold">팔로잉</h2>
           <span class="text-sm text-gray-500">
@@ -148,12 +144,10 @@
             <li
               v-for="req in outgoingRequests"
               :key="req.requestId"
-              class="p-4 rounded bg-gray-50 border border-border flex items-center justify-between gap-4"
+              class="p-4 rounded border border-border flex items-center justify-between gap-4"
             >
               <div class="flex items-center gap-3">
-                <div
-                  class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
-                >
+                <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden">
                   <span>{{ (req.nickname || 'U').charAt(0) }}</span>
                 </div>
 
@@ -170,14 +164,14 @@
 
               <div class="flex items-center gap-2">
                 <button
-                  class="px-3 py-1 rounded bg-white border border-border text-sm hover:bg-gray-100"
+                  class="px-3 py-1 rounded bg-white border border-border text-sm"
                   type="button"
                   @click="goProfile(req.userId)"
                 >
                   프로필
                 </button>
                 <button
-                  class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
+                  class="px-3 py-1 rounded bg-orange-100 text-gray-700 text-sm "
                   type="button"
                   @click="cancelOutgoing(req.requestId)"
                 >
@@ -203,9 +197,7 @@
               class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
             >
               <div class="flex items-center gap-3">
-                <div
-                  class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
-                >
+                <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden">
                   <span>{{ (u.nickname || 'U').charAt(0) }}</span>
                 </div>
                 <div>
@@ -216,14 +208,14 @@
 
               <div class="flex items-center gap-2">
                 <button
-                  class="px-3 py-1 rounded border border-border text-sm hover:bg-gray-50"
+                  class="px-3 py-1 rounded border border-border text-sm "
                   type="button"
                   @click="goProfile(u.userId)"
                 >
                   프로필
                 </button>
                 <button
-                  class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
+                  class="px-3 py-1 rounded bg-orange-100 text-gray-700 text-sm"
                   type="button"
                   @click="doUnfollow(u.userId)"
                 >
@@ -234,6 +226,59 @@
           </ul>
         </section>
       </div>
+
+      <!-- =======================
+           Blocks
+      ======================== -->
+      <div v-else class="border border-border rounded bg-card p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">차단 목록</h2>
+          <span class="text-sm text-gray-500">{{ blocks.length }} people</span>
+        </div>
+
+        <p v-if="!blocks.length" class="text-sm text-gray-500">
+          차단한 사용자가 없습니다.
+        </p>
+
+        <ul v-else class="space-y-3">
+          <li
+            v-for="u in blocks"
+            :key="u.userId"
+            class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
+          >
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden">
+                <span>{{ (u.nickname || 'U').charAt(0) }}</span>
+              </div>
+              <div>
+                <p class="font-semibold">{{ u.nickname }}</p>
+                <p class="text-xs text-gray-400">@{{ u.userId }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                class="px-3 py-1 rounded border border-border text-sm "
+                type="button"
+                @click="goProfile(u.userId)"
+              >
+                프로필
+              </button>
+
+              <!-- ✅ 차단 해제 버튼 -->
+              <button
+                class="px-3 py-1 rounded bg-orange-100 text-gray-700 text-sm "
+                type="button"
+                :disabled="unblockingId === String(u.userId)"
+                @click="doUnblock(u.userId)"
+              >
+                {{ unblockingId === String(u.userId) ? '해제 중...' : '차단 해제' }}
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
     </div>
   </Layout>
 </template>
@@ -249,7 +294,9 @@ import {
   acceptFollowRequest,
   declineFollowRequest,
   cancelFollowRequest,
-  unfollow
+  unfollow,
+  fetchBlocks,
+  unblock
 } from '@/services/follow.service'
 
 const toStr = (v) => (v === null || v === undefined ? '' : String(v))
@@ -261,23 +308,21 @@ export default defineComponent({
     const router = useRouter()
 
     const tabs = [
-      { value: 'requests', label: '팔로우 요청' },  // incoming pending
-      { value: 'followers', label: '팔로워' },      // accepted followers
-      { value: 'followings', label: '팔로잉' }      // outgoing pending + accepted followings
+      { value: 'requests', label: '팔로우 요청' },
+      { value: 'followers', label: '팔로워' },
+      { value: 'followings', label: '팔로잉' },
+      { value: 'blocks', label: '차단' }
     ]
     const tab = ref('requests')
-
     const loading = ref(false)
 
-    // incoming requests (내가 받은 요청)
     const incomingRequests = ref([])
-
-    // followers (나를 팔로우하는 사람들)
     const followers = ref([])
-
-    // outgoing requests + followings (내가 팔로우하는 쪽)
     const outgoingRequests = ref([])
     const followings = ref([])
+    const blocks = ref([])
+
+    const unblockingId = ref('')
 
     const normalizeRequestItem = (item) => ({
       requestId: toStr(item?.requestId ?? item?.followId ?? item?.id ?? ''),
@@ -296,19 +341,16 @@ export default defineComponent({
       router.push({ name: 'UserProfile', query: { userId: String(userId) } })
     }
 
-    // --- loaders ---
     const loadIncoming = async () => {
       const res = await fetchFollowRequests('incoming')
       const data = res?.data ?? res
-      const list = (data?.requests ?? data?.items ?? [])
-      incomingRequests.value = list.map(normalizeRequestItem)
+      incomingRequests.value = (data?.requests ?? data?.items ?? []).map(normalizeRequestItem)
     }
 
     const loadFollowers = async () => {
       const res = await fetchFollowers()
       const data = res?.data ?? res
-      const list = (data?.items ?? [])
-      followers.value = list.map(normalizeUserItem)
+      followers.value = (data?.items ?? []).map(normalizeUserItem)
     }
 
     const loadFollowings = async () => {
@@ -324,27 +366,32 @@ export default defineComponent({
       followings.value = (followingData?.items ?? []).map(normalizeUserItem)
     }
 
+    const loadBlocks = async () => {
+      const res = await fetchBlocks()
+      const data = res?.data ?? res
+      blocks.value = (data?.items ?? []).map(normalizeUserItem)
+    }
+
     const loadByTab = async () => {
       loading.value = true
       try {
         if (tab.value === 'requests') await loadIncoming()
         else if (tab.value === 'followers') await loadFollowers()
-        else await loadFollowings()
+        else if (tab.value === 'followings') await loadFollowings()
+        else await loadBlocks()
       } catch (e) {
         console.error('Failed to load follow list view', e)
-        // 탭별 초기화
         if (tab.value === 'requests') incomingRequests.value = []
         else if (tab.value === 'followers') followers.value = []
-        else {
+        else if (tab.value === 'followings') {
           outgoingRequests.value = []
           followings.value = []
-        }
+        } else blocks.value = []
       } finally {
         loading.value = false
       }
     }
 
-    // --- actions ---
     const acceptIncoming = async (requestId) => {
       if (!requestId) return
       try {
@@ -359,7 +406,6 @@ export default defineComponent({
       if (!requestId) return
       try {
         await declineFollowRequest(String(requestId))
-        // UX: 즉시 제거
         incomingRequests.value = incomingRequests.value.filter((x) => x.requestId !== String(requestId))
       } catch (e) {
         console.error('declineIncoming failed', e)
@@ -386,7 +432,23 @@ export default defineComponent({
       }
     }
 
-    // 탭 바뀔 때마다 로드
+    // ✅ 차단 해제
+    const doUnblock = async (targetUserId) => {
+      if (!targetUserId) return
+      const id = String(targetUserId)
+      if (unblockingId.value) return
+
+      unblockingId.value = id
+      try {
+        await unblock(id)
+        blocks.value = blocks.value.filter((x) => String(x.userId) !== id)
+      } catch (e) {
+        console.error('doUnblock failed', e)
+      } finally {
+        unblockingId.value = ''
+      }
+    }
+
     watch(tab, () => {
       loadByTab()
     }, { immediate: true })
@@ -395,16 +457,17 @@ export default defineComponent({
       tabs,
       tab,
       loading,
-
       incomingRequests,
       followers,
       outgoingRequests,
       followings,
-
+      blocks,
+      unblockingId,
       acceptIncoming,
       declineIncoming,
       cancelOutgoing,
       doUnfollow,
+      doUnblock,
       goProfile
     }
   }
