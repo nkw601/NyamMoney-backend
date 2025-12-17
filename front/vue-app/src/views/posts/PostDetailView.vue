@@ -27,17 +27,13 @@
           {{ post.content }}
         </div>
 
-        <!-- ❤️ 좋아요 영역 -->
+        <!-- 좋아요 영역 -->
         <div class="flex items-center gap-2 mb-6">
-          <button class="text-2xl" @click="toggleLike"
-            :aria-label="post.liked ? '좋아요 취소' : '좋아요'">
-            <span v-if="post.liked">❤️</span>
-            <span v-else>♡</span>
+          <button class="text-2xl transition-transform duration-150 active:scale-125"
+          @click="toggleLike" :aria-label="post.liked ? '좋아요 취소' : '좋아요'">
+            <span v-if="post.liked">게시글 좋아요 취소하기 ❤️</span>
+            <span v-else>게시글 좋아요 누르기 ♡</span>
           </button>
-
-          <span class="text-sm text-gray-600">
-            좋아요 {{ post.likeCount }}
-          </span>
         </div>
 
         <p class="text-sm text-gray-400 mb-6">
@@ -131,8 +127,9 @@ export default {
     }
 
     // 좋아요 토글
-    const toggleLike = ()=>{
-      postStore.toggleLike(props.boardId, props.postId)
+    const toggleLike = async ()=>{
+      await postStore.toggleLike(props.boardId, props.postId)
+      console.log('좋아요 클릭')
     }
 
     return {
