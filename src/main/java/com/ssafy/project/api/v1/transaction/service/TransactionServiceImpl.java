@@ -21,33 +21,33 @@ public class TransactionServiceImpl implements TransactionService {
     	this.categoryMapper = categoryMapper;
     }
 	
-	@Override
-	public TransactionCreateResponse createTransaction(Long userId, TransactionCreateRequest req) {
-		 // 1) categoryId 존재 확인
-        CategoryItem category = categoryMapper.selectCategoryItemById(req.getCategoryId());
-        if (category == null) {
+    @Override
+    public TransactionCreateResponse createTransaction(Long userId, TransactionCreateRequest req) {
+
+        // 1) categoryId 존재 검증 (선택: FK가 있으면 DB가 막지만, 메시지/검증을 위해 둠)
+        boolean categoryExists = categoryMapper.existsById(req.getCategoryId());
+        if (!categoryExists) {
             throw new IllegalArgumentException("존재하지 않는 카테고리입니다.");
         }
 
-        // 2) insert
-        // pk return하기 위해 변환하기
+        // 2) Request -> Param (Insert 전용)
         TransactionCreateParam p = TransactionCreateParam.from(userId, req);
 
-        Long txId = transactionMapper.insertAndReturnId(p);
-        if (txId == null) {
-            throw new IllegalStateException("거래내역 생성에 실패했습니다. (transactionId 누락)");
+        // 3) insert (generated key가 p.transactionId에 채워짐)
+        int affected = transactionMapper.insertTransaction(p);
+        if (affected != 1 || p.getTransactionId() == null) {
+            throw new IllegalStateException("거래내역 생성에 실패했습니다.");
         }
 
-        // 3) 응답
-        TransactionCreateResponse res = transactionMapper.selectCreateResponseById(userId, txId);
-        
+        // 4) 방금 생성한 row 조회 (resultMap으로 categoryItem까지 포함)
+        TransactionCreateResponse res =
+                transactionMapper.selectCreateResponseById(userId, p.getTransactionId());
+
         if (res == null) {
             throw new IllegalStateException("거래내역 생성 후 조회에 실패했습니다.");
         }
-        
-        // categoryItem 재사용
-        res.setCategory(category);
+
         return res;
-	}
+    }
 
 }
