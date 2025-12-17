@@ -5,7 +5,7 @@
       @click="isMobileOpen = !isMobileOpen"
       aria-label="Toggle sidebar"
     >
-      ☰
+      ??
     </button>
 
     <div
@@ -16,18 +16,18 @@
 
     <div
   :class="[
-  // 공통 스타일
+  // 공통 ?��???
   'flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out',
 
-  // 위치
+  // ?�치
   'fixed inset-y-0 left-0 z-20 lg:sticky lg:top-0 lg:h-screen',
 
-  // 👉 기본은 항상 w-72 (모바일)
+  // ?�� 기본?� ??�� w-72 (모바??
   'w-72',
-  // 👉 접힘/펼침은 lg 이상에서만 적용
+  // ?�� ?�힘/?�침?� lg ?�상?�서�??�용
   isCollapsed ? 'lg:w-[72px]' : 'lg:w-72',
 
-  // 모바일 열고 닫기
+  // 모바???�고 ?�기
   isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
 ]"
 >
@@ -117,7 +117,7 @@ export default defineComponent({
       { name: 'Permissions', href: '/permissions', icon: '🛡️' },
       { name: 'Chat', href: '/chat', icon: '💬' },
       { name: 'Follows', href: '/follows', icon: '🎥' },
-      { name: 'MyPage', href: '/me', icon: '👤' }
+      { name: 'MyPage', href: '/profile', icon: '👤' }
     ]
 
     const bottomNavigation = [
@@ -139,3 +139,4 @@ export default defineComponent({
 
 <style scoped>
 </style>
+

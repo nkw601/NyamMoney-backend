@@ -1,6 +1,6 @@
 ﻿<template>
   <Layout>
-    <div class="bg-gray-50 min-h-screen">
+    <div class=" min-h-screen">
       <div class="max-w-6xl mx-auto p-8 space-y-8">
         <div class="grid gap-8 lg:grid-cols-[320px_1fr]">
           <!-- Profile column -->
@@ -32,6 +32,13 @@
                     @click="toggleBlock"
                   >
                     {{ profile.isBlocked ? '차단 해제' : '차단' }}
+                  </UiButton>
+                  <UiButton
+                    class="w-full md:w-auto bg-white text-gray-700 border border-border"
+                    variant="outline"
+                    @click="goEdit"
+                  >
+                    내 정보 수정
                   </UiButton>
                 </div>
               </div>
@@ -73,16 +80,6 @@
 
           <!-- Posts + activity column -->
           <div class="space-y-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-500">최근 게시글</p>
-                <h2 class="text-2xl font-bold">Posts</h2>
-              </div>
-              <span class="inline-flex items-center px-3 py-1 rounded-full bg-white border border-border text-sm shadow-sm">
-                총 {{ totalPosts }}개
-              </span>
-            </div>
-
             <UiCard wrapperClass="border border-border bg-white shadow-sm">
               <div class="grid gap-6 md:grid-cols-2">
                 <div class="space-y-3">
@@ -136,6 +133,16 @@
                 </div>
               </div>
             </UiCard>
+
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-500">최근 게시글</p>
+                <h2 class="text-2xl font-bold">Posts</h2>
+              </div>
+              <span class="inline-flex items-center px-3 py-1 rounded-full bg-white border border-border text-sm shadow-sm">
+                총 {{ totalPosts }}개
+              </span>
+            </div>
 
             <div class="space-y-4">
               <div class="flex flex-wrap gap-2">
@@ -193,6 +200,7 @@
 
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Layout from '../../components/Layout.vue'
 import UiAvatar from '../../components/ui/Avatar.vue'
 import UiButton from '../../components/ui/Button.vue'
@@ -345,6 +353,11 @@ const toggleFollow = () => {
 
 const toggleBlock = () => {
   profile.isBlocked = !profile.isBlocked
+}
+
+const router = useRouter()
+const goEdit = () => {
+  router.push('/me')
 }
 
 const donutColors = ['#f97316', '#3b82f6', '#10b981', '#a855f7', '#f59e0b']
