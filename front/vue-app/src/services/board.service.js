@@ -7,3 +7,7 @@ import api from '@/api/axios'
 export function fetchPostsByBoard(boardId) {
   return api.get(`/v1/boards/${boardId}/posts`)
 }
+
+export function fetchBoards() {
+  return api.get('/v1/boards')
+}

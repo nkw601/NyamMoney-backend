@@ -49,4 +49,10 @@ public interface FollowMapper {
 	List<UserDetailResponse> selectFollowers(@Param("userId") Long userId);
 	
 	List<UserDetailResponse> selectBlocks(@Param("userId") Long userId);
+	
+	int existsBlocked(
+		    @Param("userId") Long userId,
+		    @Param("targetUserId") Long targetUserId
+		);
+
 }

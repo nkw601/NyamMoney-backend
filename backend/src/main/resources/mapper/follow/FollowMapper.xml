@@ -249,5 +249,16 @@
 	      AND u.deleted_at IS NULL
 	    ORDER BY uf.updated_at DESC
 	</select>
+	
+	<select id="existsBlocked" resultType="int">
+	    SELECT COUNT(*)
+	    FROM user_follows
+	    WHERE status = 'BLOCKED'
+	      AND (
+	            (follower_id = #{userId} AND followee_id = #{targetUserId})
+	         OR (follower_id = #{targetUserId} AND followee_id = #{userId})
+	      )
+	</select>
 
+	
 </mapper>

@@ -1,101 +1,235 @@
-<template>
+﻿<template>
   <Layout>
-    <div class="p-8 min-h-screen">
-      <h1 class="text-2xl font-bold mb-6">Follows</h1>
+    <div class="container mx-auto py-10">
+      <h1 class="text-3xl font-bold mb-6">Follows</h1>
 
-      <div class="grid gap-8 lg:grid-cols-1">
-        <section class="space-y-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">팔로우 요청</h2>
-            <span class="text-sm text-gray-500">요청 수: {{ followRequests.length }}개</span>
-          </div>
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-6">
+        <button
+          v-for="t in tabs"
+          :key="t.value"
+          @click="tab = t.value"
+          :class="[
+            'px-3 py-1 rounded',
+            tab === t.value ? 'bg-primary text-primary-foreground' : 'border border-border bg-white'
+          ]"
+          type="button"
+        >
+          {{ t.label }}
+        </button>
+      </div>
 
-          <p
-            v-if="!followRequests.length"
-            class="text-sm text-gray-500 bg-white rounded p-4 shadow"
+      <!-- Loading -->
+      <div v-if="loading" class="text-sm text-gray-500 bg-white rounded p-4 border border-border">
+        Loading...
+      </div>
+
+      <!-- =======================
+           Follow Requests (INCOMING)
+      ======================== -->
+      <div v-else-if="tab === 'requests'" class="border border-border rounded bg-card p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">팔로우 요청</h2>
+          <span class="text-sm text-gray-500">Pending {{ incomingRequests.length }}</span>
+        </div>
+
+        <p v-if="!incomingRequests.length" class="text-sm text-gray-500">
+          나에게 들어온 팔로우 요청이 없습니다.
+        </p>
+
+        <ul v-else class="space-y-3">
+          <li
+            v-for="req in incomingRequests"
+            :key="req.requestId"
+            class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
           >
-            팔로우 요청이 없습니다.
+            <div class="flex items-center gap-3">
+              <div
+                class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
+              >
+                <span>{{ (req.nickname || 'U').charAt(0) }}</span>
+              </div>
+
+              <div>
+                <p class="font-semibold">{{ req.nickname }}</p>
+                <p class="text-xs text-gray-400">요청일 {{ req.createdAt }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
+                type="button"
+                @click="declineIncoming(req.requestId)"
+              >
+                거절
+              </button>
+              <button
+                class="px-3 py-1 rounded bg-orange-500 text-white text-sm hover:bg-orange-600"
+                type="button"
+                @click="acceptIncoming(req.requestId)"
+              >
+                수락
+              </button>
+              <button
+                class="px-3 py-1 rounded border border-border text-sm hover:bg-gray-50"
+                type="button"
+                @click="goProfile(req.userId)"
+              >
+                프로필
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- =======================
+           Followers
+      ======================== -->
+      <div v-else-if="tab === 'followers'" class="border border-border rounded bg-card p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">팔로워</h2>
+          <span class="text-sm text-gray-500">{{ followers.length }} people</span>
+        </div>
+
+        <p v-if="!followers.length" class="text-sm text-gray-500">
+          아직 팔로워가 없습니다.
+        </p>
+
+        <ul v-else class="space-y-3">
+          <li
+            v-for="u in followers"
+            :key="u.userId"
+            class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
+              >
+                <span>{{ (u.nickname || 'U').charAt(0) }}</span>
+              </div>
+              <div>
+                <p class="font-semibold">{{ u.nickname }}</p>
+                <p class="text-xs text-gray-400">@{{ u.userId }}</p>
+              </div>
+            </div>
+
+            <button
+              class="px-3 py-1 rounded border border-border text-sm hover:bg-gray-50"
+              type="button"
+              @click="goProfile(u.userId)"
+            >
+              프로필
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- =======================
+           Followings (OUTGOING PENDING + ACCEPTED)
+      ======================== -->
+      <div v-else class="border border-border rounded bg-card p-4 space-y-8">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">팔로잉</h2>
+          <span class="text-sm text-gray-500">
+            신청중 {{ outgoingRequests.length }} · 팔로잉 {{ followings.length }}
+          </span>
+        </div>
+
+        <!-- Outgoing requests -->
+        <section class="space-y-3">
+          <h3 class="text-sm font-semibold text-gray-700">팔로우 요청 중</h3>
+
+          <p v-if="!outgoingRequests.length" class="text-sm text-gray-500">
+            신청 중인 팔로우가 없습니다.
           </p>
 
-          <ul v-else>
+          <ul v-else class="space-y-3">
             <li
-              v-for="request in followRequests"
-              :key="request.id"
-              class="mb-3 p-4 rounded bg-white shadow flex items-center justify-between gap-4"
+              v-for="req in outgoingRequests"
+              :key="req.requestId"
+              class="p-4 rounded bg-gray-50 border border-border flex items-center justify-between gap-4"
             >
-              <div class="flex items-center gap-4">
-                <div class="h-12 w-12 rounded-full overflow-hidden bg-orange-100 text-orange-700 font-semibold flex items-center justify-center">
-                  <img
-                    v-if="request.profileUrl"
-                    :src="request.profileUrl"
-                    :alt="request.nickname"
-                    class="h-full w-full object-cover"
-                  />
-                  <span v-else>{{ request.nickname.charAt(0) }}</span>
+              <div class="flex items-center gap-3">
+                <div
+                  class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
+                >
+                  <span>{{ (req.nickname || 'U').charAt(0) }}</span>
                 </div>
+
                 <div>
-                  <p class="font-semibold">{{ request.nickname }}</p>
-                  <p class="text-sm text-gray-500">@{{ request.id }}</p>
-                  <p class="text-xs text-gray-400">요청 시간 {{ request.requestedAt }}</p>
+                  <p class="font-semibold flex items-center gap-2">
+                    {{ req.nickname }}
+                    <span class="text-xs px-2 py-0.5 rounded-full border border-border bg-white text-gray-600">
+                      PENDING
+                    </span>
+                  </p>
+                  <p class="text-xs text-gray-400">신청일 {{ req.createdAt }}</p>
                 </div>
               </div>
 
               <div class="flex items-center gap-2">
                 <button
-                  class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
-                  @click="declineRequest(request.id)"
+                  class="px-3 py-1 rounded bg-white border border-border text-sm hover:bg-gray-100"
+                  type="button"
+                  @click="goProfile(req.userId)"
                 >
-                  거절
+                  프로필
                 </button>
                 <button
-                  class="px-3 py-1 rounded bg-orange-500 text-white text-sm hover:bg-orange-600"
-                  @click="acceptRequest(request.id)"
+                  class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
+                  type="button"
+                  @click="cancelOutgoing(req.requestId)"
                 >
-                  수락
+                  신청 취소
                 </button>
               </div>
             </li>
           </ul>
         </section>
 
+        <!-- Accepted followings -->
         <section class="space-y-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">팔로워</h2>
-            <span class="text-sm text-gray-500">{{ followers.length }}명</span>
-          </div>
+          <h3 class="text-sm font-semibold text-gray-700">팔로잉 중</h3>
 
-          <p
-            v-if="!followers.length"
-            class="text-sm text-gray-500 bg-white rounded p-4 shadow"
-          >
-            팔로워가 존재하지 않습니다.
+          <p v-if="!followings.length" class="text-sm text-gray-500">
+            팔로잉 중인 사용자가 없습니다.
           </p>
 
-          <ul v-else>
+          <ul v-else class="space-y-3">
             <li
-              v-for="follower in followers"
-              :key="follower.id"
-              class="mb-3 p-4 rounded bg-white shadow flex items-center justify-between gap-4"
+              v-for="u in followings"
+              :key="u.userId"
+              class="p-4 rounded bg-white border border-border flex items-center justify-between gap-4"
             >
-              <div class="flex items-center gap-4">
-                <div class="h-12 w-12 rounded-full overflow-hidden bg-orange-100 text-orange-700 font-semibold flex items-center justify-center">
-                  <img
-                    v-if="follower.profileUrl"
-                    :src="follower.profileUrl"
-                    :alt="follower.nickname"
-                    class="h-full w-full object-cover"
-                  />
-                  <span v-else>{{ follower.nickname.charAt(0) }}</span>
+              <div class="flex items-center gap-3">
+                <div
+                  class="h-10 w-10 rounded-full bg-orange-100 text-orange-700 font-semibold flex items-center justify-center overflow-hidden"
+                >
+                  <span>{{ (u.nickname || 'U').charAt(0) }}</span>
                 </div>
                 <div>
-                  <p class="font-semibold">{{ follower.nickname }}</p>
-                  <p class="text-sm text-gray-500">@{{ follower.id }}</p>
+                  <p class="font-semibold">{{ u.nickname }}</p>
+                  <p class="text-xs text-gray-400">@{{ u.userId }}</p>
                 </div>
               </div>
 
-              <button class="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50">
-                차단하기
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  class="px-3 py-1 rounded border border-border text-sm hover:bg-gray-50"
+                  type="button"
+                  @click="goProfile(u.userId)"
+                >
+                  프로필
+                </button>
+                <button
+                  class="px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm hover:bg-gray-200"
+                  type="button"
+                  @click="doUnfollow(u.userId)"
+                >
+                  언팔로우
+                </button>
+              </div>
             </li>
           </ul>
         </section>
@@ -104,86 +238,177 @@
   </Layout>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script>
+import { defineComponent, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import Layout from '../../components/Layout.vue'
+import {
+  fetchFollowers,
+  fetchFollowings,
+  fetchFollowRequests,
+  acceptFollowRequest,
+  declineFollowRequest,
+  cancelFollowRequest,
+  unfollow
+} from '@/services/follow.service'
 
-type UserCard = {
-  id: string
-  nickname: string
-  profileUrl?: string
-  requestedAt?: string
-  daysFollowing?: number
-}
+const toStr = (v) => (v === null || v === undefined ? '' : String(v))
 
 export default defineComponent({
-  name: 'Meetings',
+  name: 'FollowListView',
   components: { Layout },
   setup() {
-    const followRequests = ref<UserCard[]>([
-      {
-        id: 'minsu_92',
-        nickname: '123',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=minsu',
-        requestedAt: '12:34',
-      },
-      {
-        id: 'hanna.dev',
-        nickname: 'ㅁㄴㅇㄹ',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=hanna',
-        requestedAt: '123:12',
-      },
-      {
-        id: 'travel_woo',
-        nickname: 'travel_woo',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=woo',
-        requestedAt: '12:12',
-      },
-    ])
+    const router = useRouter()
 
-    const followers = ref<UserCard[]>([
-      {
-        id: 'cafe_latte',
-        nickname: 'cafe_latte',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=latte',
-      },
-      {
-        id: 'runner_june',
-        nickname: 'runner_june',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=june',
-      },
-      {
-        id: 'coding_dobi',
-        nickname: 'coding_dobi',
-        profileUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=dobi',
-      },
-    ])
+    const tabs = [
+      { value: 'requests', label: '팔로우 요청' },  // incoming pending
+      { value: 'followers', label: '팔로워' },      // accepted followers
+      { value: 'followings', label: '팔로잉' }      // outgoing pending + accepted followings
+    ]
+    const tab = ref('requests')
 
-    const acceptRequest = (id: string) => {
-      const accepted = followRequests.value.find((req) => req.id === id)
-      if (!accepted) return
+    const loading = ref(false)
 
-      followRequests.value = followRequests.value.filter((req) => req.id !== id)
-      followers.value = [
-        {
-          id: accepted.id,
-          nickname: accepted.nickname,
-          profileUrl: accepted.profileUrl,
-        },
-        ...followers.value,
-      ]
+    // incoming requests (내가 받은 요청)
+    const incomingRequests = ref([])
+
+    // followers (나를 팔로우하는 사람들)
+    const followers = ref([])
+
+    // outgoing requests + followings (내가 팔로우하는 쪽)
+    const outgoingRequests = ref([])
+    const followings = ref([])
+
+    const normalizeRequestItem = (item) => ({
+      requestId: toStr(item?.requestId ?? item?.followId ?? item?.id ?? ''),
+      userId: toStr(item?.userId ?? item?.followerId ?? item?.followeeId ?? ''),
+      nickname: item?.nickname ?? item?.followerNickname ?? item?.followeeNickname ?? 'User',
+      createdAt: item?.createdAt ?? item?.requestedAt ?? ''
+    })
+
+    const normalizeUserItem = (item) => ({
+      userId: toStr(item?.userId ?? item?.id ?? ''),
+      nickname: item?.nickname ?? item?.name ?? 'User'
+    })
+
+    const goProfile = (userId) => {
+      if (!userId) return
+      router.push({ name: 'UserProfile', query: { userId: String(userId) } })
     }
 
-    const declineRequest = (id: string) => {
-      followRequests.value = followRequests.value.filter((req) => req.id !== id)
+    // --- loaders ---
+    const loadIncoming = async () => {
+      const res = await fetchFollowRequests('incoming')
+      const data = res?.data ?? res
+      const list = (data?.requests ?? data?.items ?? [])
+      incomingRequests.value = list.map(normalizeRequestItem)
     }
+
+    const loadFollowers = async () => {
+      const res = await fetchFollowers()
+      const data = res?.data ?? res
+      const list = (data?.items ?? [])
+      followers.value = list.map(normalizeUserItem)
+    }
+
+    const loadFollowings = async () => {
+      const [reqRes, followingRes] = await Promise.all([
+        fetchFollowRequests('outgoing'),
+        fetchFollowings()
+      ])
+
+      const reqData = reqRes?.data ?? reqRes
+      outgoingRequests.value = (reqData?.requests ?? reqData?.items ?? []).map(normalizeRequestItem)
+
+      const followingData = followingRes?.data ?? followingRes
+      followings.value = (followingData?.items ?? []).map(normalizeUserItem)
+    }
+
+    const loadByTab = async () => {
+      loading.value = true
+      try {
+        if (tab.value === 'requests') await loadIncoming()
+        else if (tab.value === 'followers') await loadFollowers()
+        else await loadFollowings()
+      } catch (e) {
+        console.error('Failed to load follow list view', e)
+        // 탭별 초기화
+        if (tab.value === 'requests') incomingRequests.value = []
+        else if (tab.value === 'followers') followers.value = []
+        else {
+          outgoingRequests.value = []
+          followings.value = []
+        }
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // --- actions ---
+    const acceptIncoming = async (requestId) => {
+      if (!requestId) return
+      try {
+        await acceptFollowRequest(String(requestId))
+        await loadIncoming()
+      } catch (e) {
+        console.error('acceptIncoming failed', e)
+      }
+    }
+
+    const declineIncoming = async (requestId) => {
+      if (!requestId) return
+      try {
+        await declineFollowRequest(String(requestId))
+        // UX: 즉시 제거
+        incomingRequests.value = incomingRequests.value.filter((x) => x.requestId !== String(requestId))
+      } catch (e) {
+        console.error('declineIncoming failed', e)
+      }
+    }
+
+    const cancelOutgoing = async (requestId) => {
+      if (!requestId) return
+      try {
+        await cancelFollowRequest(String(requestId))
+        outgoingRequests.value = outgoingRequests.value.filter((x) => x.requestId !== String(requestId))
+      } catch (e) {
+        console.error('cancelOutgoing failed', e)
+      }
+    }
+
+    const doUnfollow = async (targetUserId) => {
+      if (!targetUserId) return
+      try {
+        await unfollow(String(targetUserId))
+        followings.value = followings.value.filter((x) => x.userId !== String(targetUserId))
+      } catch (e) {
+        console.error('doUnfollow failed', e)
+      }
+    }
+
+    // 탭 바뀔 때마다 로드
+    watch(tab, () => {
+      loadByTab()
+    }, { immediate: true })
 
     return {
-      followRequests,
+      tabs,
+      tab,
+      loading,
+
+      incomingRequests,
       followers,
-      acceptRequest,
-      declineRequest,
+      outgoingRequests,
+      followings,
+
+      acceptIncoming,
+      declineIncoming,
+      cancelOutgoing,
+      doUnfollow,
+      goProfile
     }
-  },
+  }
 })
 </script>
+
+<style scoped></style>
