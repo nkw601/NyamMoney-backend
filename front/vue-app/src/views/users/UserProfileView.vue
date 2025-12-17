@@ -187,6 +187,7 @@
                 <UiCard v-else-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
                   <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
                 </UiCard>
+                <div ref="sentinel" class="h-6"></div>
               </div>
             </div>
           </div>
@@ -197,7 +198,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { fetchUser } from '@/services/user.service'
@@ -211,7 +212,10 @@ import {
   fetchFollowers,
   fetchFollowings,
 } from '@/services/follow.service'
-import { fetchBoards, fetchPostsByBoard } from '@/services/board.service'
+import { fetchBoards } from '@/services/board.service'
+// ✅ 새로 추가: 유저 게시글 커서 조회 API (본인 서비스 파일 위치에 맞춰 import 경로 조정)
+import { fetchUserPosts } from '@/services/post.service'
+
 import { useAuthStore } from '@/stores/auth'
 import Layout from '../../components/Layout.vue'
 import UiAvatar from '../../components/ui/Avatar.vue'
@@ -227,8 +231,8 @@ const profile = reactive({
   bio: '',
   location: '',
   joinedDate: '',
-  followStatus: 'NONE',     // 'NONE' | 'PENDING' | 'ACCEPTED'
-  followRequestId: '',      // PENDING일 때 취소용
+  followStatus: 'NONE', // 'NONE' | 'PENDING' | 'ACCEPTED'
+  followRequestId: '', // PENDING일 때 취소용
   isBlocked: false
 })
 
@@ -263,7 +267,7 @@ const followButtonVariant = computed(() => {
 const loadingFollow = ref(false)
 const loadingBlock = ref(false)
 
-// --- Profile & Relationship loaders ---
+// -------------------- Profile & Relationship loaders --------------------
 const loadProfile = async () => {
   if (!targetUserId.value) return
   try {
@@ -281,9 +285,9 @@ const loadProfile = async () => {
   }
 }
 
-
 const loadRelationship = async () => {
   if (!targetUserId.value) return
+
   // 내 프로필이면 관계 조회 의미 없음
   if (String(targetUserId.value) === String(myUserId.value || '')) {
     profile.followStatus = 'NONE'
@@ -296,7 +300,7 @@ const loadRelationship = async () => {
     const res = await fetchFollowStatus(String(targetUserId.value))
     const data = res?.data ?? res
 
-    // ✅ 백엔드 응답
+    // ✅ 백엔드 응답 가정
     // { status: "NONE"|"PENDING"|"ACCEPTED"|"BLOCKED", requestId: 123 }
     const status = (data?.status ?? 'NONE').toUpperCase()
 
@@ -311,14 +315,10 @@ const loadRelationship = async () => {
   }
 }
 
-// 팔로워 / 팔로잉 수
+// 팔로워 / 팔로잉 수 (현재 서비스가 "내 기준"이면 그대로 유지됩니다)
 const loadFollowCounts = async () => {
   try {
-    const [followersRes, followingsRes] = await Promise.all([
-      fetchFollowers(),
-      fetchFollowings()
-    ])
-
+    const [followersRes, followingsRes] = await Promise.all([fetchFollowers(), fetchFollowings()])
     const followersData = followersRes?.data ?? followersRes
     const followingsData = followingsRes?.data ?? followingsRes
 
@@ -331,20 +331,7 @@ const loadFollowCounts = async () => {
   }
 }
 
-watch(
-  targetUserId,
-  async (id) => {
-    if (!id) return
-    profile.userId = String(id)
-    await loadProfile()
-    await loadRelationship()
-    await loadBoards()
-    await loadFollowCounts()
-  },
-  { immediate: true }
-)
-
-// --- Follow / Block actions ---
+// -------------------- Follow / Block actions --------------------
 const toggleFollow = async () => {
   if (loadingFollow.value) return
   if (profile.isBlocked) return
@@ -353,18 +340,13 @@ const toggleFollow = async () => {
   loadingFollow.value = true
   try {
     if (profile.followStatus === 'NONE') {
-      // 팔로우 신청
       const res = await requestFollow(profile.userId)
       const data = res?.data ?? res
 
-      // createFollow 응답: { followId, status: "PENDING"|"ACCEPTED", ... }
       const next = (data?.status ?? 'PENDING').toUpperCase()
       profile.followStatus = next === 'ACCEPTED' ? 'ACCEPTED' : 'PENDING'
       profile.followRequestId = data?.followId ? String(data.followId) : ''
-
-      // 서버가 requestId를 followId로 주면 여기로 충분
     } else if (profile.followStatus === 'PENDING') {
-      // 신청 취소
       if (!profile.followRequestId) {
         await loadRelationship()
         return
@@ -373,7 +355,6 @@ const toggleFollow = async () => {
       profile.followStatus = 'NONE'
       profile.followRequestId = ''
     } else if (profile.followStatus === 'ACCEPTED') {
-      // 언팔
       await unfollow(profile.userId)
       profile.followStatus = 'NONE'
       profile.followRequestId = ''
@@ -399,7 +380,6 @@ const toggleBlock = async () => {
     } else {
       await block(profile.userId)
       profile.isBlocked = true
-      // 차단하면 팔로우 관계는 끊긴다고 했으니 프론트도 정리
       profile.followStatus = 'NONE'
       profile.followRequestId = ''
     }
@@ -415,7 +395,7 @@ const goEdit = () => {
   router.push('/me')
 }
 
-// --- Stats / posts (기존 로직 유지) ---
+// -------------------- Stats / boards / posts --------------------
 const stats = ref([
   { label: 'Posts', value: 0 },
   { label: 'Followers', value: 0 },
@@ -440,6 +420,7 @@ const filteredPosts = computed(() => {
   return posts.value.filter((post) => String(post.board) === String(activeTab.value))
 })
 
+// -------------------- donut 유지(통계는 추후 교체 예정) --------------------
 const donutColors = ['#f97316', '#3b82f6', '#10b981', '#a855f7', '#f59e0b']
 
 const boardActivity = computed(() => {
@@ -502,44 +483,61 @@ const engagementGradient = computed(() => {
   return engagementSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
 })
 
-const loadPosts = async () => {
+// -------------------- 탭별 무한스크롤 상태 --------------------
+const cursor = ref(null)
+const hasNext = ref(true)
+const pageSize = 20
+
+const resetPosts = () => {
+  posts.value = []
+  cursor.value = null
+  hasNext.value = true
+  stats.value[0].value = 0
+}
+
+const loadPosts = async ({ append = false } = {}) => {
+  if (loadingPosts.value) return
+  if (!targetUserId.value) return
+  if (append && !hasNext.value) return
+
   loadingPosts.value = true
   try {
-    if (activeTab.value === 'all') {
-      const results = await Promise.all(boards.value.map((b) => fetchPostsByBoard(b.boardId)))
-      const merged = results.flatMap((res, idx) =>
-        (res?.data ?? []).map((p) => ({
-          id: p.postId ?? p.id,
-          board: String(boards.value[idx].boardId),
-          boardName: boards.value[idx].name,
-          title: p.title ?? '',
-          excerpt: p.content ?? '',
-          date: p.createdAt ?? '',
-          likes: p.likeCount ?? 0,
-          comments: p.commentCount ?? 0
-        }))
-      )
-      posts.value = merged
-    } else {
-      const boardId = Number(activeTab.value)
-      const res = await fetchPostsByBoard(boardId)
-      posts.value =
-        ((res?.data ?? [])).map((p) => ({
-          id: p.postId ?? p.id,
-          board: String(boardId),
-          boardName: boards.value.find((b) => b.boardId === boardId)?.name ?? '',
-          title: p.title ?? '',
-          excerpt: p.content ?? '',
-          date: p.createdAt ?? '',
-          likes: p.likeCount ?? 0,
-          comments: p.commentCount ?? 0
-        })) ?? []
-    }
-    stats[0].value = posts.value.length
+    const boardId = activeTab.value === 'all' ? null : Number(activeTab.value)
+
+    const res = await fetchUserPosts({
+      userId: String(targetUserId.value),
+      boardId,
+      cursor: append ? cursor.value : null,
+      size: pageSize
+    })
+
+    const data = res?.data ?? res
+
+    const mapped = (data?.items ?? []).map((p) => ({
+      id: p.postId ?? p.id,
+      board: String(p.boardId),
+      boardName: p.boardName ?? boards.value.find((b) => String(b.boardId) === String(p.boardId))?.name ?? '',
+      title: p.title ?? '',
+      excerpt: p.excerpt ?? '', // ✅ 목록은 excerpt만
+      date: p.createdAt ?? '',
+      likes: p.likeCount ?? 0,
+      comments: p.commentCount ?? 0
+    }))
+
+    if (append) posts.value.push(...mapped)
+    else posts.value = mapped
+
+    cursor.value = data?.nextCursor ?? null
+    hasNext.value = !!data?.hasNext
+
+    stats.value[0].value = posts.value.length
   } catch (err) {
     console.error('Failed to load posts', err)
-    posts.value = []
-    stats[0].value = 0
+    if (!append) {
+      posts.value = []
+      stats.value[0].value = 0
+    }
+    hasNext.value = false
   } finally {
     loadingPosts.value = false
   }
@@ -549,13 +547,60 @@ const loadBoards = async () => {
   try {
     const res = await fetchBoards()
     boards.value = res?.data?.items ?? []
-    await loadPosts()
   } catch (err) {
     console.error('Failed to load boards', err)
+    boards.value = []
   }
 }
 
-watch(activeTab, () => {
-  loadPosts()
+// 탭 바뀌면: 목록 초기화 후 첫 페이지 다시
+watch(activeTab, async () => {
+  resetPosts()
+  await loadPosts({ append: false })
 })
+
+// -------------------- IntersectionObserver (무한스크롤 트리거) --------------------
+const sentinel = ref(null)
+let io = null
+
+onMounted(() => {
+  io = new IntersectionObserver(
+    (entries) => {
+      if (entries?.[0]?.isIntersecting) {
+        loadPosts({ append: true })
+      }
+    },
+    { root: null, threshold: 0.1 }
+  )
+  if (sentinel.value) io.observe(sentinel.value)
+})
+
+onBeforeUnmount(() => {
+  if (io && sentinel.value) io.unobserve(sentinel.value)
+  io = null
+})
+
+// targetUserId 바뀌면: 프로필/관계/boards 로드 후 posts 초기 로드
+watch(
+  targetUserId,
+  async (id) => {
+    if (!id) return
+    profile.userId = String(id)
+
+    await loadProfile()
+    await loadRelationship()
+    await loadBoards()
+    await loadFollowCounts()
+
+    // 새 유저로 바뀌면 탭도 전체로 초기화하는 게 안전
+    activeTab.value = 'all'
+    resetPosts()
+    await loadPosts({ append: false })
+  },
+  { immediate: true }
+)
+
+// ✅ 템플릿에서 아래처럼 sentinel을 추가해 주세요.
+// <div ref="sentinel" class="h-6"></div>
 </script>
+
