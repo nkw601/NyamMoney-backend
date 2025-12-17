@@ -31,3 +31,11 @@ export function deleteUser(userId) {
 export function fetchUser(userId) {
   return api.get(`v1/users/${userId}`)
 }
+
+export const fetchUserPosts = ({ userId, cursor = null, size = 10 }) => {
+  const params = {}
+  if (cursor) params.cursor = cursor
+  if (size) params.size = size
+
+  return api.get(`/v1/users/${userId}/posts`, { params })
+}

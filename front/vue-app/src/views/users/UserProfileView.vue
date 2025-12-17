@@ -162,7 +162,12 @@
               </div>
 
               <div class="space-y-3">
-                <UiCard v-for="post in filteredPosts" :key="post.id" wrapperClass="border border-border bg-white shadow-sm">
+                <UiCard
+                  v-for="post in filteredPosts"
+                  :key="post.id"
+                  wrapperClass="border border-border bg-white shadow-sm cursor-pointer"
+                  @click="goPostDetail(post)"
+                >
                   <div class="space-y-2">
                     <div class="flex items-center justify-between text-sm text-gray-500">
                       <div class="flex items-center gap-2">
@@ -213,8 +218,8 @@ import {
   fetchFollowings,
 } from '@/services/follow.service'
 import { fetchBoards } from '@/services/board.service'
-// ✅ 새로 추가: 유저 게시글 커서 조회 API (본인 서비스 파일 위치에 맞춰 import 경로 조정)
-import { fetchUserPosts } from '@/services/post.service'
+
+import { fetchUserPosts } from '@/services/user.service'
 
 import { useAuthStore } from '@/stores/auth'
 import Layout from '../../components/Layout.vue'
@@ -393,6 +398,17 @@ const toggleBlock = async () => {
 
 const goEdit = () => {
   router.push('/me')
+}
+
+const goPostDetail = (post) => {
+  if (!post?.id || !post?.board) return
+  router.push({
+    name: 'postDetail',
+    params: {
+      boardId: Number(post.board),
+      postId: post.id,
+    },
+  })
 }
 
 // -------------------- Stats / boards / posts --------------------
@@ -603,4 +619,3 @@ watch(
 // ✅ 템플릿에서 아래처럼 sentinel을 추가해 주세요.
 // <div ref="sentinel" class="h-6"></div>
 </script>
-
