@@ -54,6 +54,7 @@ const routes = [
   {
   path: '/organization',
   name:'Organization',
+  redirect: { name: 'boardPosts', params: { boardId: 1 } },
   component: Organization,
   meta: { requiresAuth: true },
   children: [
