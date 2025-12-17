@@ -116,7 +116,7 @@ export default defineComponent({
       { name: 'Members', href: '/members', icon: '👥' },
       { name: 'Permissions', href: '/permissions', icon: '🛡️' },
       { name: 'Chat', href: '/chat', icon: '💬' },
-      { name: 'Meetings', href: '/meetings', icon: '🎥' },
+      { name: 'Follows', href: '/follows', icon: '🎥' },
       { name: 'MyPage', href: '/me', icon: '👤' }
     ]
 
