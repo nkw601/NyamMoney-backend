@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +21,14 @@ import com.ssafy.project.api.v1.user.dto.UserDto;
 import com.ssafy.project.api.v1.user.dto.UserLoginRequest;
 import com.ssafy.project.api.v1.user.dto.UserLoginResponse;
 import com.ssafy.project.api.v1.user.dto.UserPasswordUpdateRequest;
+import com.ssafy.project.api.v1.user.dto.UserPostCursorRequest;
+import com.ssafy.project.api.v1.user.dto.UserPostItem;
 import com.ssafy.project.api.v1.user.dto.UserSignupRequest;
 import com.ssafy.project.api.v1.user.dto.UserSignupResponse;
 import com.ssafy.project.api.v1.user.dto.UserUpdateRequest;
 import com.ssafy.project.api.v1.user.dto.UserUpdateResponse;
 import com.ssafy.project.api.v1.user.service.UserService;
+import com.ssafy.project.common.dto.CursorPage;
 import com.ssafy.project.security.auth.UserPrincipal;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -104,4 +108,13 @@ public class UserController {
 		UserDetailResponse response = uService.getUserDetail(userId);
 		return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/{userId}/posts")
+	public ResponseEntity<CursorPage<UserPostItem>> getUserPosts(@PathVariable Long userId, @ModelAttribute UserPostCursorRequest request) {
+		
+		CursorPage<UserPostItem> res = uService.getUserPosts(userId, request);
+		
+		return ResponseEntity.ok(res);
+	}
+
 }

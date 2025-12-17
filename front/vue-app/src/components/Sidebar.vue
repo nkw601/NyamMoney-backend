@@ -5,7 +5,7 @@
       @click="isMobileOpen = !isMobileOpen"
       aria-label="Toggle sidebar"
     >
-      ??
+      ☰
     </button>
 
     <div
