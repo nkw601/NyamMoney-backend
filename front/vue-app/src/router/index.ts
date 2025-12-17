@@ -12,12 +12,13 @@ import Payments from '../views/Payments.vue'
 import Members from '../views/Members.vue'
 import Permissions from '../views/Permissions.vue'
 import Chat from '../views/Chat.vue'
-import Meetings from '../views/Meetings.vue'
+import FollowList from '../views/follow/followList.vue'
 import Help from '../views/Help.vue'
 import { useAuthStore } from '../stores/auth'
 import Login from '../views/users/Login.vue'
 import BoardPostsView from '../views/boards/BoardPostsView.vue'
 import PostCreateView from '../views/boards/PostCreateView.vue'
+import UserProfileView from '../views/users/UserProfileView.vue'
 
 const routes = [
   // 루트 → 로그인으로 리다이렉트
@@ -41,7 +42,8 @@ const routes = [
   { path: '/members', name: 'Members', component: Members, meta: { requiresAuth: true } },
   { path: '/permissions', name: 'Permissions', component: Permissions, meta: { requiresAuth: true } },
   { path: '/chat', name: 'Chat', component: Chat, meta: { requiresAuth: true } },
-  { path: '/meetings', name: 'Meetings', component: Meetings, meta: { requiresAuth: true } },
+  { path: '/profile', name: 'UserProfile', component: UserProfileView, meta: { requiresAuth: true } },
+  { path: '/follows', name: 'FollowList', component: FollowList, meta: { requiresAuth: true } },
   // { path: '/organization', name: 'Organization', component: Organization, meta: { requiresAuth: true } },
   { path: '/boards/:boardId/posts/:postId/edit', name: 'postEdit', component: ()=>import('@/views/posts/PostEditView.vue'),
     props: route => ({

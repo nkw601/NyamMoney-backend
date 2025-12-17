@@ -64,7 +64,7 @@
               </p>
             </div>
             <div class="border-t border-border mt-2 pt-2 space-y-1">
-              <RouterLink to="/me" class="block px-2 py-1 hover:bg-accent rounded" @click="closeMenu">
+              <RouterLink to="/profile" class="block px-2 py-1 hover:bg-accent rounded" @click="closeMenu">
                 My Page
               </RouterLink>
               <button
