@@ -1,10 +1,13 @@
 ﻿<template>
   <Layout>
-    <div class="min-h-screen">
+    <div>
       <div class="max-w-6xl mx-auto p-8 space-y-8">
-        <div class="grid gap-8 lg:grid-cols-[320px_1fr]">
-          <!-- Profile column -->
-          <div class="space-y-4">
+
+        <!-- ✅ 데스크톱: 2열 + 2행 / 모바일: 자동 세로 -->
+        <div class="grid gap-8 lg:grid-cols-[320px_1fr] lg:grid-rows-[auto_1fr] lg:items-stretch">
+
+          <!-- -------------------- LEFT / TOP (프로필 + 통계 + 소개) -------------------- -->
+          <div class="space-y-4 order-1 lg:col-start-1 lg:row-start-1">
             <UiCard wrapperClass="border border-border bg-white shadow-sm">
               <div class="flex flex-col items-center md:items-start gap-3 text-center md:text-left">
                 <UiAvatar
@@ -64,82 +67,16 @@
                 </div>
               </div>
             </UiCard>
-
-            <UiCard wrapperClass="border border-border bg-white shadow-sm">
-              <div class="space-y-3">
-                <div class="space-y-1">
-                  <p class="text-sm font-semibold text-gray-600">한 줄 소개</p>
-                  <p class="text-sm text-gray-600 leading-relaxed">{{ profile.bio }}</p>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                  <span class="text-xs font-semibold text-gray-400">위치</span>
-                  <span>{{ profile.location }}</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                  <span class="text-xs font-semibold text-gray-400">가입</span>
-                  <span>{{ profile.joinedDate }}</span>
-                </div>
-              </div>
-            </UiCard>
           </div>
 
-          <!-- Posts + activity column -->
-          <div class="space-y-6">
-            <UiCard wrapperClass="border border-border bg-white shadow-sm">
-              <div class="grid gap-6 md:grid-cols-2">
-                <div class="space-y-3">
-                  <p class="text-sm font-semibold text-gray-700">소비내역 분석</p>
-                  <div class="flex items-center gap-4">
-                    <div class="relative w-36 h-36">
-                      <div class="w-full h-full rounded-full" :style="{ background: boardGradient }"></div>
-                      <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
-                        <div>
-                          <p class="text-xs text-gray-500">총 게시글</p>
-                          <p class="text-lg">{{ totalPosts }}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                      <li v-for="seg in boardSegments" :key="seg.label" class="flex items-center gap-2">
-                        <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
-                        <span class="w-14">{{ seg.label }}</span>
-                        <span class="text-gray-500">{{ seg.percent }}%</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div class="space-y-3">
-                  <p class="text-sm font-semibold text-gray-700">예산?</p>
-                  <div class="flex items-center gap-4">
-                    <div class="relative w-36 h-36">
-                      <div class="w-full h-full rounded-full" :style="{ background: engagementGradient }"></div>
-                      <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
-                        <div>
-                          <p class="text-xs text-gray-500">총 반응</p>
-                          <p class="text-lg">{{ totalEngagement }}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                      <li v-for="seg in engagementSegments" :key="seg.label" class="flex items-center gap-2">
-                        <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
-                        <span class="w-14">{{ seg.label }}</span>
-                        <span class="text-gray-500">{{ seg.percent }}%</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </UiCard>
-
+          <!-- -------------------- RIGHT (Posts) : 데스크톱에서 2행 span -------------------- -->
+          <div class="space-y-6 order-3 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:row-span-2 lg:h-full lg:min-h-0">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-500">최근 게시글</p>
                 <h2 class="text-2xl font-bold">Posts</h2>
               </div>
 
-              <!-- ✅ 진짜 총 개수 -->
               <span class="inline-flex items-center px-3 py-1 rounded-full bg-white border border-border text-sm shadow-sm">
                 총 {{ totalPosts }}개
               </span>
@@ -163,18 +100,16 @@
                 </button>
               </div>
 
-              <!-- ✅ 내부 무한스크롤: root를 이 컨테이너로 -->
-              <div class="border border-border bg-white rounded-lg shadow-sm">
+              <div class="border border-border bg-white rounded-lg shadow-sm h-full lg:min-h-0 flex flex-col">
                 <div class="p-4 flex items-center justify-between">
                   <p class="text-sm text-gray-500">
                     {{ activeTab === 'all' ? '전체' : tabs.find(t => t.key === activeTab)?.label }} 게시글
                   </p>
                 </div>
 
-                <!-- ✅ 이 영역만 스크롤 -->
                 <div
                   ref="postsScrollRoot"
-                  class="max-h-[520px] overflow-y-auto px-4 pb-4 space-y-3"
+                  class="max-h-[520px] lg:max-h-[640px] overflow-y-auto px-4 pb-4 space-y-3"
                 >
                   <UiCard
                     v-for="post in filteredPosts"
@@ -213,18 +148,73 @@
                     <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
                   </UiCard>
 
-                  <!-- ✅ 관찰 대상(sentinel) -->
                   <div ref="sentinel" class="h-8"></div>
                 </div>
               </div>
-              <!-- /Posts 컨테이너 -->
             </div>
           </div>
+
+          <!-- -------------------- LEFT / BOTTOM (소비내역 분석) -------------------- -->
+          <UiCard
+            wrapperClass="order-2 border border-border bg-white shadow-sm"
+            class="lg:col-start-1 lg:row-start-2"
+          >
+            <!-- ✅ 왼쪽 컬럼에선 세로 배치가 자연스러움 -->
+            <div class="grid gap-8 grid-cols-1">
+
+              <div class="space-y-3">
+                <p class="text-sm font-semibold text-gray-700">소비내역 분석</p>
+                <div class="flex items-center gap-4">
+                  <div class="relative w-36 h-36 shrink-0">
+                    <div class="w-full h-full rounded-full" :style="{ background: boardGradient }"></div>
+                    <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
+                      <div>
+                        <p class="text-xs text-gray-500">총 게시글</p>
+                        <p class="text-lg">{{ totalPosts }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    <li v-for="seg in boardSegments" :key="seg.label" class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
+                      <span class="w-14">{{ seg.label }}</span>
+                      <span class="text-gray-500">{{ seg.percent }}%</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <p class="text-sm font-semibold text-gray-700">예산?</p>
+                <div class="flex items-center gap-4">
+                  <div class="relative w-36 h-36 shrink-0">
+                    <div class="w-full h-full rounded-full" :style="{ background: engagementGradient }"></div>
+                    <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
+                      <div>
+                        <p class="text-xs text-gray-500">총 반응</p>
+                        <p class="text-lg">{{ totalEngagement }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    <li v-for="seg in engagementSegments" :key="seg.label" class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
+                      <span class="w-14">{{ seg.label }}</span>
+                      <span class="text-gray-500">{{ seg.percent }}%</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </UiCard>
+
         </div>
       </div>
     </div>
   </Layout>
 </template>
+
 
 <script setup>
 import { computed, reactive, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
@@ -486,13 +476,21 @@ const boardSegments = computed(() => {
 })
 
 const boardGradient = computed(() => {
-  if (!boardSegments.value.length) return '#e5e7eb 0deg 360deg'
-  return boardSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
+  if (!boardSegments.value.length) return 'conic-gradient(#e5e7eb 0deg 360deg)'
+  const stops = boardSegments.value
+    .map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`)
+    .join(', ')
+  return `conic-gradient(${stops})`
 })
 
+
 const totalEngagement = computed(() => {
-  return posts.value.reduce((acc, post) => acc + (post.likes || 0) + (post.comments || 0), 0)
+  return posts.value.reduce(
+    (acc, post) => acc + (Number(post.likes) || 0) + (Number(post.comments) || 0),
+    0
+  )
 })
+
 
 const engagementSegments = computed(() => {
   const total = totalEngagement.value || 1
@@ -512,9 +510,13 @@ const engagementSegments = computed(() => {
 })
 
 const engagementGradient = computed(() => {
-  if (!engagementSegments.value.length) return '#e5e7eb 0deg 360deg'
-  return engagementSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
+  if (!engagementSegments.value.length) return 'conic-gradient(#e5e7eb 0deg 360deg)'
+  const stops = engagementSegments.value
+    .map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`)
+    .join(', ')
+  return `conic-gradient(${stops})`
 })
+
 
 // -------------------- cursor infinite scroll 상태 --------------------
 const cursor = ref(null)
