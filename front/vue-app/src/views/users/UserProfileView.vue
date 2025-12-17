@@ -1,10 +1,13 @@
 ﻿<template>
   <Layout>
-    <div class="min-h-screen">
+    <div>
       <div class="max-w-6xl mx-auto p-8 space-y-8">
-        <div class="grid gap-8 lg:grid-cols-[320px_1fr]">
-          <!-- Profile column -->
-          <div class="space-y-4">
+
+        <!-- ✅ 데스크톱: 2열 + 2행 / 모바일: 자동 세로 -->
+        <div class="grid gap-8 lg:grid-cols-[320px_1fr] lg:grid-rows-[auto_1fr] lg:items-stretch">
+
+          <!-- -------------------- LEFT / TOP (프로필 + 통계 + 소개) -------------------- -->
+          <div class="space-y-4 order-1 lg:col-start-1 lg:row-start-1">
             <UiCard wrapperClass="border border-border bg-white shadow-sm">
               <div class="flex flex-col items-center md:items-start gap-3 text-center md:text-left">
                 <UiAvatar
@@ -64,80 +67,16 @@
                 </div>
               </div>
             </UiCard>
-
-            <UiCard wrapperClass="border border-border bg-white shadow-sm">
-              <div class="space-y-3">
-                <div class="space-y-1">
-                  <p class="text-sm font-semibold text-gray-600">한 줄 소개</p>
-                  <p class="text-sm text-gray-600 leading-relaxed">{{ profile.bio }}</p>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                  <span class="text-xs font-semibold text-gray-400">위치</span>
-                  <span>{{ profile.location }}</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-500">
-                  <span class="text-xs font-semibold text-gray-400">가입</span>
-                  <span>{{ profile.joinedDate }}</span>
-                </div>
-              </div>
-            </UiCard>
           </div>
 
-          <!-- Posts + activity column -->
-          <div class="space-y-6">
-            <UiCard wrapperClass="border border-border bg-white shadow-sm">
-              <div class="grid gap-6 md:grid-cols-2">
-                <div class="space-y-3">
-                  <p class="text-sm font-semibold text-gray-700">소비내역 분석</p>
-                  <div class="flex items-center gap-4">
-                    <div class="relative w-36 h-36">
-                      <div class="w-full h-full rounded-full" :style="{ background: boardGradient }"></div>
-                      <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
-                        <div>
-                          <p class="text-xs text-gray-500">총 게시글</p>
-                          <p class="text-lg">{{ totalPosts }}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                      <li v-for="seg in boardSegments" :key="seg.label" class="flex items-center gap-2">
-                        <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
-                        <span class="w-14">{{ seg.label }}</span>
-                        <span class="text-gray-500">{{ seg.percent }}%</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div class="space-y-3">
-                  <p class="text-sm font-semibold text-gray-700">예산?</p>
-                  <div class="flex items-center gap-4">
-                    <div class="relative w-36 h-36">
-                      <div class="w-full h-full rounded-full" :style="{ background: engagementGradient }"></div>
-                      <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
-                        <div>
-                          <p class="text-xs text-gray-500">총 반응</p>
-                          <p class="text-lg">{{ totalEngagement }}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                      <li v-for="seg in engagementSegments" :key="seg.label" class="flex items-center gap-2">
-                        <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
-                        <span class="w-14">{{ seg.label }}</span>
-                        <span class="text-gray-500">{{ seg.percent }}%</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </UiCard>
-
+          <!-- -------------------- RIGHT (Posts) : 데스크톱에서 2행 span -------------------- -->
+          <div class="space-y-6 order-3 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:row-span-2 lg:h-full lg:min-h-0">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-500">최근 게시글</p>
                 <h2 class="text-2xl font-bold">Posts</h2>
               </div>
+
               <span class="inline-flex items-center px-3 py-1 rounded-full bg-white border border-border text-sm shadow-sm">
                 총 {{ totalPosts }}개
               </span>
@@ -161,52 +100,128 @@
                 </button>
               </div>
 
-              <div class="space-y-3">
-                <UiCard
-                  v-for="post in filteredPosts"
-                  :key="post.id"
-                  wrapperClass="border border-border bg-white shadow-sm cursor-pointer"
-                  @click="goPostDetail(post)"
-                >
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm text-gray-500">
-                      <div class="flex items-center gap-2">
-                        <span class="px-2 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">
-                          {{ post.boardName }}
-                        </span>
-                        <span>{{ post.date }}</span>
-                      </div>
-                      <div class="flex items-center gap-4 text-xs">
-                        <span class="flex items-center gap-1">좋아요 {{ post.likes }}</span>
-                        <span class="flex items-center gap-1">댓글 {{ post.comments }}</span>
-                      </div>
-                    </div>
-                    <h3 class="font-semibold text-lg text-gray-900">{{ post.title }}</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">{{ post.excerpt }}</p>
-                  </div>
-                </UiCard>
+              <div class="border border-border bg-white rounded-lg shadow-sm h-full lg:min-h-0 flex flex-col">
+                <div class="p-4 flex items-center justify-between">
+                  <p class="text-sm text-gray-500">
+                    {{ activeTab === 'all' ? '전체' : tabs.find(t => t.key === activeTab)?.label }} 게시글
+                  </p>
+                </div>
 
-                <UiCard v-if="loadingPosts" wrapperClass="border border-dashed border-border bg-white">
-                  <div class="text-center text-gray-500 py-6">불러오는 중...</div>
-                </UiCard>
-                <UiCard v-else-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
-                  <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
-                </UiCard>
-                <div ref="sentinel" class="h-6"></div>
+                <div
+                  ref="postsScrollRoot"
+                  class="max-h-[520px] lg:max-h-[640px] overflow-y-auto px-4 pb-4 space-y-3"
+                >
+                  <UiCard
+                    v-for="post in filteredPosts"
+                    :key="post.id"
+                    wrapperClass="border border-border bg-white shadow-sm cursor-pointer"
+                    @click="goPostDetail(post)"
+                  >
+                    <div class="space-y-2">
+                      <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center gap-2">
+                          <span class="px-2 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">
+                            {{ post.boardName }}
+                          </span>
+                          <span>{{ post.date }}</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs">
+                          <span>좋아요 {{ post.likes }}</span>
+                          <span>댓글 {{ post.comments }}</span>
+                        </div>
+                      </div>
+
+                      <h3 class="font-semibold text-lg text-gray-900 line-clamp-1">
+                        {{ post.title || '제목 없는 글' }}
+                      </h3>
+                      <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                        {{ post.excerpt }}
+                      </p>
+                    </div>
+                  </UiCard>
+
+                  <UiCard v-if="loadingPosts" wrapperClass="border border-dashed border-border bg-white">
+                    <div class="text-center text-gray-500 py-6">불러오는 중...</div>
+                  </UiCard>
+
+                  <UiCard v-else-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
+                    <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
+                  </UiCard>
+
+                  <div ref="sentinel" class="h-8"></div>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- -------------------- LEFT / BOTTOM (소비내역 분석) -------------------- -->
+          <UiCard
+            wrapperClass="order-2 border border-border bg-white shadow-sm"
+            class="lg:col-start-1 lg:row-start-2"
+          >
+            <!-- ✅ 왼쪽 컬럼에선 세로 배치가 자연스러움 -->
+            <div class="grid gap-8 grid-cols-1">
+
+              <div class="space-y-3">
+                <p class="text-sm font-semibold text-gray-700">소비내역 분석</p>
+                <div class="flex items-center gap-4">
+                  <div class="relative w-36 h-36 shrink-0">
+                    <div class="w-full h-full rounded-full" :style="{ background: boardGradient }"></div>
+                    <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
+                      <div>
+                        <p class="text-xs text-gray-500">총 게시글</p>
+                        <p class="text-lg">{{ totalPosts }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    <li v-for="seg in boardSegments" :key="seg.label" class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
+                      <span class="w-14">{{ seg.label }}</span>
+                      <span class="text-gray-500">{{ seg.percent }}%</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <p class="text-sm font-semibold text-gray-700">예산?</p>
+                <div class="flex items-center gap-4">
+                  <div class="relative w-36 h-36 shrink-0">
+                    <div class="w-full h-full rounded-full" :style="{ background: engagementGradient }"></div>
+                    <div class="absolute inset-4 rounded-full bg-white shadow-inner flex items-center justify-center text-center text-sm font-semibold">
+                      <div>
+                        <p class="text-xs text-gray-500">총 반응</p>
+                        <p class="text-lg">{{ totalEngagement }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    <li v-for="seg in engagementSegments" :key="seg.label" class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full" :style="{ background: seg.color }"></span>
+                      <span class="w-14">{{ seg.label }}</span>
+                      <span class="text-gray-500">{{ seg.percent }}%</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </UiCard>
+
         </div>
       </div>
     </div>
   </Layout>
 </template>
 
+
 <script setup>
-import { computed, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, reactive, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { fetchUser } from '@/services/user.service'
+
+import { fetchUser, fetchUserPosts } from '@/services/user.service'
 import {
   requestFollow,
   unfollow,
@@ -219,8 +234,6 @@ import {
 } from '@/services/follow.service'
 import { fetchBoards } from '@/services/board.service'
 
-import { fetchUserPosts } from '@/services/user.service'
-
 import { useAuthStore } from '@/stores/auth'
 import Layout from '../../components/Layout.vue'
 import UiAvatar from '../../components/ui/Avatar.vue'
@@ -229,6 +242,7 @@ import UiCard from '../../components/ui/Card.vue'
 
 const toStr = (v) => (v === null || v === undefined ? '' : String(v))
 
+// -------------------- state --------------------
 const profile = reactive({
   nickname: '',
   userId: '',
@@ -237,7 +251,7 @@ const profile = reactive({
   location: '',
   joinedDate: '',
   followStatus: 'NONE', // 'NONE' | 'PENDING' | 'ACCEPTED'
-  followRequestId: '', // PENDING일 때 취소용
+  followRequestId: '',
   isBlocked: false
 })
 
@@ -293,7 +307,6 @@ const loadProfile = async () => {
 const loadRelationship = async () => {
   if (!targetUserId.value) return
 
-  // 내 프로필이면 관계 조회 의미 없음
   if (String(targetUserId.value) === String(myUserId.value || '')) {
     profile.followStatus = 'NONE'
     profile.followRequestId = ''
@@ -304,9 +317,6 @@ const loadRelationship = async () => {
   try {
     const res = await fetchFollowStatus(String(targetUserId.value))
     const data = res?.data ?? res
-
-    // ✅ 백엔드 응답 가정
-    // { status: "NONE"|"PENDING"|"ACCEPTED"|"BLOCKED", requestId: 123 }
     const status = (data?.status ?? 'NONE').toUpperCase()
 
     profile.isBlocked = status === 'BLOCKED'
@@ -320,7 +330,7 @@ const loadRelationship = async () => {
   }
 }
 
-// 팔로워 / 팔로잉 수 (현재 서비스가 "내 기준"이면 그대로 유지됩니다)
+// 내 기준 팔로워/팔로잉(기존 유지)
 const loadFollowCounts = async () => {
   try {
     const [followersRes, followingsRes] = await Promise.all([fetchFollowers(), fetchFollowings()])
@@ -396,18 +406,13 @@ const toggleBlock = async () => {
   }
 }
 
-const goEdit = () => {
-  router.push('/me')
-}
+const goEdit = () => router.push('/me')
 
 const goPostDetail = (post) => {
   if (!post?.id || !post?.board) return
   router.push({
     name: 'postDetail',
-    params: {
-      boardId: Number(post.board),
-      postId: post.id,
-    },
+    params: { boardId: Number(post.board), postId: post.id },
   })
 }
 
@@ -429,14 +434,16 @@ const tabs = computed(() => [
 
 const activeTab = ref('all')
 
-const totalPosts = computed(() => posts.value.length)
+const totalPosts = ref(0)
 
 const filteredPosts = computed(() => {
   if (activeTab.value === 'all') return posts.value
   return posts.value.filter((post) => String(post.board) === String(activeTab.value))
 })
 
-// -------------------- donut 유지(통계는 추후 교체 예정) --------------------
+const loadedCount = computed(() => filteredPosts.value.length)
+
+// -------------------- donut(기존 유지) --------------------
 const donutColors = ['#f97316', '#3b82f6', '#10b981', '#a855f7', '#f59e0b']
 
 const boardActivity = computed(() => {
@@ -469,13 +476,21 @@ const boardSegments = computed(() => {
 })
 
 const boardGradient = computed(() => {
-  if (!boardSegments.value.length) return '#e5e7eb 0deg 360deg'
-  return boardSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
+  if (!boardSegments.value.length) return 'conic-gradient(#e5e7eb 0deg 360deg)'
+  const stops = boardSegments.value
+    .map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`)
+    .join(', ')
+  return `conic-gradient(${stops})`
 })
 
+
 const totalEngagement = computed(() => {
-  return posts.value.reduce((acc, post) => acc + (post.likes || 0) + (post.comments || 0), 0)
+  return posts.value.reduce(
+    (acc, post) => acc + (Number(post.likes) || 0) + (Number(post.comments) || 0),
+    0
+  )
 })
+
 
 const engagementSegments = computed(() => {
   const total = totalEngagement.value || 1
@@ -495,14 +510,18 @@ const engagementSegments = computed(() => {
 })
 
 const engagementGradient = computed(() => {
-  if (!engagementSegments.value.length) return '#e5e7eb 0deg 360deg'
-  return engagementSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
+  if (!engagementSegments.value.length) return 'conic-gradient(#e5e7eb 0deg 360deg)'
+  const stops = engagementSegments.value
+    .map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`)
+    .join(', ')
+  return `conic-gradient(${stops})`
 })
 
-// -------------------- 탭별 무한스크롤 상태 --------------------
+
+// -------------------- cursor infinite scroll 상태 --------------------
 const cursor = ref(null)
 const hasNext = ref(true)
-const pageSize = 20
+const pageSize = ref(5)
 
 const resetPosts = () => {
   posts.value = []
@@ -511,6 +530,7 @@ const resetPosts = () => {
   stats.value[0].value = 0
 }
 
+// ✅ 서버는 userId + cursor + size만 받는 구조로 맞춤
 const loadPosts = async ({ append = false } = {}) => {
   if (loadingPosts.value) return
   if (!targetUserId.value) return
@@ -518,23 +538,21 @@ const loadPosts = async ({ append = false } = {}) => {
 
   loadingPosts.value = true
   try {
-    const boardId = activeTab.value === 'all' ? null : Number(activeTab.value)
-
     const res = await fetchUserPosts({
       userId: String(targetUserId.value),
-      boardId,
       cursor: append ? cursor.value : null,
-      size: pageSize
+      size: pageSize.value
     })
 
     const data = res?.data ?? res
+    totalPosts.value = Number(data?.totalCount ?? 0)
 
     const mapped = (data?.items ?? []).map((p) => ({
       id: p.postId ?? p.id,
       board: String(p.boardId),
       boardName: p.boardName ?? boards.value.find((b) => String(b.boardId) === String(p.boardId))?.name ?? '',
       title: p.title ?? '',
-      excerpt: p.excerpt ?? '', // ✅ 목록은 excerpt만
+      excerpt: p.excerpt ?? '',
       date: p.createdAt ?? '',
       likes: p.likeCount ?? 0,
       comments: p.commentCount ?? 0
@@ -546,7 +564,8 @@ const loadPosts = async ({ append = false } = {}) => {
     cursor.value = data?.nextCursor ?? null
     hasNext.value = !!data?.hasNext
 
-    stats.value[0].value = posts.value.length
+    stats.value[0].value = totalPosts.value
+
   } catch (err) {
     console.error('Failed to load posts', err)
     if (!append) {
@@ -569,26 +588,37 @@ const loadBoards = async () => {
   }
 }
 
-// 탭 바뀌면: 목록 초기화 후 첫 페이지 다시
-watch(activeTab, async () => {
-  resetPosts()
-  await loadPosts({ append: false })
-})
-
-// -------------------- IntersectionObserver (무한스크롤 트리거) --------------------
+// -------------------- IntersectionObserver (내부 스크롤 컨테이너) --------------------
+const postsScrollRoot = ref(null)
 const sentinel = ref(null)
 let io = null
 
-onMounted(() => {
+const setupObserver = async () => {
+  await nextTick()
+
+  if (io && sentinel.value) io.unobserve(sentinel.value)
+  io = null
+
+  if (!postsScrollRoot.value || !sentinel.value) return
+
   io = new IntersectionObserver(
     (entries) => {
       if (entries?.[0]?.isIntersecting) {
         loadPosts({ append: true })
       }
     },
-    { root: null, threshold: 0.1 }
+    {
+      root: postsScrollRoot.value, // ✅ 내부 스크롤
+      threshold: 0,
+      rootMargin: '120px'
+    }
   )
-  if (sentinel.value) io.observe(sentinel.value)
+
+  io.observe(sentinel.value)
+}
+
+onMounted(() => {
+  setupObserver()
 })
 
 onBeforeUnmount(() => {
@@ -596,7 +626,14 @@ onBeforeUnmount(() => {
   io = null
 })
 
-// targetUserId 바뀌면: 프로필/관계/boards 로드 후 posts 초기 로드
+// 탭 바뀌면: 목록 초기화 + 첫 페이지 + observer 재설정(스크롤 루트가 유지돼도 안전)
+watch(activeTab, async () => {
+  resetPosts()
+  await loadPosts({ append: false })
+  await setupObserver()
+})
+
+// targetUserId 바뀌면: 전체 로드 후 posts 초기 로드
 watch(
   targetUserId,
   async (id) => {
@@ -608,14 +645,11 @@ watch(
     await loadBoards()
     await loadFollowCounts()
 
-    // 새 유저로 바뀌면 탭도 전체로 초기화하는 게 안전
     activeTab.value = 'all'
     resetPosts()
     await loadPosts({ append: false })
+    await setupObserver()
   },
   { immediate: true }
 )
-
-// ✅ 템플릿에서 아래처럼 sentinel을 추가해 주세요.
-// <div ref="sentinel" class="h-6"></div>
 </script>
