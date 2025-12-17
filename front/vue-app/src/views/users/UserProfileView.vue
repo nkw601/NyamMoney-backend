@@ -138,6 +138,8 @@
                 <p class="text-sm text-gray-500">최근 게시글</p>
                 <h2 class="text-2xl font-bold">Posts</h2>
               </div>
+
+              <!-- ✅ 진짜 총 개수 -->
               <span class="inline-flex items-center px-3 py-1 rounded-full bg-white border border-border text-sm shadow-sm">
                 총 {{ totalPosts }}개
               </span>
@@ -161,39 +163,61 @@
                 </button>
               </div>
 
-              <div class="space-y-3">
-                <UiCard
-                  v-for="post in filteredPosts"
-                  :key="post.id"
-                  wrapperClass="border border-border bg-white shadow-sm cursor-pointer"
-                  @click="goPostDetail(post)"
-                >
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm text-gray-500">
-                      <div class="flex items-center gap-2">
-                        <span class="px-2 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">
-                          {{ post.boardName }}
-                        </span>
-                        <span>{{ post.date }}</span>
-                      </div>
-                      <div class="flex items-center gap-4 text-xs">
-                        <span class="flex items-center gap-1">좋아요 {{ post.likes }}</span>
-                        <span class="flex items-center gap-1">댓글 {{ post.comments }}</span>
-                      </div>
-                    </div>
-                    <h3 class="font-semibold text-lg text-gray-900">{{ post.title }}</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">{{ post.excerpt }}</p>
-                  </div>
-                </UiCard>
+              <!-- ✅ 내부 무한스크롤: root를 이 컨테이너로 -->
+              <div class="border border-border bg-white rounded-lg shadow-sm">
+                <div class="p-4 flex items-center justify-between">
+                  <p class="text-sm text-gray-500">
+                    {{ activeTab === 'all' ? '전체' : tabs.find(t => t.key === activeTab)?.label }} 게시글
+                  </p>
+                </div>
 
-                <UiCard v-if="loadingPosts" wrapperClass="border border-dashed border-border bg-white">
-                  <div class="text-center text-gray-500 py-6">불러오는 중...</div>
-                </UiCard>
-                <UiCard v-else-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
-                  <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
-                </UiCard>
-                <div ref="sentinel" class="h-6"></div>
+                <!-- ✅ 이 영역만 스크롤 -->
+                <div
+                  ref="postsScrollRoot"
+                  class="max-h-[520px] overflow-y-auto px-4 pb-4 space-y-3"
+                >
+                  <UiCard
+                    v-for="post in filteredPosts"
+                    :key="post.id"
+                    wrapperClass="border border-border bg-white shadow-sm cursor-pointer"
+                    @click="goPostDetail(post)"
+                  >
+                    <div class="space-y-2">
+                      <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center gap-2">
+                          <span class="px-2 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">
+                            {{ post.boardName }}
+                          </span>
+                          <span>{{ post.date }}</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs">
+                          <span>좋아요 {{ post.likes }}</span>
+                          <span>댓글 {{ post.comments }}</span>
+                        </div>
+                      </div>
+
+                      <h3 class="font-semibold text-lg text-gray-900 line-clamp-1">
+                        {{ post.title || '제목 없는 글' }}
+                      </h3>
+                      <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                        {{ post.excerpt }}
+                      </p>
+                    </div>
+                  </UiCard>
+
+                  <UiCard v-if="loadingPosts" wrapperClass="border border-dashed border-border bg-white">
+                    <div class="text-center text-gray-500 py-6">불러오는 중...</div>
+                  </UiCard>
+
+                  <UiCard v-else-if="!filteredPosts.length" wrapperClass="border border-dashed border-border bg-white">
+                    <div class="text-center text-gray-500 py-6">이 카테고리에 게시글이 없습니다.</div>
+                  </UiCard>
+
+                  <!-- ✅ 관찰 대상(sentinel) -->
+                  <div ref="sentinel" class="h-8"></div>
+                </div>
               </div>
+              <!-- /Posts 컨테이너 -->
             </div>
           </div>
         </div>
@@ -203,10 +227,11 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, reactive, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { fetchUser } from '@/services/user.service'
+
+import { fetchUser, fetchUserPosts } from '@/services/user.service'
 import {
   requestFollow,
   unfollow,
@@ -219,8 +244,6 @@ import {
 } from '@/services/follow.service'
 import { fetchBoards } from '@/services/board.service'
 
-import { fetchUserPosts } from '@/services/user.service'
-
 import { useAuthStore } from '@/stores/auth'
 import Layout from '../../components/Layout.vue'
 import UiAvatar from '../../components/ui/Avatar.vue'
@@ -229,6 +252,7 @@ import UiCard from '../../components/ui/Card.vue'
 
 const toStr = (v) => (v === null || v === undefined ? '' : String(v))
 
+// -------------------- state --------------------
 const profile = reactive({
   nickname: '',
   userId: '',
@@ -237,7 +261,7 @@ const profile = reactive({
   location: '',
   joinedDate: '',
   followStatus: 'NONE', // 'NONE' | 'PENDING' | 'ACCEPTED'
-  followRequestId: '', // PENDING일 때 취소용
+  followRequestId: '',
   isBlocked: false
 })
 
@@ -293,7 +317,6 @@ const loadProfile = async () => {
 const loadRelationship = async () => {
   if (!targetUserId.value) return
 
-  // 내 프로필이면 관계 조회 의미 없음
   if (String(targetUserId.value) === String(myUserId.value || '')) {
     profile.followStatus = 'NONE'
     profile.followRequestId = ''
@@ -304,9 +327,6 @@ const loadRelationship = async () => {
   try {
     const res = await fetchFollowStatus(String(targetUserId.value))
     const data = res?.data ?? res
-
-    // ✅ 백엔드 응답 가정
-    // { status: "NONE"|"PENDING"|"ACCEPTED"|"BLOCKED", requestId: 123 }
     const status = (data?.status ?? 'NONE').toUpperCase()
 
     profile.isBlocked = status === 'BLOCKED'
@@ -320,7 +340,7 @@ const loadRelationship = async () => {
   }
 }
 
-// 팔로워 / 팔로잉 수 (현재 서비스가 "내 기준"이면 그대로 유지됩니다)
+// 내 기준 팔로워/팔로잉(기존 유지)
 const loadFollowCounts = async () => {
   try {
     const [followersRes, followingsRes] = await Promise.all([fetchFollowers(), fetchFollowings()])
@@ -396,18 +416,13 @@ const toggleBlock = async () => {
   }
 }
 
-const goEdit = () => {
-  router.push('/me')
-}
+const goEdit = () => router.push('/me')
 
 const goPostDetail = (post) => {
   if (!post?.id || !post?.board) return
   router.push({
     name: 'postDetail',
-    params: {
-      boardId: Number(post.board),
-      postId: post.id,
-    },
+    params: { boardId: Number(post.board), postId: post.id },
   })
 }
 
@@ -429,14 +444,16 @@ const tabs = computed(() => [
 
 const activeTab = ref('all')
 
-const totalPosts = computed(() => posts.value.length)
+const totalPosts = ref(0)
 
 const filteredPosts = computed(() => {
   if (activeTab.value === 'all') return posts.value
   return posts.value.filter((post) => String(post.board) === String(activeTab.value))
 })
 
-// -------------------- donut 유지(통계는 추후 교체 예정) --------------------
+const loadedCount = computed(() => filteredPosts.value.length)
+
+// -------------------- donut(기존 유지) --------------------
 const donutColors = ['#f97316', '#3b82f6', '#10b981', '#a855f7', '#f59e0b']
 
 const boardActivity = computed(() => {
@@ -499,10 +516,10 @@ const engagementGradient = computed(() => {
   return engagementSegments.value.map((seg) => `${seg.color} ${seg.start}deg ${seg.end}deg`).join(', ')
 })
 
-// -------------------- 탭별 무한스크롤 상태 --------------------
+// -------------------- cursor infinite scroll 상태 --------------------
 const cursor = ref(null)
 const hasNext = ref(true)
-const pageSize = 20
+const pageSize = ref(5)
 
 const resetPosts = () => {
   posts.value = []
@@ -511,6 +528,7 @@ const resetPosts = () => {
   stats.value[0].value = 0
 }
 
+// ✅ 서버는 userId + cursor + size만 받는 구조로 맞춤
 const loadPosts = async ({ append = false } = {}) => {
   if (loadingPosts.value) return
   if (!targetUserId.value) return
@@ -518,23 +536,21 @@ const loadPosts = async ({ append = false } = {}) => {
 
   loadingPosts.value = true
   try {
-    const boardId = activeTab.value === 'all' ? null : Number(activeTab.value)
-
     const res = await fetchUserPosts({
       userId: String(targetUserId.value),
-      boardId,
       cursor: append ? cursor.value : null,
-      size: pageSize
+      size: pageSize.value
     })
 
     const data = res?.data ?? res
+    totalPosts.value = Number(data?.totalCount ?? 0)
 
     const mapped = (data?.items ?? []).map((p) => ({
       id: p.postId ?? p.id,
       board: String(p.boardId),
       boardName: p.boardName ?? boards.value.find((b) => String(b.boardId) === String(p.boardId))?.name ?? '',
       title: p.title ?? '',
-      excerpt: p.excerpt ?? '', // ✅ 목록은 excerpt만
+      excerpt: p.excerpt ?? '',
       date: p.createdAt ?? '',
       likes: p.likeCount ?? 0,
       comments: p.commentCount ?? 0
@@ -546,7 +562,8 @@ const loadPosts = async ({ append = false } = {}) => {
     cursor.value = data?.nextCursor ?? null
     hasNext.value = !!data?.hasNext
 
-    stats.value[0].value = posts.value.length
+    stats.value[0].value = totalPosts.value
+
   } catch (err) {
     console.error('Failed to load posts', err)
     if (!append) {
@@ -569,26 +586,37 @@ const loadBoards = async () => {
   }
 }
 
-// 탭 바뀌면: 목록 초기화 후 첫 페이지 다시
-watch(activeTab, async () => {
-  resetPosts()
-  await loadPosts({ append: false })
-})
-
-// -------------------- IntersectionObserver (무한스크롤 트리거) --------------------
+// -------------------- IntersectionObserver (내부 스크롤 컨테이너) --------------------
+const postsScrollRoot = ref(null)
 const sentinel = ref(null)
 let io = null
 
-onMounted(() => {
+const setupObserver = async () => {
+  await nextTick()
+
+  if (io && sentinel.value) io.unobserve(sentinel.value)
+  io = null
+
+  if (!postsScrollRoot.value || !sentinel.value) return
+
   io = new IntersectionObserver(
     (entries) => {
       if (entries?.[0]?.isIntersecting) {
         loadPosts({ append: true })
       }
     },
-    { root: null, threshold: 0.1 }
+    {
+      root: postsScrollRoot.value, // ✅ 내부 스크롤
+      threshold: 0,
+      rootMargin: '120px'
+    }
   )
-  if (sentinel.value) io.observe(sentinel.value)
+
+  io.observe(sentinel.value)
+}
+
+onMounted(() => {
+  setupObserver()
 })
 
 onBeforeUnmount(() => {
@@ -596,7 +624,14 @@ onBeforeUnmount(() => {
   io = null
 })
 
-// targetUserId 바뀌면: 프로필/관계/boards 로드 후 posts 초기 로드
+// 탭 바뀌면: 목록 초기화 + 첫 페이지 + observer 재설정(스크롤 루트가 유지돼도 안전)
+watch(activeTab, async () => {
+  resetPosts()
+  await loadPosts({ append: false })
+  await setupObserver()
+})
+
+// targetUserId 바뀌면: 전체 로드 후 posts 초기 로드
 watch(
   targetUserId,
   async (id) => {
@@ -608,14 +643,11 @@ watch(
     await loadBoards()
     await loadFollowCounts()
 
-    // 새 유저로 바뀌면 탭도 전체로 초기화하는 게 안전
     activeTab.value = 'all'
     resetPosts()
     await loadPosts({ append: false })
+    await setupObserver()
   },
   { immediate: true }
 )
-
-// ✅ 템플릿에서 아래처럼 sentinel을 추가해 주세요.
-// <div ref="sentinel" class="h-6"></div>
 </script>
