@@ -88,7 +88,7 @@
             <UiCard wrapperClass="border border-border bg-white shadow-sm">
               <div class="grid gap-6 md:grid-cols-2">
                 <div class="space-y-3">
-                  <p class="text-sm font-semibold text-gray-700">게시판 활동</p>
+                  <p class="text-sm font-semibold text-gray-700">소비내역 분석</p>
                   <div class="flex items-center gap-4">
                     <div class="relative w-36 h-36">
                       <div class="w-full h-full rounded-full" :style="{ background: boardGradient }"></div>
@@ -110,7 +110,7 @@
                 </div>
 
                 <div class="space-y-3">
-                  <p class="text-sm font-semibold text-gray-700">반응 요약</p>
+                  <p class="text-sm font-semibold text-gray-700">예산?</p>
                   <div class="flex items-center gap-4">
                     <div class="relative w-36 h-36">
                       <div class="w-full h-full rounded-full" :style="{ background: engagementGradient }"></div>
@@ -207,7 +207,9 @@ import {
   cancelFollowRequest,
   fetchFollowStatus,
   block,
-  unblock
+  unblock,
+  fetchFollowers,
+  fetchFollowings,
 } from '@/services/follow.service'
 import { fetchBoards, fetchPostsByBoard } from '@/services/board.service'
 import { useAuthStore } from '@/stores/auth'
@@ -279,6 +281,7 @@ const loadProfile = async () => {
   }
 }
 
+
 const loadRelationship = async () => {
   if (!targetUserId.value) return
   // 내 프로필이면 관계 조회 의미 없음
@@ -293,7 +296,7 @@ const loadRelationship = async () => {
     const res = await fetchFollowStatus(String(targetUserId.value))
     const data = res?.data ?? res
 
-    // ✅ 백엔드 응답을 이렇게 기대:
+    // ✅ 백엔드 응답
     // { status: "NONE"|"PENDING"|"ACCEPTED"|"BLOCKED", requestId: 123 }
     const status = (data?.status ?? 'NONE').toUpperCase()
 
@@ -308,6 +311,26 @@ const loadRelationship = async () => {
   }
 }
 
+// 팔로워 / 팔로잉 수
+const loadFollowCounts = async () => {
+  try {
+    const [followersRes, followingsRes] = await Promise.all([
+      fetchFollowers(),
+      fetchFollowings()
+    ])
+
+    const followersData = followersRes?.data ?? followersRes
+    const followingsData = followingsRes?.data ?? followingsRes
+
+    stats.value[1].value = followersData?.totalCount ?? 0
+    stats.value[2].value = followingsData?.totalCount ?? 0
+  } catch (err) {
+    console.error('Failed to load follow counts', err)
+    stats.value[1].value = 0
+    stats.value[2].value = 0
+  }
+}
+
 watch(
   targetUserId,
   async (id) => {
@@ -316,6 +339,7 @@ watch(
     await loadProfile()
     await loadRelationship()
     await loadBoards()
+    await loadFollowCounts()
   },
   { immediate: true }
 )
@@ -392,7 +416,7 @@ const goEdit = () => {
 }
 
 // --- Stats / posts (기존 로직 유지) ---
-const stats = reactive([
+const stats = ref([
   { label: 'Posts', value: 0 },
   { label: 'Followers', value: 0 },
   { label: 'Following', value: 0 }

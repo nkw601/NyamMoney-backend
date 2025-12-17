@@ -11,7 +11,7 @@ export function unfollow(targetUserId) {
 }
 
 // 팔로우 요청 목록 (incoming/outgoing)
-export function fetchFollowRequests(direction = 'incoming') {
+export function fetchFollowRequests(direction) {
   return api.get('/v1/follows/follow-requests', { params: { direction } })
 }
 
@@ -49,5 +49,5 @@ export function fetchBlocks() {
 
 // 팔로우 상태 조회
 export function fetchFollowStatus(targetUserId) {
-  return api.get(`/api/v1/follows/${targetUserId}/status`)
+  return api.get(`/v1/follows/${targetUserId}/status`)
 }
