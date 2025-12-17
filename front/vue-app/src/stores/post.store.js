@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { fetchPostDetail, createPost, updatePost, deletePost, } from '@/services/post.service'
+import { fetchPostDetail, createPost, updatePost, deletePost, unlikePost, likePost, } from '@/services/post.service'
 
 export const usePostStore = defineStore('post', {
   state: () => ({
@@ -60,6 +60,21 @@ export const usePostStore = defineStore('post', {
     async removePost(boardId, postId) {
       await deletePost(boardId, postId)
       this.post = null
+    },
+
+    // 좋아요 등록, 삭제
+    async toggleLike(boardId, postId) {
+      if (!this.post) return
+
+      if (this.post.liked) {
+        await unlikePost(boardId, postId)
+        this.post.liked = false
+        this.post.likeCount--
+      } else {
+        await likePost(boardId, postId)
+        this.post.liked = true
+        this.post.likeCount++
+      }
     },
 
 

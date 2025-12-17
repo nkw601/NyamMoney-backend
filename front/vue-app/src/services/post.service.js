@@ -19,3 +19,12 @@ export const updatePost = (boardId, postId, data) => {
 export function deletePost(boardId, postId) {
   return api.delete(`/v1/boards/${boardId}/posts/${postId}`)
 }
+
+// 게시글 좋아요
+export function likePost(boardId, postId) {
+  return api.get(`/v1/boards/${boardId}/posts/${postId}/like`)
+}
+// 좋아요 취소
+export function unlikePost(boardId, postId) {
+  return api.post(`/v1/boards/${boardId}/posts/${postId}/like`)
+}
