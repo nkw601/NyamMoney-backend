@@ -10,83 +10,71 @@
       아직 댓글이 없습니다.
     </p>
 
-    <!-- 댓글 목록 -->
-    <ul v-else class="mb-6">
-      <li
-        v-for="comment in comments"
-        :key="comment.commentId"
-        class="mb-3 p-3 rounded bg-gray-50"
-      >
-        <!-- 수정 화면 -->
-        <div v-if="editingCommentId === comment.commentId">
-          <textarea
-            v-model="editingContent"
-            rows="2"
-            class="w-full p-2 border rounded"
-          />
-          <div class="mt-2 text-right">
-            <button @click="saveEdit(comment.commentId)">저장 |</button>
-            <button @click="cancelEdit"> 취소</button>
+    <template v-else>
+      <!-- 댓글 목록 제일 위쪽 영역 -->
+      <div ref="commentTop" class="comment-scroll-anchor"></div>
+      <!-- 댓글 목록 -->
+      <ul class="mb-6">
+        <li
+          v-for="comment in comments"
+          :key="comment.commentId"
+          class="mb-3 p-3 rounded bg-gray-50">
+          <!-- 수정 화면 -->
+          <div v-if="editingCommentId === comment.commentId">
+            <textarea
+              v-model="editingContent"
+              rows="2"
+              class="w-full p-2 border rounded" />
+            <div class="mt-2 text-right">
+              <button @click="saveEdit(comment.commentId)">저장 |</button>
+              <button @click="cancelEdit"> 취소</button>
+            </div>
           </div>
-        </div>
 
-        <!-- 일반 화면 -->
-        <div v-else>
-          <p class="text-sm font-medium">
-            {{ comment.author?.nickname || '익명' }}
-          </p>
-          <p class="text-sm">{{ comment.content }}</p>
+          <!-- 일반 화면 -->
+          <div v-else>
+            <p class="text-sm font-medium">
+              {{ comment.author?.nickname || '익명' }}
+            </p>
+            <p class="text-sm">{{ comment.content }}</p>
 
-          <!-- 권한 확인해서 수정/삭제 -->
-          <button
-            v-if="isMyComment(comment) && editingCommentId !== comment.commentId"
-            class="text-xs text-gray-400"
-            @click="startEdit(comment)"
-          >
-            수정 |
-          </button>
-          <button
-            v-if="isMyComment(comment) && editingCommentId !== comment.commentId"
-            class="text-xs text-gray-400"
-            @click="deleteComment(comment.commentId)"
-          >
-            삭제
-          </button>
+            <!-- 권한 확인해서 수정/삭제 -->
+            <button
+              v-if="isMyComment(comment) && editingCommentId !== comment.commentId"
+              class="text-xs text-gray-400"
+              @click="startEdit(comment)">수정 | </button>
+            <button
+              v-if="isMyComment(comment) && editingCommentId !== comment.commentId"
+              class="text-xs text-gray-400"
+              @click="deleteComment(comment.commentId)">삭제</button>
 
-          <p class="text-xs text-gray-400">
-            {{ comment.updatedAt }}
-          </p>
-        </div>
-      </li>
-    </ul>
+            <p class="text-xs text-gray-400">
+              {{ comment.updatedAt }}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </template>
 
     <!-- 댓글 입력 폼 (댓글 0개여도 항상 노출) -->
     <div class="mt-6">
-      <CommentCreateForm
-        v-if="isAuthenticated"
-        :boardId="boardId"
-        :postId="postId"
-      />
+      <CommentCreateForm v-if="isAuthenticated"
+        :boardId="boardId" :postId="postId" />
       <p v-else class="text-sm text-gray-400">
         로그인 후 댓글을 작성할 수 있습니다.
       </p>
     </div>
 
     <!-- 페이지네이션 -->
-    <div
-      v-if="totalPages > 1"
-      class="flex justify-center gap-2 mt-6"
-    >
-      <button
-        v-for="p in totalPages"
-        :key="p"
-        @click="goPage(p - 1)"
+    <div v-if="totalPages > 1"
+      class="flex justify-center gap-2 mt-6" >
+      <button v-for="p in totalPages"
+        :key="p" @click="goPage(p - 1)"
         :disabled="loading"
         class="px-3 py-1 border rounded"
         :class="{
           'bg-orange-500 text-white': page === p - 1,
-        }"
-      >
+        }" >
         {{ p }}
       </button>
     </div>
@@ -94,7 +82,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCommentStore } from '@/stores/comment.store'
 import { useAuthStore } from '@/stores/auth'
@@ -119,9 +107,9 @@ export default {
   setup(props) {
     const authStore = useAuthStore()
     const commentStore = useCommentStore()
-    const { comments, loading, page, totalPages, totalElements } =
-      storeToRefs(commentStore)
-
+    const { comments, loading, page, totalPages, totalElements } = storeToRefs(commentStore)
+    const commentTop = ref(null)
+    
     // 수정 중인 댓글
     const editingCommentId = ref(null)
     const editingContent = ref('')
@@ -138,8 +126,14 @@ export default {
       commentStore.loadComments(props.boardId, props.postId)
     })
 
-    const goPage = (p) => {
-      commentStore.loadComments(props.boardId, props.postId, p)
+    const goPage = async (p) => {
+      await commentStore.loadComments(props.boardId, props.postId, p)
+      // 댓글 목록 최상단으로 이동 설정
+      await nextTick()
+      commentTop.value?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
     }
 
     // 수정 시작
@@ -176,23 +170,17 @@ export default {
     }
 
     return {
-      comments,
-      loading,
-      page,
-      totalPages,
-      totalElements,
-      goPage,
-
-      editingCommentId,
-      editingContent,
-      startEdit,
-      cancelEdit,
-      saveEdit,
-
-      isMyComment,
-      isAuthenticated,
-      deleteComment,
+      comments, loading, page,
+      totalPages, totalElements, goPage, commentTop,
+      editingCommentId, editingContent, startEdit, cancelEdit, saveEdit,
+      isMyComment, isAuthenticated, deleteComment,
     }
   },
 }
 </script>
+
+<style lang="css">
+  .comment-scroll-anchor {
+    scroll-margin-top: 100px;
+  }
+</style>
