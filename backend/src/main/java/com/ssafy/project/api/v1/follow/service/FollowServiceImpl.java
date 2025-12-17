@@ -219,15 +219,14 @@ public class FollowServiceImpl implements FollowService{
 	    }
 
 	    // 1) 차단
-	    int iBlocked = followMapper.existsBlocked(userId, targetUserId);
-	    int blockedMe = followMapper.existsBlocked(targetUserId, userId);
+	    int blocked = followMapper.existsBlocked(userId, targetUserId);
 
-	    if (iBlocked > 0 || blockedMe > 0) {
+	    if (blocked > 0) {
 	        return FollowStatusResponse.builder()
 	                .status("BLOCKED")
-	                .requestId(null)
 	                .build();
 	    }
+
 
 	    // 2) 내 -> 상대 관계 조회
 	    FollowDto rel = followMapper.selectByPair(userId, targetUserId);
