@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { fetchPostDetail, createPost, updatePost } from '@/services/post.service'
+import { fetchPostDetail, createPost, updatePost, deletePost, } from '@/services/post.service'
 
 export const usePostStore = defineStore('post', {
   state: () => ({
@@ -55,6 +55,13 @@ export const usePostStore = defineStore('post', {
         this.updating = false
       }
     },
+
+    // 삭제
+    async removePost(boardId, postId) {
+      await deletePost(boardId, postId)
+      this.post = null
+    },
+
 
 
   },

@@ -14,3 +14,8 @@ export function createPost(boardId, title, content) {
 export const updatePost = (boardId, postId, data) => {
   return api.patch(`/v1/boards/${boardId}/posts/${postId}`, data)
 }
+
+// 삭제
+export function deletePost(boardId, postId) {
+  return api.delete(`/v1/boards/${boardId}/posts/${postId}`)
+}
