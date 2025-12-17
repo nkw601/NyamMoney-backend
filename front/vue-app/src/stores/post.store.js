@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { fetchPostDetail, createPost, updatePost } from '@/services/post.service'
+import { fetchPostDetail, createPost, updatePost, deletePost,toggleLike, } from '@/services/post.service'
 
 export const usePostStore = defineStore('post', {
   state: () => ({
@@ -55,6 +55,42 @@ export const usePostStore = defineStore('post', {
         this.updating = false
       }
     },
+
+    // 삭제
+    async removePost(boardId, postId) {
+      await deletePost(boardId, postId)
+      this.post = null
+    },
+
+    // 좋아요 등록, 삭제
+    async toggleLike(boardId, postId) {
+      if (!this.post) return
+
+      // 🔥 1. UI 즉시 반영 (optimistic)
+      const prevLiked = this.post.liked
+      const prevCount = this.post.likeCount
+
+      this.post.liked = !prevLiked
+      this.post.likeCount += this.post.liked ? 1 : -1
+
+      try {
+        // 2️⃣ 서버에 실제 토글 요청
+        await toggleLike(boardId, postId)
+
+        // 3️⃣ 백그라운드 동기화 (깜빡임 없음)
+        const res = await fetchPostDetail(boardId, postId)
+        this.post = res.data
+      } catch (error) {
+        // ❌ 실패 시 롤백
+        this.post.liked = prevLiked
+        this.post.likeCount = prevCount
+
+        console.error('좋아요 토글 실패', error)
+      }
+    },
+
+
+
 
 
   },

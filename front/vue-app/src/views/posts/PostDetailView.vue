@@ -11,8 +11,10 @@
         
         <!-- 게시글 -->
         <div v-else-if="post">
-        <button v-if="post.author?.userId === authStore.userId"
-        class="text-sm text-gray-400" @click="goEdit">수정</button>
+        <div v-if="post.author?.userId === authStore.userId">
+        <button class="text-sm text-gray-400" @click="goEdit">수정</button>
+        <button class="px-4 py-2 bg-red-500 text-white rounded" @click="handleDelete">삭제</button>
+        </div>
         <h1 class="text-2xl font-bold mb-2">
           {{ post.title }}
         </h1>
@@ -23,6 +25,15 @@
 
         <div class="mb-8 whitespace-pre-line">
           {{ post.content }}
+        </div>
+
+        <!-- 좋아요 영역 -->
+        <div class="flex items-center gap-2 mb-6">
+          <button class="text-2xl transition-transform duration-150 active:scale-125"
+          @click="toggleLike" :aria-label="post.liked ? '좋아요 취소' : '좋아요'">
+            <span v-if="post.liked">게시글 좋아요 취소하기 ❤️</span>
+            <span v-else>게시글 좋아요 누르기 ♡</span>
+          </button>
         </div>
 
         <p class="text-sm text-gray-400 mb-6">
@@ -66,8 +77,8 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const postStore = usePostStore()
-    const { post, loading } = storeToRefs(postStore)
     const authStore = useAuthStore()
+    const { post, loading } = storeToRefs(postStore)
 
     // 게시글 상세 조회
     onMounted(() => {
@@ -94,6 +105,7 @@ export default {
       })
     }
 
+    // 없어도 수정 내용 잘 출력됨
     // watch(
     //   ()=>props.postId,
     //   ()=>{
@@ -102,10 +114,28 @@ export default {
     //   {immediate: true}
     // )
 
+    const handleDelete = async () => {
+      if (!confirm('게시글을 삭제하시겠습니까?')) return
+
+      await postStore.removePost(props.boardId, props.postId)
+
+      // 삭제 후 게시판 목록으로 이동
+      router.push({
+        name: 'boardPosts',
+        params: { boardId: props.boardId, },
+      })
+    }
+
+    // 좋아요 토글
+    const toggleLike = async ()=>{
+      await postStore.toggleLike(props.boardId, props.postId)
+      console.log('좋아요 클릭')
+    }
+
     return {
       post,
       loading,
-      goList, goEdit, authStore,
+      goList, goEdit, authStore, handleDelete, toggleLike,
     }
   },
 }
