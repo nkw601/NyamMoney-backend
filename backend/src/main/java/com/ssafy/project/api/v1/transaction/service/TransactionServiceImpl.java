@@ -3,6 +3,7 @@ package com.ssafy.project.api.v1.transaction.service;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ssafy.project.api.v1.category.dto.CategoryItem;
 import com.ssafy.project.api.v1.category.mapper.CategoryMapper;
@@ -102,6 +103,16 @@ public class TransactionServiceImpl implements TransactionService {
         if (updated != 1) {
             throw new IllegalArgumentException("삭제할 거래내역을 찾을 수 없습니다.");
         }
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public TransactionDetailResponse getTransactionDetail(Long userId, Long transactionId) {
+        TransactionDetailResponse res = transactionMapper.selectDetailById(userId, transactionId);
+        if (res == null) {
+            throw new IllegalArgumentException("거래내역을 찾을 수 없습니다.");
+        }
+        return res;
     }
 
 }
