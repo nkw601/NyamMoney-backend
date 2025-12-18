@@ -69,7 +69,7 @@ public class TransactionController {
 	) {
 	    Long userId = principal.getUserId();
 	    
-	    TransactionDetailResponse res = transactionService.getTransactionDetail(userId, transactionId)
+	    TransactionDetailResponse res = transactionService.getTransactionDetail(userId, transactionId);
 	    return ResponseEntity.ok(res);
 	}
 }
