@@ -28,6 +28,7 @@ public class TransactionCreateParam {
     private String tags;            // DB: VARCHAR(255)
     private Boolean isRefund;
     private LocalDateTime canceledAt;
+    private Boolean impulseFlag;
 
     public static TransactionCreateParam from(Long userId, TransactionCreateRequest req) {
         TransactionCreateParam p = new TransactionCreateParam();
@@ -48,6 +49,7 @@ public class TransactionCreateParam {
 
         p.isRefund = req.getIsRefund();
         p.canceledAt = req.getCanceledAt();
+        p.impulseFlag = req.getImpulseFlag() != null ? req.getImpulseFlag() : Boolean.FALSE;
         return p;
     }
 }

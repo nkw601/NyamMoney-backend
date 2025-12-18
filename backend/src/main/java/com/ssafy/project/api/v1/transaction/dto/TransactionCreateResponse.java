@@ -31,6 +31,7 @@ public class TransactionCreateResponse {
     private String memo;
 
     private Boolean isRefund;
+    private Boolean impulseFlag;
 
     private LocalDateTime canceledAt;
 
