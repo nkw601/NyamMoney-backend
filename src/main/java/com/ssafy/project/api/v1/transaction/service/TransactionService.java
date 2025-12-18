@@ -10,5 +10,7 @@ public interface TransactionService {
 	TransactionCreateResponse createTransaction(Long userId, TransactionCreateRequest req);
 
 	TransactionDetailResponse updateTransaction(Long userId, Long transactionId, TransactionUpdateRequest req);
+
+	void deleteTransaction(Long userId, Long transactionId);
 	
 }

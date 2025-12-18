@@ -2,6 +2,7 @@ package com.ssafy.project.api.v1.transaction.Controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,5 +49,15 @@ public class TransactionController {
         Long userId = principal.getUserId();
         TransactionDetailResponse res = transactionService.updateTransaction(userId, transactionId, req);
         return ResponseEntity.ok(res);
+    }
+	
+	@DeleteMapping("/{transactionId}")
+    public ResponseEntity<Void> deleteTransaction(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long transactionId
+    ) {
+        Long userId = principal.getUserId();
+        transactionService.deleteTransaction(userId, transactionId);
+        return ResponseEntity.noContent().build();
     }
 }

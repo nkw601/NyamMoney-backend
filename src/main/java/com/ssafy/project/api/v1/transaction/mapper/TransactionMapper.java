@@ -20,5 +20,8 @@ public interface TransactionMapper {
     int updateTransaction(TransactionUpdateParam p);
 
     TransactionDetailResponse selectDetailById(Long userId, Long transactionId);
+
+	int deleteTransaction(@Param("userId") Long userId, 
+						  @Param("transactionId") Long transactionId);
 	
 }

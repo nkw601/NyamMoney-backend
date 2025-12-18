@@ -94,6 +94,14 @@ public class TransactionServiceImpl implements TransactionService {
         return res;
     }
     
-    
+    @Override
+    public void deleteTransaction(Long userId, Long transactionId) {
+
+        int updated = transactionMapper.deleteTransaction(userId, transactionId);
+
+        if (updated != 1) {
+            throw new IllegalArgumentException("삭제할 거래내역을 찾을 수 없습니다.");
+        }
+    }
 
 }
