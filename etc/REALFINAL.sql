@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS challenges (
   challenge_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   title        VARCHAR(120) NOT NULL, -- 예: "일주일 5만원"
+  description VARCHAR(255) NOT NULL,
   budget_limit DECIMAL(12,2) NOT NULL,
   period_days  INT NOT NULL DEFAULT 7,
   starts_at    DATETIME NOT NULL,
