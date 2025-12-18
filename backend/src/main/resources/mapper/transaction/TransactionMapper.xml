@@ -169,5 +169,13 @@
       AND t.transaction_id = #{transactionId}
       AND t.deleted_at IS NULL
   </select>
-	
+
+
+	<update id="deleteTransaction">
+	  UPDATE transactions
+	  SET deleted_at = CURRENT_TIMESTAMP
+	  WHERE transaction_id = #{transactionId}
+	    AND user_id = #{userId}
+	    AND deleted_at IS NULL
+	</update>
 </mapper>
