@@ -2,6 +2,8 @@ package com.ssafy.project.api.v1.transaction.Controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateRequest;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateResponse;
+import com.ssafy.project.api.v1.transaction.dto.TransactionDetailResponse;
+import com.ssafy.project.api.v1.transaction.dto.TransactionUpdateRequest;
 import com.ssafy.project.api.v1.transaction.service.TransactionService;
 import com.ssafy.project.security.auth.UserPrincipal;
 
@@ -34,4 +38,15 @@ public class TransactionController {
 		
 		return ResponseEntity.ok(res);
 	}
+	
+	@PatchMapping("/{transactionId}")
+    public ResponseEntity<TransactionDetailResponse> updateTransaction(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long transactionId,
+            @RequestBody TransactionUpdateRequest req
+    ) {
+        Long userId = principal.getUserId();
+        TransactionDetailResponse res = transactionService.updateTransaction(userId, transactionId, req);
+        return ResponseEntity.ok(res);
+    }
 }
