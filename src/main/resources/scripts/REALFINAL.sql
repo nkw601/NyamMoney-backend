@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
   occurred_at        DATETIME NOT NULL,  -- 거래일시
   amount             DECIMAL(12,2) NOT NULL,  -- 금액
-  tx_type            ENUM('income','expense','transfer') NOT NULL, -- 분류
+  tx_type            ENUM('INCOME','EXPENSE','TRANSFER') NOT NULL, -- 분류
 
   category_id        BIGINT UNSIGNED NULL,   -- 카테고리
   merchant_name_raw  VARCHAR(120) NULL,      -- 원본 가맹점명(AfstNm)
