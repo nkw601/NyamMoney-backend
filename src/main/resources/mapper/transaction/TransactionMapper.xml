@@ -19,6 +19,7 @@
 
     <result property="memo"           column="memo"/>
     <result property="isRefund"       column="is_refund"/>
+    <result property="impulseFlag"    column="impulse_flag"/>
     <result property="canceledAt"     column="canceled_at"/>
     <result property="createdAt"      column="created_at"/>
 
@@ -45,6 +46,7 @@
       memo,
       tags,
       is_refund,
+      impulse_flag,
       canceled_at,
       source
     ) VALUES (
@@ -57,6 +59,7 @@
       #{memo},
       #{tags},
       #{isRefund},
+      #{impulseFlag},
       #{canceledAt},
       'manual'
     )
@@ -73,6 +76,7 @@
       t.merchant_name_raw AS merchant_name,
       t.memo,
       t.is_refund,
+      t.impulse_flag,
       t.canceled_at,
       t.created_at,
 

@@ -26,6 +26,9 @@ public class TransactionController {
 	@PostMapping
 	public ResponseEntity<TransactionCreateResponse> createTransaction(@AuthenticationPrincipal UserPrincipal principal, @RequestBody TransactionCreateRequest req) {
 		Long userId = principal.getUserId();
+		if (req.getImpulseFlag() == null) {
+			req.setImpulseFlag(Boolean.FALSE);
+		}
 		
 		TransactionCreateResponse res = transactionService.createTransaction(userId, req);
 		

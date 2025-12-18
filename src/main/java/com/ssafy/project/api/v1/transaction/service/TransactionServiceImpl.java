@@ -23,6 +23,9 @@ public class TransactionServiceImpl implements TransactionService {
 	
     @Override
     public TransactionCreateResponse createTransaction(Long userId, TransactionCreateRequest req) {
+    	if (req.getImpulseFlag() == null) {
+    		req.setImpulseFlag(Boolean.FALSE);
+    	}
 
         // 1) categoryId 존재 검증 (선택: FK가 있으면 DB가 막지만, 메시지/검증을 위해 둠)
         boolean categoryExists = categoryMapper.existsById(req.getCategoryId());

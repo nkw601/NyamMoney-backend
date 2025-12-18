@@ -36,6 +36,8 @@ public class TransactionCreateRequest {
 
     private Boolean isRefund;
     private LocalDateTime canceledAt;
+    @Builder.Default
+    private Boolean impulseFlag = Boolean.FALSE;
 
     private List<String> tags;         // 분류/클러스터링 대비
 }
