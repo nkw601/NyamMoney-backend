@@ -1,4 +1,4 @@
-package com.ssafy.project.api.v1.transaction.Controller;
+package com.ssafy.project.api.v1.transaction.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
