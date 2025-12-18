@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class CursorUtil {
 
-    public record Cursor(LocalDateTime createdAt, Long postId) {}
+    public record Cursor(LocalDateTime createdAt, Long id) {}
 
     public static Cursor parse(String cursor) {
         if (cursor == null || cursor.isBlank()) return null;
