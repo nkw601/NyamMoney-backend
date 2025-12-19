@@ -18,6 +18,30 @@
         ORDER BY c.starts_at DESC
     </select>
     
+    <!-- 단일 챌린지 상세 조회 -->
+    <select id="selectChallengeDetail" resultType="com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeDetailResponse">
+	    SELECT 
+	        c.challenge_id AS challengeId,
+	        c.title, 
+	        c.description, 
+	        c.starts_at AS startDate, 
+	        c.ends_at AS endDate,
+	        COALESCE(COUNT(cp.challenge_id), 0) AS participantCount,  -- 참여자 수
+	        CASE 
+	            WHEN EXISTS (
+	                SELECT 1
+	                FROM challenge_participants cp
+	                WHERE cp.challenge_id = c.challenge_id
+	                AND cp.user_id = #{userId}
+	            ) THEN true
+	            ELSE false
+	        END AS isJoined  -- 사용자 참여 여부
+	    FROM challenges c
+	    LEFT JOIN challenge_participants cp ON cp.challenge_id = c.challenge_id
+	    WHERE c.challenge_id = #{challengeId}
+	    GROUP BY c.challenge_id
+	</select>
+    
     <insert id="insertChallenge" useGeneratedKeys="true" keyProperty="challengeId">
 	  INSERT INTO challenges (title, description, budget_limit, period_days, starts_at, ends_at, status, user_id)
 	  VALUES (#{title}, #{description}, #{budgetLimit}, #{periodDays}, #{startDate}, #{endDate}, 'UPCOMING', #{userId})

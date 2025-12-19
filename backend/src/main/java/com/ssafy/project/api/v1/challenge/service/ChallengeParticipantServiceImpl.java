@@ -40,8 +40,8 @@ public class ChallengeParticipantServiceImpl implements ChallengeParticipantServ
             throw new IllegalStateException("진행 예정이거나 진행 중인 챌린지만 참여할 수 있습니다.");
         }
 
-        // 이미 참여한 경우 체크하지만 REFUNDED상태는 재참여 가능
-        int exists = pMapper.existsParticipant(challengeId, userId);
+        // 이미 참여한 경우 체크, REFUNDED상태는 재참여 가능
+        int exists = pMapper.existsParticipant(userId, challengeId);
         if (exists > 0) {
         	// 참여자 상태 확인
         	ChallengeParticipantStatus pStatus = pMapper.selectParticipantStatus(challengeId, userId);
@@ -60,7 +60,7 @@ public class ChallengeParticipantServiceImpl implements ChallengeParticipantServ
 	@Override
 	public void cancelChallengeJoin(Long challengeId, Long userId) {
 		 // 참여한 사용자인지 확인
-	    int participantCount = pMapper.existsParticipant(challengeId, userId);
+	    int participantCount = pMapper.existsParticipant(userId, challengeId);
 	    if (participantCount == 0) {
 	        throw new IllegalArgumentException("이 챌린지에 참여하지 않은 사용자입니다.");
 	    }

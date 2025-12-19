@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeDetailResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
 import com.ssafy.project.api.v1.challenge.dto.participant.ChallengeJoinResponse;
@@ -37,6 +38,15 @@ public class ChallengeController {
 	@GetMapping
 	public ResponseEntity<ChallengeListResponse> getChallenge() {
 		return ResponseEntity.ok(challengeService.getChallengeList());
+	}
+	
+	// 단일 챌린지 상세조회
+	@GetMapping("/{challengeId}")
+	public ResponseEntity<ChallengeDetailResponse> getChallengeDetail(@PathVariable Long challengeId,
+            @AuthenticationPrincipal UserPrincipal user) {
+		Long userId = user.getUserId();
+		ChallengeDetailResponse response = challengeService.getChallengeDetail(challengeId, userId);
+		return ResponseEntity.ok(response);
 	}
 	
 	@PostMapping
