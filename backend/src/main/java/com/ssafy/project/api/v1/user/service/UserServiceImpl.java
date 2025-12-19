@@ -255,7 +255,7 @@ public class UserServiceImpl implements UserService {
 	        if (req.getCursor() != null && !req.getCursor().isBlank()) {
 	            CursorUtil.Cursor c = CursorUtil.parse(req.getCursor());
 	            cursorCreatedAt = c.createdAt();
-	            cursorPostId = c.postId();
+	            cursorPostId = c.id();
 	        }
 
 	        // 3) size + 1 로 조회해서 hasNext 판단

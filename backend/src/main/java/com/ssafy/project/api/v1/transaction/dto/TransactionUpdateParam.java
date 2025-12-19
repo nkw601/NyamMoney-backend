@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.ssafy.project.domain.transaction.model.TxType;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,44 +11,49 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class TransactionCreateParam {
-    private Long transactionId; // DB가 채움
+public class TransactionUpdateParam {
+
     private Long userId;
+    private Long transactionId;
 
     private TxType txType;
     private Long amount;
     private LocalDateTime occurredAt;
+
     private Long categoryId;
 
-    private String merchantNameRaw; // DB: merchant_name_raw
+    private String merchantNameRaw;
     private String memo;
 
-    private String tags;            // DB: VARCHAR(255)
-    private Boolean isRefund;
-    private LocalDateTime canceledAt;
+    private String tags;
     private Boolean impulseFlag;
 
-    public static TransactionCreateParam from(Long userId, TransactionCreateRequest req) {
-        TransactionCreateParam p = new TransactionCreateParam();
+    private Boolean isRefund;
+    private LocalDateTime canceledAt;
+
+    public static TransactionUpdateParam from(Long userId, Long transactionId, TransactionUpdateRequest req) {
+        TransactionUpdateParam p = new TransactionUpdateParam();
         p.userId = userId;
+        p.transactionId = transactionId;
+
         p.txType = req.getTxType();
         p.amount = req.getAmount();
         p.occurredAt = req.getOccurredAt();
+
         p.categoryId = req.getCategoryId();
+
         p.merchantNameRaw = req.getMerchantName();
         p.memo = req.getMemo();
 
-        // List<String> -> "a,b,c"
-        if (req.getTags() == null || req.getTags().isEmpty()) {
-            p.tags = null;
-        } else {
-            p.tags = String.join(",", req.getTags());
+        // tags: null이면 미수정, 빈 리스트면 빈 문자열로 갱신
+        if (req.getTags() != null) {
+            p.tags = req.getTags().isEmpty() ? "" : String.join(",", req.getTags());
         }
+
+        p.impulseFlag = req.getImpulseFlag();
 
         p.isRefund = req.getIsRefund();
         p.canceledAt = req.getCanceledAt();
-        p.impulseFlag = req.getImpulseFlag() != null ? req.getImpulseFlag() : Boolean.FALSE;
         return p;
     }
 }

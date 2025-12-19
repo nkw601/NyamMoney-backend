@@ -5,9 +5,6 @@ import java.util.List;
 
 import com.ssafy.project.domain.transaction.model.TxType;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,29 +12,20 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class TransactionCreateRequest {
-	@NotNull
-    private TxType txType; // INCOME, EXPENSE, TRANSFER
+public class TransactionUpdateRequest {
 
-    @NotNull
+    private TxType txType;
     private Long amount;
-
-    @NotNull
     private LocalDateTime occurredAt;
 
-    @NotNull
     private Long categoryId;
 
-    private String merchantName;
-
+    private String merchantName;     // DB: merchant_name_raw
     private String memo;
+
+    private List<String> tags;       // -> "a,b,c"로 저장
+    private Boolean impulseFlag;
 
     private Boolean isRefund;
     private LocalDateTime canceledAt;
-    @Builder.Default
-    private Boolean impulseFlag = Boolean.FALSE;
-
-    private List<String> tags;         // 분류/클러스터링 대비
 }
