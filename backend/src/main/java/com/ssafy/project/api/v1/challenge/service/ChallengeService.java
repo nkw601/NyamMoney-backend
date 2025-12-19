@@ -11,10 +11,10 @@ public interface ChallengeService {
 
 	ChallengeListResponse getChallengeList();
 
-	ChallengeCreateResponse createChallenge(@Valid ChallengeCreateRequest request);
+	ChallengeCreateResponse createChallenge(@Valid ChallengeCreateRequest request, Long userId);
 
-	void updateChallenge(Long challengeId, @Valid ChallengeUpdateRequest request);
+	void updateChallenge(Long challengeId, @Valid ChallengeUpdateRequest request, Long userId) throws Exception;
 
-	void deleteChallenge(Long challengeId);
+	void deleteChallenge(Long challengeId, Long userId) throws Exception;
 
 }

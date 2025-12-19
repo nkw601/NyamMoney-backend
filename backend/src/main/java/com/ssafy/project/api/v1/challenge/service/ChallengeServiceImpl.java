@@ -15,24 +15,32 @@ import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateParam;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
 import com.ssafy.project.api.v1.challenge.mapper.ChallengeMapper;
+import com.ssafy.project.api.v1.challenge.mapper.ChallengeParticipantMapper;
 import com.ssafy.project.domain.challenge.model.ChallengeStatus;
+import com.ssafy.project.domain.challengeParticipant.ChallengeParticipantStatus;
 
 
 @Service
 public class ChallengeServiceImpl implements ChallengeService {
-	private ChallengeMapper challengeMapper;
-	public ChallengeServiceImpl(ChallengeMapper challengeMapper) {
+	private final ChallengeMapper challengeMapper;
+	private final ChallengeParticipantMapper pMapper;
+	//private final ChallengeSchedulerService a;
+	public ChallengeServiceImpl(ChallengeMapper challengeMapper, ChallengeParticipantMapper pMapper) {
 		this.challengeMapper = challengeMapper;
+		this.pMapper = pMapper;
+		//this.a = a;
 	}
 
 	@Override
 	public ChallengeListResponse getChallengeList() {
 		List<ChallengeListItem> items = challengeMapper.selectChallengeList();
+		// 스케줄러 작동하는지 확인
+        //a.checkExpiredChallenges();
         return new ChallengeListResponse(items);
 	}
 
 	@Override
-	public ChallengeCreateResponse createChallenge(ChallengeCreateRequest request) {
+	public ChallengeCreateResponse createChallenge(ChallengeCreateRequest request, Long userId) {
 		LocalDate start = request.getStartDate().toLocalDate();
 	    LocalDate end = request.getEndDate().toLocalDate();
 	    
@@ -48,14 +56,25 @@ public class ChallengeServiceImpl implements ChallengeService {
 	    param.setStartDate(request.getStartDate());
 	    param.setEndDate(request.getEndDate());
 	    param.setPeriodDays(periodDays);
+	    param.setUserId(userId);
 
 	    challengeMapper.insertChallenge(param);
+	    
+	    // 챌린지 생성한 유저 자동으로 참여하도록
+	    pMapper.insertParticipant(param.getChallengeId(), userId);
 	    
 	    return new ChallengeCreateResponse(param.getChallengeId());
 	    }
 
 	@Override
-	public void updateChallenge(Long challengeId, ChallengeUpdateRequest request) {
+	public void updateChallenge(Long challengeId, ChallengeUpdateRequest request, Long userId) throws Exception {
+		// 생성한 유저만 수정 가능하도록
+		// 챌린지Id 통해 userId 가져오기
+		Long creatorId = challengeMapper.selectUserIdByChallengeId(challengeId);
+        if (!creatorId.equals(userId)) {
+            throw new Exception("생성자만 챌린지를 수정할 수 있습니다.");
+        }
+        
 		// 상태 검증
         ChallengeStatus status = challengeMapper.selectStatus(challengeId);
         if (status != ChallengeStatus.UPCOMING) {
@@ -89,7 +108,13 @@ public class ChallengeServiceImpl implements ChallengeService {
 	}
 
 	@Override
-	public void deleteChallenge(Long challengeId) {
+	public void deleteChallenge(Long challengeId, Long userId) throws Exception {
+		// 생성한 유저만 삭제 가능하도록
+		Long creatorId = challengeMapper.selectUserIdByChallengeId(challengeId);
+        if (!creatorId.equals(userId)) {
+            throw new Exception("생성자만 챌린지를 삭제할 수 있습니다.");
+        }
+		
 		// 상태 검증
         ChallengeStatus status = challengeMapper.selectStatus(challengeId);
         if (status == null) {
@@ -105,6 +130,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (!LocalDateTime.now().isBefore(startsAt)) {
             throw new IllegalStateException("이미 시작되었거나 종료된 챌린지는 삭제할 수 없습니다.");
         }
+        
+        // 삭제되기 전에 참여자들 REFUNDED로 바꾸기
+        pMapper.updateParticipantStatus(challengeId, ChallengeParticipantStatus.REFUNDED);
 
         // 3소프트 삭제
         int updated = challengeMapper.softDeleteChallenge(challengeId);

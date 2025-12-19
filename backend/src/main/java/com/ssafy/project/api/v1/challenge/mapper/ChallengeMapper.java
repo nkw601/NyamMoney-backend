@@ -25,4 +25,10 @@ public interface ChallengeMapper {
 
 	int softDeleteChallenge(Long challengeId);
 
+	Long selectUserIdByChallengeId(Long challengeId);
+
+	void updateChallengeStatusByDate(LocalDateTime now);
+
+	List<Long> selectExpiredChallengeIds(LocalDateTime now);
+
 }

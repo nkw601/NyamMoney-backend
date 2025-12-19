@@ -11,4 +11,5 @@ public class ChallengeListItem {
     private String description;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private Long userId; // 생성한 유저 id
 }
