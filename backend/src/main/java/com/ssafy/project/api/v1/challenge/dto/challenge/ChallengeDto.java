@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChallengeDto {
     private Long challengeId;
+    private Long userId;
     private String title;
     private BigDecimal budgetLimit;
     private Integer periodDays;

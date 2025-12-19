@@ -13,4 +13,5 @@ public class ChallengeCreateParam {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private int periodDays;
+    private Long userId;
 }

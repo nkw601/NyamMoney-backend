@@ -25,4 +25,6 @@ public interface ChallengeMapper {
 
 	int softDeleteChallenge(Long challengeId);
 
+	Long selectUserIdByChallengeId(Long challengeId);
+
 }
