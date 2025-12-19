@@ -2,6 +2,7 @@ package com.ssafy.project.api.v1.challenge.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,7 +16,10 @@ import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.participant.MyChallengeListResponse;
+import com.ssafy.project.api.v1.challenge.service.ChallengeParticipantService;
 import com.ssafy.project.api.v1.challenge.service.ChallengeService;
+import com.ssafy.project.security.auth.UserPrincipal;
 
 import jakarta.validation.Valid;
 
@@ -23,8 +27,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/challenges")
 public class ChallengeController {
 	private final ChallengeService challengeService;
-	public ChallengeController(ChallengeService challengeService) {
+	private final ChallengeParticipantService pService;
+	public ChallengeController(ChallengeService challengeService, ChallengeParticipantService pService) {
 		this.challengeService = challengeService;
+		this.pService = pService;
 	}
 	
 	@GetMapping
@@ -55,6 +61,12 @@ public class ChallengeController {
     }
 	
 	
+	@GetMapping("/me")
+	public ResponseEntity<MyChallengeListResponse> getMyChallenges(
+            @AuthenticationPrincipal UserPrincipal user) {
+		Long userId = user.getUserId();
+        return ResponseEntity.ok(pService.getMyChallenges(userId));
+    }
 	
 
 }

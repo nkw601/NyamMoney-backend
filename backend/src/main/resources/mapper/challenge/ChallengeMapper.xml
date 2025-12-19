@@ -5,7 +5,7 @@
 <mapper namespace="com.ssafy.project.api.v1.challenge.mapper.ChallengeMapper">
 
     <select id="selectChallengeList"
-            resultType="com.ssafy.project.api.v1.challenge.dto.ChallengeListItem">
+            resultType="com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListItem">
         SELECT
             c.challenge_id AS challengeId,
             c.title,
