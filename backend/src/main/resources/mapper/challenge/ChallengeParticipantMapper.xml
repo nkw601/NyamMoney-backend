@@ -40,8 +40,14 @@
     <select id="existsParticipant" resultType="int">
         SELECT COUNT(*)
         FROM challenge_participants
-        WHERE challenge_id = #{challengeId}
-          AND user_id = #{userId}
+        WHERE challenge_id = #{challengeId} AND user_id = #{userId}
+    </select>
+    
+    <!-- JOINED 여부 확인 -->
+    <select id="JOINEDParticipant" resultType="int">
+        SELECT COUNT(*)
+        FROM challenge_participants
+        WHERE challenge_id = #{challengeId} AND user_id = #{userId} AND status = 'JOINED'
     </select>
 
     <!-- 참여 -->
@@ -70,6 +76,14 @@
 	    FROM challenge_participants
 	    WHERE challenge_id = #{challengeId} AND user_id = #{userId}
 	</select>
+	
+	<!-- 참여자 수 조회 -->
+	<select id="countParticipants" resultType="int">
+	    SELECT COUNT(*)
+	    FROM challenge_participants
+	    WHERE challenge_id = #{challengeId}
+	</select>
+	
 
 
 </mapper>

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateParam;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeDetailResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListItem;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateParam;
@@ -19,8 +20,11 @@ import com.ssafy.project.api.v1.challenge.mapper.ChallengeParticipantMapper;
 import com.ssafy.project.domain.challenge.model.ChallengeStatus;
 import com.ssafy.project.domain.challengeParticipant.ChallengeParticipantStatus;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 @Service
+@Slf4j
 public class ChallengeServiceImpl implements ChallengeService {
 	private final ChallengeMapper challengeMapper;
 	private final ChallengeParticipantMapper pMapper;
@@ -39,6 +43,37 @@ public class ChallengeServiceImpl implements ChallengeService {
         return new ChallengeListResponse(items);
 	}
 
+	// 단일 챌린지 상세정보 조회
+	@Override
+	public ChallengeDetailResponse getChallengeDetail(Long challengeId, Long userId) {
+		// 챌린지 정보 조회
+		ChallengeDetailResponse challengeDetail = challengeMapper.selectChallengeDetail(challengeId);
+        if (challengeDetail == null) {
+            throw new IllegalArgumentException("존재하지 않는 챌린지입니다.");
+        }
+
+        // 참여자 수 조회
+        int participantCount = pMapper.countParticipants(challengeId);
+
+        // 사용자 참여 여부 확인 (로그인된 사용자가 참여한 챌린지인지)
+        boolean isJoined = false;
+        if (userId != null) {
+            isJoined = pMapper.JOINEDParticipant(userId, challengeId) > 0;
+            log.debug("count?: " + pMapper.JOINEDParticipant(userId, challengeId));
+            log.debug("isJoined?" + isJoined);
+        }
+
+        // 응답 생성
+        return new ChallengeDetailResponse(
+            challengeDetail.getChallengeId(),
+            challengeDetail.getTitle(),
+            challengeDetail.getDescription(),
+            challengeDetail.getStartDate(),
+            challengeDetail.getEndDate(),
+            participantCount,
+            isJoined);
+	}
+	
 	@Override
 	public ChallengeCreateResponse createChallenge(ChallengeCreateRequest request, Long userId) {
 		LocalDate start = request.getStartDate().toLocalDate();
@@ -140,6 +175,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw new IllegalArgumentException("챌린지 삭제에 실패했습니다.");
         }
 	}
+
 	
 
 }
