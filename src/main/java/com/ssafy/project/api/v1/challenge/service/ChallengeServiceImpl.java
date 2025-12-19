@@ -7,13 +7,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateParam;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateRequest;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeListItem;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeListResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeUpdateParam;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateParam;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListItem;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateParam;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
 import com.ssafy.project.api.v1.challenge.mapper.ChallengeMapper;
 import com.ssafy.project.domain.challenge.model.ChallengeStatus;
 

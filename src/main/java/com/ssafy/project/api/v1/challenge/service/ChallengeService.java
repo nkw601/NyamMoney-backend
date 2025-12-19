@@ -1,9 +1,9 @@
 package com.ssafy.project.api.v1.challenge.service;
 
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateRequest;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeListResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
 
 import jakarta.validation.Valid;
 
