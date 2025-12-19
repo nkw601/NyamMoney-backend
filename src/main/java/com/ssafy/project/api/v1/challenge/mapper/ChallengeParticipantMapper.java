@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.ssafy.project.api.v1.challenge.dto.participant.MyChallengeItem;
+import com.ssafy.project.domain.challenge.model.ChallengeStatus;
 import com.ssafy.project.domain.challengeParticipant.ChallengeParticipantStatus;
 
 @Mapper
@@ -20,5 +21,7 @@ public interface ChallengeParticipantMapper {
 	void updateParticipantStatusByDelete(Long challengeId, ChallengeParticipantStatus status);
 	// 챌린지 참여 취소하는 경우 상태 업데이트 (userId 받음)
 	void updateParticipantStatus(Long challengeId, Long userId, ChallengeParticipantStatus status);
+
+	ChallengeParticipantStatus selectParticipantStatus(Long challengeId, Long userId);
 
 }
