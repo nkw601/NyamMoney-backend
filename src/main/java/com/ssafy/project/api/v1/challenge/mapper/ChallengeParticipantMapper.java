@@ -11,4 +11,8 @@ public interface ChallengeParticipantMapper {
 
 	List<MyChallengeItem> selectMyChallenges(Long userId);
 
+	int existsParticipant(Long challengeId, Long userId);
+
+	void insertParticipant(Long challengeId, Long userId);
+
 }

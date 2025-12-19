@@ -16,6 +16,7 @@ import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
 import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.participant.ChallengeJoinResponse;
 import com.ssafy.project.api.v1.challenge.dto.participant.MyChallengeListResponse;
 import com.ssafy.project.api.v1.challenge.service.ChallengeParticipantService;
 import com.ssafy.project.api.v1.challenge.service.ChallengeService;
@@ -60,12 +61,19 @@ public class ChallengeController {
         return ResponseEntity.noContent().build();
     }
 	
-	
+	// 참여한 챌린지 조회
 	@GetMapping("/me")
 	public ResponseEntity<MyChallengeListResponse> getMyChallenges(
             @AuthenticationPrincipal UserPrincipal user) {
 		Long userId = user.getUserId();
         return ResponseEntity.ok(pService.getMyChallenges(userId));
+    }
+	
+	@PostMapping("/{challengeId}/join")
+	public ResponseEntity<ChallengeJoinResponse> joinChallenge(@PathVariable Long challengeId,
+            @AuthenticationPrincipal UserPrincipal user) {
+        ChallengeJoinResponse response = pService.joinChallenge(challengeId, user.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 	
 
