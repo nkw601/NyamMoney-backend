@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateRequest;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeListResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
 import com.ssafy.project.api.v1.challenge.service.ChallengeService;
 
 import jakarta.validation.Valid;
@@ -53,6 +53,8 @@ public class ChallengeController {
         challengeService.deleteChallenge(challengeId);
         return ResponseEntity.noContent().build();
     }
+	
+	
 	
 
 }
