@@ -11,15 +11,16 @@
             c.title,
             c.description,
             DATE_FORMAT(c.starts_at, '%Y-%m-%d') AS startDate,
-            DATE_FORMAT(c.ends_at, '%Y-%m-%d')   AS endDate
+            DATE_FORMAT(c.ends_at, '%Y-%m-%d')   AS endDate,
+            c.user_id AS userId -- 생성한 사람 userId
         FROM challenges c
         WHERE c.status != 'CLOSED'
         ORDER BY c.starts_at DESC
     </select>
     
     <insert id="insertChallenge" useGeneratedKeys="true" keyProperty="challengeId">
-	  INSERT INTO challenges (title, description, budget_limit, period_days, starts_at, ends_at, status)
-	  VALUES (#{title}, #{description}, #{budgetLimit}, #{periodDays}, #{startDate}, #{endDate}, 'UPCOMING')
+	  INSERT INTO challenges (title, description, budget_limit, period_days, starts_at, ends_at, status, user_id)
+	  VALUES (#{title}, #{description}, #{budgetLimit}, #{periodDays}, #{startDate}, #{endDate}, 'UPCOMING', #{userId})
 	</insert>
 	
 	<select id="selectStatus" resultType="com.ssafy.project.domain.challenge.model.ChallengeStatus">
@@ -51,5 +52,11 @@
             updated_at = CURRENT_TIMESTAMP
         WHERE challenge_id = #{challengeId}
     </update>
+    
+    <select id="selectUserIdByChallengeId">
+	    SELECT user_id
+	    FROM challenges
+	    WHERE challenge_id = #{challengeId}
+    </select>
     
 </mapper>
