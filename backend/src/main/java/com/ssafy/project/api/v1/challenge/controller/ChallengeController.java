@@ -2,6 +2,7 @@ package com.ssafy.project.api.v1.challenge.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,11 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateRequest;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeCreateResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeListResponse;
-import com.ssafy.project.api.v1.challenge.dto.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateRequest;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeCreateResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeListResponse;
+import com.ssafy.project.api.v1.challenge.dto.challenge.ChallengeUpdateRequest;
+import com.ssafy.project.api.v1.challenge.dto.participant.ChallengeJoinResponse;
+import com.ssafy.project.api.v1.challenge.dto.participant.MyChallengeListResponse;
+import com.ssafy.project.api.v1.challenge.service.ChallengeParticipantService;
 import com.ssafy.project.api.v1.challenge.service.ChallengeService;
+import com.ssafy.project.security.auth.UserPrincipal;
 
 import jakarta.validation.Valid;
 
@@ -23,8 +28,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/challenges")
 public class ChallengeController {
 	private final ChallengeService challengeService;
-	public ChallengeController(ChallengeService challengeService) {
+	private final ChallengeParticipantService pService;
+	public ChallengeController(ChallengeService challengeService, ChallengeParticipantService pService) {
 		this.challengeService = challengeService;
+		this.pService = pService;
 	}
 	
 	@GetMapping
@@ -52,6 +59,21 @@ public class ChallengeController {
 	public ResponseEntity<Void> deleteChallenge(@PathVariable Long challengeId) {
         challengeService.deleteChallenge(challengeId);
         return ResponseEntity.noContent().build();
+    }
+	
+	// 참여한 챌린지 조회
+	@GetMapping("/me")
+	public ResponseEntity<MyChallengeListResponse> getMyChallenges(
+            @AuthenticationPrincipal UserPrincipal user) {
+		Long userId = user.getUserId();
+        return ResponseEntity.ok(pService.getMyChallenges(userId));
+    }
+	
+	@PostMapping("/{challengeId}/join")
+	public ResponseEntity<ChallengeJoinResponse> joinChallenge(@PathVariable Long challengeId,
+            @AuthenticationPrincipal UserPrincipal user) {
+        ChallengeJoinResponse response = pService.joinChallenge(challengeId, user.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 	
 
