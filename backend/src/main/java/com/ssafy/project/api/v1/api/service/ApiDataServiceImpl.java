@@ -15,6 +15,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +48,7 @@ public class ApiDataServiceImpl implements ApiDataService {
     }
     
     @PostConstruct
+    @Async
     public void init() {
         log.info("🔥 fetchDataAndStore START");
         fetchDataAndStore();
@@ -55,8 +57,8 @@ public class ApiDataServiceImpl implements ApiDataService {
     @Override
     public void fetchDataAndStore() {
 
-        int startKey = 10000;
-        int endKey = 10508; // 10508
+        int startKey = 10000; // 10000
+        int endKey = 10001; // 10508
         int numOfRows = 1000; // 1000
         int totalDocs = 0;
 
@@ -170,8 +172,7 @@ public class ApiDataServiceImpl implements ApiDataService {
     private void ingestPage(ApiResponse res) {
 
         List<MerchantItem> items = res.getBody().getItems();
-        if (items == null || items.isEmpty())
-            return;
+        if (items == null || items.isEmpty()) return;
 
         log.info("📦 ingest items = {}", items.size());
 
@@ -183,12 +184,14 @@ public class ApiDataServiceImpl implements ApiDataService {
                     item.getIndsLclsNm(),
                     item.getIndsMclsNm());
 
+            // ✅ content 최소화 (공백 나열)
             String content = String.format(
-                    "상호명:%s 업종대:%s 업종중:%s 업종소:%s",
-                    item.getBizesNm(),
-                    item.getIndsLclsNm(),
-                    item.getIndsMclsNm(),
-                    item.getIndsSclsNm());
+                    "%s %s %s %s",
+                    safe(item.getBizesNm()),
+                    safe(item.getIndsLclsNm()),
+                    safe(item.getIndsMclsNm()),
+                    safe(item.getIndsSclsNm())
+            );
 
             Map<String, Object> meta = new HashMap<>();
             meta.put("category", mappedCategory);
@@ -201,11 +204,25 @@ public class ApiDataServiceImpl implements ApiDataService {
         }
 
         VectorStore vectorStore = vectorStoreProvider.getObject();
-        log.info("🧠 vectorStore.add docs={}", docs.size());
-        final int batchSize = 100;
+
+        final int batchSize = 5;      // 🔽 안정성 우선
+        final long sleepMs = 250L;
+
         for (int start = 0; start < docs.size(); start += batchSize) {
             int end = Math.min(start + batchSize, docs.size());
-            vectorStore.add(docs.subList(start, end));
+            List<Document> batch = docs.subList(start, end);
+
+            long t0 = System.currentTimeMillis();
+            vectorStore.add(batch);
+            long took = System.currentTimeMillis() - t0;
+
+            log.info("🧠 vectorStore.add size={}, took={}ms", batch.size(), took);
+
+            try {
+                Thread.sleep(sleepMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -222,5 +239,9 @@ public class ApiDataServiceImpl implements ApiDataService {
             return key;
         }
         return URLEncoder.encode(key, StandardCharsets.UTF_8);
+    }
+    
+    private String safe(String v) {
+        return v == null ? "" : v.trim();
     }
 }

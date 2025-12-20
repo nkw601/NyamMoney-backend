@@ -20,7 +20,7 @@ import redis.clients.jedis.DefaultJedisClientConfig;
 public class AiConfig {
 
     @Bean(name = "customVectorStore")
-    @Primary
+//    @Primary
 //    @Lazy
     public VectorStore customVectorStore(EmbeddingModel embeddingModel) {
 
