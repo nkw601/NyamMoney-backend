@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { fetchChallengeList, fetchChallengeDetail, challengeJoin, challengeJoinCancle, } from '@/services/challenge.service'
+import { fetchChallengeList, fetchChallengeDetail, challengeJoin, challengeJoinCancle, 
+    createChallenge, } from '@/services/challenge.service'
 
 export const useChallengeStore = defineStore('challenge', {
   state: () => ({
@@ -53,6 +54,20 @@ export const useChallengeStore = defineStore('challenge', {
         this.joining = false
       }
     },
+    // 챌린지 생성
+    async createChallenge(payload) {
+      this.creating = true
+      try {
+        const res = await createChallenge(payload)
+        return res.data.challengeId // 생성된 ID 반환
+      } catch (e) {
+        console.error('챌린지 생성 실패', e)
+        throw e
+      } finally {
+        this.creating = false
+      }
+    },
+
 
   },
 })

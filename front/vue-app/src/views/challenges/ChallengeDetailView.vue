@@ -3,9 +3,7 @@
     <div class="p-8 max-w-3xl mx-auto">
       <button
         class="mb-6 text-sm text-gray-500 hover:underline"
-        @click="goBack"
-      >
-        ← 목록으로
+        @click="goBack">← 목록으로
       </button>
 
       <p v-if="loading">불러오는 중...</p>
@@ -85,7 +83,7 @@ export default {
     })
 
     const goBack = () => {
-      router.back()
+      router.push({ name: 'Projects'})
     }
 
     const canJoin = computed(() => {

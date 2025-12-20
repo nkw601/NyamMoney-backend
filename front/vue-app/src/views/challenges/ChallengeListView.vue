@@ -2,6 +2,20 @@
   <Layout>
     <div>
       <h1 class="text-2xl font-bold mb-6">챌린지</h1>
+<!-- 헤더 영역 -->
+      <div class="flex justify-between items-center mb-6">
+        <!-- 챌린지 생성 버튼 -->
+        <button
+          @click="goCreate"
+          class="inline-flex items-center
+                 px-3 py-1.5
+                 text-sm font-medium
+                 rounded-full
+                 border border-red-500
+                 bg-yummoney-primary text-black
+                 hover:bg-yummoney-primaryHover
+                 transition">+ 챌린지 생성</button>
+      </div>
 
       <p v-if="loading">불러오는 중...</p>
 
@@ -107,12 +121,17 @@ export default {
         params: { challengeId },
       })
     }
+    // 🔥 챌린지 생성 이동
+    const goCreate = () => {
+        router.push({
+        name: 'challengeCreate',
+        })
+    }
 
     return {
-      challenges,
-      loading,
-      goDetail,
+      challenges, loading, goDetail,
       statusStyleMap,
+      goCreate,
     }
   },
 }

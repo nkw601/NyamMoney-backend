@@ -19,6 +19,7 @@ import Login from '../views/users/Login.vue'
 import BoardPostsView from '../views/boards/BoardPostsView.vue'
 import PostCreateView from '../views/boards/PostCreateView.vue'
 import UserProfileView from '../views/users/UserProfileView.vue'
+import ChallengeListView from '../views/challenges/ChallengeListView.vue'
 
 const routes = [
   // 루트 → 로그인으로 리다이렉트
@@ -56,7 +57,9 @@ const routes = [
       challengeId: Number(route.params.challengeId),
     }),
   },
-
+  { path: '/challenges/new', name: 'challengeCreate',
+    component: ()=>import('@/views/challenges/ChallengeCreateView.vue'),
+  },
   {
   path: '/organization',
   name:'Organization',
