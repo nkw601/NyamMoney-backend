@@ -4,3 +4,8 @@ import api from '@/api/axios'
 export function fetchChallengeList() {
   return api.get('/v1/challenges')
 }
+// 챌린지 상세 조회
+export function fetchChallengeDetail(challengeId) {
+  return api.get(`/v1/challenges/${challengeId}`)
+}
+

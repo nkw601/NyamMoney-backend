@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
-import { fetchChallengeList } from '@/services/challenge.service'
+import { fetchChallengeList, fetchChallengeDetail, } from '@/services/challenge.service'
 
 export const useChallengeStore = defineStore('challenge', {
   state: () => ({
     challenges: [],
+    challengeDetail: null,
     loading: false,
   }),
 
@@ -20,7 +21,16 @@ export const useChallengeStore = defineStore('challenge', {
       }
     },
 
+    async loadChallengeDetail(challengeId) {
+      this.loading = true
+      this.challengeDetail = null
+      try {
+        const res = await fetchChallengeDetail(challengeId)
+        this.challengeDetail = res.data
+      } finally {
+        this.loading = false
+      }
+    },
 
-    
   },
 })
