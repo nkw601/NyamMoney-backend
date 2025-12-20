@@ -10,20 +10,26 @@
 
       <p v-if="loading">불러오는 중...</p>
 
-      <div v-else-if="challenge" class="rounded-xl border p-6 bg-white">
+    <div v-else-if="challenge" class="rounded-xl border p-6 bg-white">
         <button
-  v-if="canJoin"
-  :disabled="joining"
-  @click="handleJoin"
-  class="px-4 py-2 rounded font-medium transition"
-  :class="joinButtonClass"
->
-  {{ joinButtonText }}
-</button>
+            v-if="canJoin"
+            :disabled="joining"
+            @click="handleJoin"
+            class="inline-flex items-center
+            px-3 py-1.5
+            text-sm font-medium
+            rounded-full
+            bg-orange-400 hover:bg-orange-500
+            text-white
+            transition
+            disabled:opacity-50"
+            >
+            {{ joinButtonText }}
+        </button>
 
-<p v-else class="text-sm text-gray-400 mt-4">
-  참여할 수 없는 챌린지입니다.
-</p>
+    <p v-else class="text-sm text-gray-400 mt-4">
+    참여할 수 없는 챌린지입니다.
+    </p>
         <h1 class="text-2xl font-bold mb-2">
           {{ challenge.title }}
         </h1>
@@ -83,8 +89,10 @@ export default {
     }
 
     const canJoin = computed(() => {
+        console.log('status:', challenge.value.status)
         if (!challenge.value) return false
         return ['UPCOMING', 'ACTIVE'].includes(challenge.value.status)
+        
     })
 
     const joinButtonText = computed(() => {
