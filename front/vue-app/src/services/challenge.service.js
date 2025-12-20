@@ -8,4 +8,11 @@ export function fetchChallengeList() {
 export function fetchChallengeDetail(challengeId) {
   return api.get(`/v1/challenges/${challengeId}`)
 }
-
+// 챌린지 참여 / 재참여
+export function challengeJoin(challengeId) {
+  return api.post(`/v1/challenges/${challengeId}/join`)
+}
+// 챌린지 참여 취소
+export function challengeJoinCancle(challengeId) {
+  return api.delete(`/v1/challenges/${challengeId}/join`)
+}

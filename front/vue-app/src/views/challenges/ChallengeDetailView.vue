@@ -11,6 +11,19 @@
       <p v-if="loading">불러오는 중...</p>
 
       <div v-else-if="challenge" class="rounded-xl border p-6 bg-white">
+        <button
+  v-if="canJoin"
+  :disabled="joining"
+  @click="handleJoin"
+  class="px-4 py-2 rounded font-medium transition"
+  :class="joinButtonClass"
+>
+  {{ joinButtonText }}
+</button>
+
+<p v-else class="text-sm text-gray-400 mt-4">
+  참여할 수 없는 챌린지입니다.
+</p>
         <h1 class="text-2xl font-bold mb-2">
           {{ challenge.title }}
         </h1>
@@ -40,7 +53,7 @@
 </template>
 
 <script>
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useChallengeStore } from '@/stores/challenge.store'
@@ -69,10 +82,29 @@ export default {
       router.back()
     }
 
+    const canJoin = computed(() => {
+        if (!challenge.value) return false
+        return ['UPCOMING', 'ACTIVE'].includes(challenge.value.status)
+    })
+
+    const joinButtonText = computed(() => {
+        if (!challenge.value) return ''
+        return challenge.value.isJoined ? '참여 취소' : '챌린지 참여'
+    })
+
+    const joinButtonClass = computed(() => {
+        return challenge.value?.isJoined
+        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        : 'bg-orange-500 text-white hover:bg-orange-600'
+    })
+
+    const handleJoin = () => {
+        store.toggleJoin(challenge.value.challengeId)
+    }
+
     return {
-      challenge,
-      loading,
-      goBack,
+      challenge, loading, goBack,
+      canJoin, joinButtonText, joinButtonClass, handleJoin,
     }
   },
 }
