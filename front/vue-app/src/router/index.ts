@@ -51,6 +51,12 @@ const routes = [
     postId: Number(route.params.postId),
     }),
   },
+  { path: '/challenges/:challengeId', name: 'challengeDetail', component: ()=>import('@/views/challenges/ChallengeDetailView.vue'),
+    props: route=>({
+      challengeId: Number(route.params.challengeId),
+    }),
+  },
+
   {
   path: '/organization',
   name:'Organization',
