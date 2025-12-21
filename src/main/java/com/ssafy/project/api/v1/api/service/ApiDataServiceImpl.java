@@ -30,8 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApiDataServiceImpl implements ApiDataService {
 
-    private static final String BASE_URL =
-            "https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInArea";
+    private static final String BASE_URL = "https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInArea";
 
     private final CategoryService categoryService;
     private final ObjectProvider<VectorStore> vectorStoreProvider;
@@ -43,31 +42,34 @@ public class ApiDataServiceImpl implements ApiDataService {
     public ApiDataServiceImpl(
             CategoryService categoryService,
             ObjectProvider<VectorStore> vectorStoreProvider,
-            ObjectMapper objectMapper
-    ) {
+            ObjectMapper objectMapper) {
         this.categoryService = categoryService;
         this.vectorStoreProvider = vectorStoreProvider;
         this.objectMapper = objectMapper;
     }
 
-    /* =========================
+    /*
+     * =========================
      * 시작 지점
-     * ========================= */
-    @PostConstruct
+     * =========================
+     */
+    // @PostConstruct
     @Async
     public void init() {
         log.info("🔥 fetchDataAndStore START");
         fetchDataAndStore();
     }
 
-    /* =========================
+    /*
+     * =========================
      * 메인 적재 로직
-     * ========================= */
+     * =========================
+     */
     @Override
     public void fetchDataAndStore() {
 
         int startKey = 10000; // 10000
-        int endKey   = 10020; // 10508
+        int endKey = 10020; // 10508
         int numOfRows = 1000;
 
         int totalDocs = 0;
@@ -120,17 +122,18 @@ public class ApiDataServiceImpl implements ApiDataService {
                 : res.getBody().getItems().size();
     }
 
-    /* =========================
+    /*
+     * =========================
      * API 호출
-     * ========================= */
+     * =========================
+     */
     private ApiResponse call(int key, int pageNo, int numOfRows) {
 
         HttpURLConnection conn = null;
 
         try {
             String finalServiceKey = toQuerySafeServiceKey(
-                    serviceKey == null ? "" : serviceKey.trim()
-            );
+                    serviceKey == null ? "" : serviceKey.trim());
 
             StringBuilder urlBuilder = new StringBuilder(BASE_URL)
                     .append("?serviceKey=").append(finalServiceKey)
@@ -152,13 +155,12 @@ public class ApiDataServiceImpl implements ApiDataService {
                             (code >= 200 && code < 300)
                                     ? conn.getInputStream()
                                     : conn.getErrorStream(),
-                            StandardCharsets.UTF_8
-                    )
-            );
+                            StandardCharsets.UTF_8));
 
             StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = br.readLine()) != null) sb.append(line);
+            while ((line = br.readLine()) != null)
+                sb.append(line);
             br.close();
 
             if (code < 200 || code >= 300) {
@@ -173,21 +175,24 @@ public class ApiDataServiceImpl implements ApiDataService {
             return null;
 
         } finally {
-            if (conn != null) conn.disconnect();
+            if (conn != null)
+                conn.disconnect();
         }
     }
 
-    /* =========================
+    /*
+     * =========================
      * 벡터 적재
-     * ========================= */
+     * =========================
+     */
     private void ingestPage(
             ApiResponse res,
             int key,
             int pageNo,
-            int totalPages
-    ) {
+            int totalPages) {
         List<MerchantItem> items = res.getBody().getItems();
-        if (items == null || items.isEmpty()) return;
+        if (items == null || items.isEmpty())
+            return;
 
         log.info("📦 INGEST key={} page={}/{} items={}",
                 key, pageNo, totalPages, items.size());
@@ -196,11 +201,9 @@ public class ApiDataServiceImpl implements ApiDataService {
 
         for (MerchantItem item : items) {
 
-            String mappedCategory =
-                    categoryService.mapCategoryByIndustry(
-                            item.getIndsLclsNm(),
-                            item.getIndsMclsNm()
-                    );
+            String mappedCategory = categoryService.mapCategoryByIndustry(
+                    item.getIndsLclsNm(),
+                    item.getIndsMclsNm());
 
             String content = String.format(
                     "%s %s %s",
@@ -214,7 +217,7 @@ public class ApiDataServiceImpl implements ApiDataService {
             meta.put("indsM", item.getIndsMclsNm());
             meta.put("indsS", item.getIndsSclsNm());
             meta.put("bizesId", item.getBizesId());
-            
+
             Document d = new Document(item.getBizesId(), content, meta);
             docs.add(d);
         }
@@ -243,9 +246,11 @@ public class ApiDataServiceImpl implements ApiDataService {
         }
     }
 
-    /* =========================
+    /*
+     * =========================
      * Utils
-     * ========================= */
+     * =========================
+     */
     private String toQuerySafeServiceKey(String key) throws Exception {
         if (key.contains("%2B") || key.contains("%2F")
                 || key.contains("%3D") || key.contains("%25")) {
