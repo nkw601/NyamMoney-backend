@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { fetchChallengeList, fetchChallengeDetail, challengeJoin, challengeJoinCancle, 
-    createChallenge, } from '@/services/challenge.service'
+    createChallenge, updateChallenge, } from '@/services/challenge.service'
 
 export const useChallengeStore = defineStore('challenge', {
   state: () => ({
@@ -8,6 +8,8 @@ export const useChallengeStore = defineStore('challenge', {
     challengeDetail: null,
     loading: false,
     joining: false,
+    creating: false,
+    updating: false,
   }),
 
   actions: {
@@ -65,6 +67,20 @@ export const useChallengeStore = defineStore('challenge', {
         throw e
       } finally {
         this.creating = false
+      }
+    },
+    // 챌린지 수정
+    async updateChallenge(challengeId, payload) {
+      this.updating = true
+      try {
+        const res = await updateChallenge(challengeId, payload)
+        this.challengeDetail = res.data // 수정된 정보로 갱신
+        return res.data
+      } catch (e) {
+        console.error('챌린지 수정 실패', e)
+        throw e
+      } finally {
+        this.updating = false
       }
     },
 

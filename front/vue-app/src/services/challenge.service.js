@@ -15,3 +15,6 @@ export function challengeJoinCancle(challengeId) {
   // 챌린지 생성
 export function createChallenge(payload) {
   return api.post('/v1/challenges', payload)}
+  // 챌린지 수정
+export function updateChallenge(challengeId, payload) {
+  return api.patch(`/v1/challenges/${challengeId}`, payload)}

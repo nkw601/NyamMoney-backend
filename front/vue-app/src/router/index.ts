@@ -94,7 +94,10 @@ const routes = [
       props: true,
     },
   ],
-}
+},
+{ path: '/challenges/:challengeId/edit', name: 'challengeEdit',
+  component: ()=>import('@/views/challenges/ChallengeEditView.vue')
+},
 
 
 ]

@@ -52,6 +52,14 @@
           참여 중
         </span>
       </div>
+    <button
+        v-if="isCreator"
+        @click="goEdit"
+        class="text-sm text-gray-400"
+        >
+        수정
+    </button>
+
     </div>
   </Layout>
 </template>
@@ -62,6 +70,7 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useChallengeStore } from '@/stores/challenge.store'
 import Layout from '@/components/Layout.vue'
+import { useAuthStore } from '../../stores/auth'
 
 export default {
   components: { Layout },
@@ -75,11 +84,12 @@ export default {
 
   setup(props) {
     const router = useRouter()
-    const store = useChallengeStore()
-    const { challengeDetail: challenge, loading } = storeToRefs(store)
+    const challengeStore = useChallengeStore()
+    const authStore = useAuthStore()
+    const { challengeDetail: challenge, loading } = storeToRefs(challengeStore)
 
     onMounted(() => {
-      store.loadChallengeDetail(props.challengeId)
+      challengeStore.loadChallengeDetail(props.challengeId)
     })
 
     const goBack = () => {
@@ -87,8 +97,8 @@ export default {
     }
 
     const canJoin = computed(() => {
-        console.log('status:', challenge.value.status)
         if (!challenge.value) return false
+        console.log('status:', challenge.value.status)
         return ['UPCOMING', 'ACTIVE'].includes(challenge.value.status)
         
     })
@@ -105,12 +115,27 @@ export default {
     })
 
     const handleJoin = () => {
-        store.toggleJoin(challenge.value.challengeId)
+        challengeStore.toggleJoin(challenge.value.challengeId)
     }
+
+    const goEdit = () => {
+        const challengeId = challenge.value.challengeId
+        router.push({
+            name: 'challengeEdit',
+            params: { challengeId },
+        })
+    }
+    // 여기서 isCreator 정의
+    const isCreator = computed(() => {
+        if (!challenge.value) return false
+        return challenge.value.userId === authStore.userId
+    })
+
 
     return {
       challenge, loading, goBack,
       canJoin, joinButtonText, joinButtonClass, handleJoin,
+      goEdit, isCreator,
     }
   },
 }
