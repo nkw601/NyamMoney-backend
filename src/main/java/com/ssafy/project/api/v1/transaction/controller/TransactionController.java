@@ -117,7 +117,7 @@ public class TransactionController {
         return ResponseEntity.ok(res);
     }
     
-    @GetMapping("/daily-summary")
+    @GetMapping("/summary/daily")
     public ResponseEntity<List<TransactionDailySummaryItem>> getDailySummary(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) LocalDateTime from,
@@ -138,6 +138,19 @@ public class TransactionController {
         List<TransactionDailySummaryItem> res =
                 transactionService.getDailySummary(userId, start, end);
 
+        return ResponseEntity.ok(res);
+    }
+    
+    @GetMapping("/summary/today")
+    public ResponseEntity<TransactionSummaryResponse> getTodaySummary(
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        Long userId = principal.getUserId();
+
+        LocalDateTime end = LocalDateTime.now();                 // 현재 시각(now)
+        LocalDateTime start = end.toLocalDate().atStartOfDay();  // 오늘 00:00:00
+
+        TransactionSummaryResponse res = transactionService.getSummary(userId, start, end);
         return ResponseEntity.ok(res);
     }
 }
