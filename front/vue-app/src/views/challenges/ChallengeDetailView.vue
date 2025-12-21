@@ -59,6 +59,14 @@
         >
         수정
     </button>
+    <button
+      v-if="canDelete"
+      @click="handleDelete"
+      class="text-sm text-red-500 hover:text-red-600"
+    >
+      삭제
+    </button>
+
 
     </div>
   </Layout>
@@ -66,7 +74,7 @@
 
 <script>
 import { onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute, } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useChallengeStore } from '@/stores/challenge.store'
 import Layout from '@/components/Layout.vue'
@@ -83,10 +91,13 @@ export default {
   },
 
   setup(props) {
-    const router = useRouter()
     const challengeStore = useChallengeStore()
     const authStore = useAuthStore()
     const { challengeDetail: challenge, loading } = storeToRefs(challengeStore)
+    const router = useRouter()
+    const route = useRoute()
+
+    const challengeId = route.params.challengeId
 
     onMounted(() => {
       challengeStore.loadChallengeDetail(props.challengeId)
@@ -119,23 +130,46 @@ export default {
     }
 
     const goEdit = () => {
-        const challengeId = challenge.value.challengeId
+        //const challengeId = challenge.value.challengeId
         router.push({
             name: 'challengeEdit',
             params: { challengeId },
         })
     }
-    // 여기서 isCreator 정의
+    // 생성한 사람인지 체크
     const isCreator = computed(() => {
         if (!challenge.value) return false
         return challenge.value.userId === authStore.userId
     })
+
+    const canDelete = computed(() => {
+      if (!challenge.value) return false
+      return (
+        isCreator.value &&
+        challenge.value.status === 'UPCOMING'
+      )
+    })
+
+    const handleDelete = async () => {
+      //const challengeId = challenge.value.challengeId
+      if (!confirm('이 챌린지를 삭제하시겠습니까?\n참여자 전원에게 환불됩니다.')) {
+        return
+      }
+
+      await challengeStore.deleteChallenge(challengeId)
+
+      // 삭제 후 목록으로 이동 (back 아님)
+      router.replace({ name: 'Projects' })
+    }
+
+
 
 
     return {
       challenge, loading, goBack,
       canJoin, joinButtonText, joinButtonClass, handleJoin,
       goEdit, isCreator,
+      canDelete, handleDelete,
     }
   },
 }

@@ -18,3 +18,6 @@ export function createChallenge(payload) {
   // 챌린지 수정
 export function updateChallenge(challengeId, payload) {
   return api.patch(`/v1/challenges/${challengeId}`, payload)}
+  // 챌린지 삭제
+export function deleteChallenge(challengeId) {
+  return api.delete(`/v1/challenges/${challengeId}`)}
