@@ -1,5 +1,6 @@
 package com.ssafy.project.api.v1.transaction.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface TransactionService {
 	public CursorPage<TransactionItem> getTransactions(Long userId, TransactionCursorRequest req);
 
 	List<TransactionDailySummaryItem> getDailySummary(Long userId, LocalDateTime start, LocalDateTime end);
+
+	int syncNhTransactions(Long userId, LocalDate fromDate, LocalDate toDate);
 }

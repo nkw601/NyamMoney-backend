@@ -40,13 +40,14 @@ public class NhCardController {
             throw new IllegalArgumentException("조회 기간은 최대 3개월입니다.");
         }
 
-        int syncedCount = nhCardService.sync(userId, fromDate, toDate);
+        var params = nhCardService.collect(userId, fromDate, toDate);
 
         Map<String, Object> res = Map.of(
                 "success", true,
                 "from", from,
                 "to", to,
-                "syncedCount", syncedCount
+                "syncedCount", params.size(),
+                "items", params
         );
 
         return ResponseEntity.ok(res);

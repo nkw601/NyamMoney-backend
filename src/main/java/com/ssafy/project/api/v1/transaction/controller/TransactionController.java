@@ -1,7 +1,11 @@
 package com.ssafy.project.api.v1.transaction.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.project.api.v1.integration.nhcard.dto.TransactionUpsertParam;
+import com.ssafy.project.api.v1.integration.nhcard.service.NhCardService;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateRequest;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateResponse;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCursorRequest;
@@ -34,9 +40,11 @@ import com.ssafy.project.security.auth.UserPrincipal;
 public class TransactionController {
 	
 	private final TransactionService transactionService;
-	
-	public TransactionController(TransactionService transactionService) {
+    private final NhCardService nhCardService;
+    
+	public TransactionController(TransactionService transactionService, NhCardService nhCardService) {
 		this.transactionService = transactionService;
+		this.nhCardService = nhCardService;
 	}
 	
 	@PostMapping
@@ -140,4 +148,40 @@ public class TransactionController {
 
         return ResponseEntity.ok(res);
     }
+    
+    
+    @PostMapping("/nh/sync")
+    public ResponseEntity<Map<String, Object>> syncNhTransactions(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam String from,
+            @RequestParam String to
+    ) {
+        Long userId = principal.getUserId();
+
+        // 1) yyyyMMdd 파싱
+        LocalDate fromDate = LocalDate.parse(from, DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate toDate = LocalDate.parse(to, DateTimeFormatter.BASIC_ISO_DATE);
+
+        // 2) 기간 검증 (최대 3개월)
+        if (fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("from은 to 이후일 수 없습니다.");
+        }
+        if (ChronoUnit.DAYS.between(fromDate, toDate) > 92) {
+            throw new IllegalArgumentException("조회 기간은 최대 3개월입니다.");
+        }
+
+        // 3) 서비스 호출 (NH 호출 + 분류 + upsert 저장)
+        int syncedCount = transactionService.syncNhTransactions(userId, fromDate, toDate);
+
+        // 4) 결과만 반환
+        Map<String, Object> body = Map.of(
+                "success", true,
+                "from", from,
+                "to", to,
+                "syncedCount", syncedCount
+        );
+
+        return ResponseEntity.ok(body);
+    }
+
 }

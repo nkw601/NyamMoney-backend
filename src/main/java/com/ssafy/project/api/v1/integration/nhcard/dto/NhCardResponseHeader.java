@@ -18,7 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NhCardHeader {
+public class NhCardResponseHeader {
 
  @JsonProperty("ApiNm")
  private String apiNm;

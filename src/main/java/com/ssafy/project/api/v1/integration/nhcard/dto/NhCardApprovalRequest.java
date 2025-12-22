@@ -17,7 +17,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class NhCardApprovalRequest {
-
+	
+    @JsonProperty("Header")
+    private NhCardRequestHeader header;
+    
     @JsonProperty("FinCard")
     private String finCard;   // 30, 필수
 

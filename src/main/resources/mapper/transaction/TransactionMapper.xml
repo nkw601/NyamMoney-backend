@@ -318,4 +318,62 @@
 	  ORDER BY DATE(t.occurred_at) ASC
 	</select>	
 	
+	<insert id="upsertNhCardTransaction"
+            parameterType="com.ssafy.project.api.v1.integration.nhcard.dto.TransactionUpsertParam">
+
+        INSERT INTO transactions (
+            user_id,
+            occurred_at,
+            amount,
+            tx_type,
+
+            category_id,
+            merchant_name_raw,
+            payment_method,
+            memo,
+            tags,
+
+            source,
+            card_auth_no,
+            sales_type,
+            installment_months,
+            currency_code,
+
+            impulse_flag,
+            is_refund,
+            canceled_at
+        )
+        VALUES (
+            #{userId},
+            #{occurredAt},
+            #{amount},
+            #{txType},
+
+            #{categoryId},
+            #{merchantNameRaw},
+            #{paymentMethod},
+            #{memo},
+            #{tags},
+
+            #{source},
+            #{cardAuthNo},
+            #{salesType},
+            #{installmentMonths},
+            #{currencyCode},
+
+            #{impulseFlag},
+            #{isRefund},
+            #{canceledAt}
+        )
+        ON DUPLICATE KEY UPDATE
+            amount              = VALUES(amount),
+            category_id         = VALUES(category_id),
+            payment_method      = VALUES(payment_method),
+            sales_type          = VALUES(sales_type),
+            installment_months  = VALUES(installment_months),
+            currency_code       = VALUES(currency_code),
+            is_refund           = VALUES(is_refund),
+            canceled_at         = VALUES(canceled_at),
+            updated_at          = CURRENT_TIMESTAMP
+    </insert>
 </mapper>

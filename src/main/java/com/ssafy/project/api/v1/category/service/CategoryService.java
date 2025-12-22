@@ -12,4 +12,6 @@ public interface CategoryService {
 	
 	public String mapManufacturingCategory(String industryMcls);
 
+	Long findVector(String merchantName);
+
 }

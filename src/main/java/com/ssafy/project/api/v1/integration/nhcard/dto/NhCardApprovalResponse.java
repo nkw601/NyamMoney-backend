@@ -21,7 +21,7 @@ import lombok.Setter;
 public class NhCardApprovalResponse {
 
  @JsonProperty("Header")
- private NhCardHeader header;
+ private NhCardResponseHeader header;
 
  @JsonProperty("PageNo")
  private String pageNo;
