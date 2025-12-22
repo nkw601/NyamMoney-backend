@@ -13,6 +13,7 @@ import com.ssafy.project.api.v1.openai.dto.OpenAiResponsesRequest;
 import com.ssafy.project.api.v1.openai.dto.OpenAiResponsesResponse;
 import com.ssafy.project.api.v1.openai.dto.OutputItemDto;
 import com.ssafy.project.api.v1.openai.dto.ToolDto;
+import com.ssafy.project.api.v1.openai.dto.UserLocationDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
