@@ -1,13 +1,24 @@
 package com.ssafy.project.api.v1.transaction.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ssafy.project.api.v1.brand.service.BrandService;
 import com.ssafy.project.api.v1.category.dto.CategoryItem;
 import com.ssafy.project.api.v1.category.mapper.CategoryMapper;
+import com.ssafy.project.api.v1.category.service.CategoryService;
+import com.ssafy.project.api.v1.integration.nhcard.dto.NhCardApprovalItem;
+import com.ssafy.project.api.v1.integration.nhcard.dto.TransactionUpsertParam;
+import com.ssafy.project.api.v1.integration.nhcard.service.NhCardService;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateParam;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateRequest;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateResponse;
@@ -29,13 +40,19 @@ public class TransactionServiceImpl implements TransactionService {
 	
 	private final TransactionMapper transactionMapper;
     private final CategoryMapper categoryMapper;
+    private final BrandService brandService;
+    private final CategoryService categoryService;
+    private final NhCardService nhCardService;
     
 	private static final int DEFAULT_SIZE = 10;
     private static final int MAX_SIZE = 50;
     
-    public TransactionServiceImpl(TransactionMapper transactionMapper, CategoryMapper categoryMapper) {
+    public TransactionServiceImpl(TransactionMapper transactionMapper, CategoryMapper categoryMapper, BrandService brandService, CategoryService categoryService, NhCardService nhCardService) {
     	this.transactionMapper = transactionMapper;
     	this.categoryMapper = categoryMapper;
+    	this.brandService = brandService;
+    	this.categoryService = categoryService;
+    	this.nhCardService = nhCardService;
     }
 	
     @Override
@@ -196,4 +213,146 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionSummaryQuery q = new TransactionSummaryQuery(userId, from, to);
         return transactionMapper.selectDailySummary(q);
     }
+
+    @Override
+    @Transactional
+    public int syncNhTransactions(Long userId, LocalDate fromDate, LocalDate toDate) {
+
+        // 1) NH 승인내역 수집
+        List<NhCardApprovalItem> items = nhCardService.collect(userId, fromDate, toDate);
+        if (items == null || items.isEmpty()) return 0;
+
+        final String SOURCE = "nhcard";
+
+        // 2) authNo 목록 뽑기 (null/blank 제외)
+        List<String> authNos = items.stream()
+            .map(NhCardApprovalItem::getCardAthzNo)
+            .filter(no -> no != null && !no.isBlank())
+            .distinct()
+            .toList();
+
+        // 3) 이미 DB에 있는 authNo를 한 번에 조회
+        Set<String> existing = authNos.isEmpty()
+            ? Set.of()
+            : new HashSet<>(transactionMapper.findExistingNhAuthNos(userId, SOURCE, authNos));
+
+        // 4) (선택) merchantName 기준 분류 결과를 sync 1회 동안만 메모리 캐시
+        Map<String, CategoryPick> categoryCache = new HashMap<>();
+
+        int savedCount = 0;
+
+        for (NhCardApprovalItem it : items) {
+
+            String authNo = it.getCardAthzNo();
+            if (authNo == null || authNo.isBlank()) {
+                // authNo가 없으면 유니크키로 중복판정이 안됨 → 정책 결정 필요
+                // 일단 스킵하거나, 다른 키로 중복판정(occurredAt+amount+merchant) 등을 쓰는 방식으로 가야 함
+                continue;
+            }
+
+            // 5) 이미 있으면 스킵
+            if (existing.contains(authNo)) continue;
+
+            TransactionUpsertParam p = mapToUpsertParam(it, userId);
+            p.setSource(SOURCE);
+            p.setCardAuthNo(authNo);
+
+            String merchantName = p.getMerchantNameRaw();
+            if (merchantName == null || merchantName.isBlank()) {
+                p.setCategoryId(10L);
+                p.setCategoryMethod("NONE");
+            } else {
+                CategoryPick pick = categoryCache.get(merchantName);
+
+                if (pick == null) {
+                    // 6) RULE → VECTOR → NONE
+                    Long categoryId = brandService.findBrand(merchantName);
+                    if (categoryId != null) {
+                        pick = new CategoryPick(categoryId, "RULE");
+                    } else {
+                        categoryId = categoryService.findVector(merchantName);
+                        if (categoryId != null) pick = new CategoryPick(categoryId, "VECTOR");
+                        else pick = new CategoryPick(10L, "NONE");
+                    }
+                    categoryCache.put(merchantName, pick);
+                }
+
+                p.setCategoryId(pick.categoryId());
+                p.setCategoryMethod(pick.method());
+            }
+
+            // 7) insert만 수행
+            savedCount += transactionMapper.insertNhCardTransaction(p);
+
+            // 8) 이번 실행 중 중복 방지
+            existing.add(authNo);
+        }
+
+        return savedCount;
+    }
+
+    private record CategoryPick(Long categoryId, String method) {}
+
+
+    private TransactionUpsertParam mapToUpsertParam(
+            NhCardApprovalItem it,
+            Long userId
+    ) {
+        TransactionUpsertParam p = new TransactionUpsertParam();
+
+        p.setUserId(userId);
+
+        // occurredAt
+        String d = it.getTrdd();
+        String t = it.getTxtm();
+        if (t == null || t.length() < 6) {
+            t = String.format("%6s", t == null ? "" : t).replace(' ', '0');
+        }
+        p.setOccurredAt(LocalDateTime.parse(d + t,
+                DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+
+        // amount
+        long amount = 0L;
+        if (it.getUsam() != null && !it.getUsam().isBlank()) {
+            amount = Long.parseLong(it.getUsam().trim());
+        }
+        p.setAmount(amount);
+
+        p.setTxType("EXPENSE");
+        p.setMerchantNameRaw(it.getAfstNm());
+        p.setPaymentMethod("CARD");
+        p.setSource("nhcard");
+
+        p.setCardAuthNo(it.getCardAthzNo());
+
+        // salesType
+        String amsl = it.getAmslKnd();
+        if ("1".equals(amsl)) p.setSalesType("ONETIME");
+        else if ("2".equals(amsl)) p.setSalesType("INSTALLMENT");
+        else if ("3".equals(amsl)) p.setSalesType("CASH");
+        else if ("6".equals(amsl)) p.setSalesType("FOREIGN_ONETIME");
+        else if ("7".equals(amsl)) p.setSalesType("FOREIGN_INSTALLMENT");
+        else if ("8".equals(amsl)) p.setSalesType("FOREIGN_CASH");
+
+        // installment
+        if (it.getTris() != null && !"00".equals(it.getTris())) {
+            p.setInstallmentMonths(Integer.parseInt(it.getTris()));
+        }
+
+        // refund
+        p.setIsRefund("1".equals(it.getCcyn()) ? 1 : 0);
+
+        // canceledAt
+        if (it.getCnclYmd() != null && !it.getCnclYmd().isBlank()) {
+            p.setCanceledAt(LocalDate.parse(it.getCnclYmd(),
+                    DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay());
+        }
+
+        p.setCategoryId(null);
+        p.setCategoryMethod(null);
+
+        return p;
+    }
+
+
 }
