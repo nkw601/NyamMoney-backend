@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.project.api.v1.integration.nhcard.dto.TransactionUpsertParam;
 import com.ssafy.project.api.v1.integration.nhcard.service.NhCardService;
+import com.ssafy.project.api.v1.brand.service.BrandService;
+import com.ssafy.project.api.v1.category.service.CategoryService;
+import com.ssafy.project.api.v1.openai.service.MerchantCategoryAiService;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateRequest;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCreateResponse;
 import com.ssafy.project.api.v1.transaction.dto.TransactionCursorRequest;
@@ -41,10 +44,22 @@ public class TransactionController {
 	
 	private final TransactionService transactionService;
     private final NhCardService nhCardService;
+    private final BrandService brandService;
+    private final CategoryService categoryService;
+    private final MerchantCategoryAiService merchantCategoryAiService;
     
-	public TransactionController(TransactionService transactionService, NhCardService nhCardService) {
+	public TransactionController(
+	        TransactionService transactionService,
+	        NhCardService nhCardService,
+	        BrandService brandService,
+	        CategoryService categoryService,
+	        MerchantCategoryAiService merchantCategoryAiService
+    ) {
 		this.transactionService = transactionService;
 		this.nhCardService = nhCardService;
+		this.brandService = brandService;
+		this.categoryService = categoryService;
+		this.merchantCategoryAiService = merchantCategoryAiService;
 	}
 	
 	@PostMapping
@@ -179,6 +194,49 @@ public class TransactionController {
                 "from", from,
                 "to", to,
                 "syncedCount", syncedCount
+        );
+
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/classify")
+    public ResponseEntity<Map<String, Object>> classifyCategory(
+            @RequestParam String merchantName,
+            @RequestParam(defaultValue = "true") boolean allowAi
+    ) {
+        if (merchantName == null || merchantName.isBlank()) {
+            throw new IllegalArgumentException("merchantName은 필수입니다.");
+        }
+
+        String cleaned = merchantName.trim();
+        Long categoryId = 10L; // default 기타
+        String method = "NONE";
+
+        Long byRule = brandService.findBrand(cleaned);
+        if (byRule != null) {
+            categoryId = byRule;
+            method = "RULE";
+        } else {
+            Long byVector = categoryService.findVector(cleaned);
+            if (byVector != null) {
+                categoryId = byVector;
+                method = "VECTOR";
+            } else if (allowAi) {
+                try {
+                    String code = merchantCategoryAiService.classifySingleDigitCode(cleaned); // "0"~"9"
+                    categoryId = transactionService.mapCodeToCategoryId(code); // 1~10
+                    method = "OPENAI";
+                } catch (Exception e) {
+                    categoryId = 10L;
+                    method = "NONE";
+                }
+            }
+        }
+
+        Map<String, Object> body = Map.of(
+                "merchantName", cleaned,
+                "categoryId", categoryId,
+                "method", method
         );
 
         return ResponseEntity.ok(body);
