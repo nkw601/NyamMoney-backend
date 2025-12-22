@@ -87,8 +87,8 @@
             p.updated_at,
             (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.post_id AND c.deleted_at IS NULL) AS comment_count,
             (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.post_id) AS likes_computed,
-            u.user_id,
-            u.nickname
+            u.user_id AS author_id,
+            u.nickname AS author_nickname
         FROM posts p
         JOIN users u ON p.user_id = u.user_id
         WHERE p.board_id = #{boardId}
