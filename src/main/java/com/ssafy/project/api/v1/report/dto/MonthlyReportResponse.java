@@ -20,5 +20,6 @@ public class MonthlyReportResponse {
 
     private String aiSummary;
     private String emotionSummary;
+    private PersonaResult persona;
 
 }
