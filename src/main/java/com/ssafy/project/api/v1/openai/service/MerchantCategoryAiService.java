@@ -60,10 +60,8 @@ public class MerchantCategoryAiService {
 
     		        // 3️ 우선순위 + 실패 조건
     		        new InputMessageDto(
-    		            "developer",
-    		            "업종이 여러 개로 해석될 경우 다음 우선순위를 따르세요: "
-    		          + "이동·차량 > 건강·의료 > 교육 > 쇼핑 > 카페·간식 > 식사 > 여가·취미 > 금융 > 기타. "
-    		          + "다음 경우에는 반드시 0을 출력하세요: "
+    		            "developer", 
+    		          "다음 경우에는 반드시 0을 출력하세요: "
     		          + "웹 검색 결과가 상호명과 명확히 일치하지 않음, "
     		          + "업종을 특정할 수 있는 정보가 부족함, "
     		          + "상호명이 지점명/약칭뿐이라 업종 단서가 없음."
@@ -116,6 +114,7 @@ public class MerchantCategoryAiService {
             if (out.getContent() == null) continue;
 
             for (ContentItemDto c : out.getContent()) {
+            	log.debug("내가 받은 Content의 내용들을 확인: "+ c.toString());
                 if ("output_text".equals(c.getType()) && c.getText() != null && !c.getText().isBlank()) {
                     return c.getText();
                 }

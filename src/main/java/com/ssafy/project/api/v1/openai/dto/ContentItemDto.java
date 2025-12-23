@@ -12,9 +12,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+
 public class ContentItemDto {
     private String type; // output_text
     private String text;
-
+    
+    @Override
+	public String toString() {
+    	return text;
+    }
 }
