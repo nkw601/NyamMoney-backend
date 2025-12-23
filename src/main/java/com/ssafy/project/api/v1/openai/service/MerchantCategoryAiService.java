@@ -114,6 +114,7 @@ public class MerchantCategoryAiService {
             if (out.getContent() == null) continue;
 
             for (ContentItemDto c : out.getContent()) {
+            	log.debug("내가 받은 Content의 내용들을 확인: "+ c.toString());
                 if ("output_text".equals(c.getType()) && c.getText() != null && !c.getText().isBlank()) {
                     return c.getText();
                 }
