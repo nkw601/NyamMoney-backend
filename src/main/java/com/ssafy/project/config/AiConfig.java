@@ -6,15 +6,11 @@ import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.ai.vectorstore.redis.RedisVectorStore.MetadataField;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-
-import redis.clients.jedis.JedisPooled;
+import org.springframework.context.annotation.Profile;
 
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisPooled;
-import redis.clients.jedis.DefaultJedisClientConfig;
 
 @Configuration
 public class AiConfig {
