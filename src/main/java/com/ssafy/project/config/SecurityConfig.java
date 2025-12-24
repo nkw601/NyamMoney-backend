@@ -101,7 +101,8 @@ public class SecurityConfig {
                                 "/api/v1/users/signup",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/users/check-nickname",
-                                "/api/v1/users/check-loginId"
+                                "/api/v1/users/check-loginId",
+                                "/api/v1/users/check-email"
                         )
                         .permitAll()
 
