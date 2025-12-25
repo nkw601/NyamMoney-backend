@@ -40,8 +40,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-challenge-chat")
-                .setAllowedOriginPatterns("*")
-                .addInterceptors(userHandshakeInterceptor);
+        .setAllowedOriginPatterns("*")
+        .addInterceptors(userHandshakeInterceptor)
+        .withSockJS();
     }
     
     @Override
