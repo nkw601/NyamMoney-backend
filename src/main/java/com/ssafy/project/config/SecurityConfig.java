@@ -46,13 +46,14 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "https://nyammoney.kr",
                 "https://www.nyammoney.kr",
-                "https://api.nyammoney.kr"
+                "https://api.nyammoney.kr",
+                "https://app.nyammoney.kr"
         ));
         
         config.setAllowedOriginPatterns(List.of(
                 "https://*.vercel.app"
             ));
-
+        
         // 허용 메서드
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
