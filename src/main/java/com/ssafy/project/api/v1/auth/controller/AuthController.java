@@ -3,6 +3,7 @@ package com.ssafy.project.api.v1.auth.controller;
 import java.time.Duration;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,10 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
+	
+	@Value("${app.cookie.secure}")
+	private boolean cookieSecure;
+	
 	private final UserService uService;
 	private final AuthService aService;
 	private final JWTUtil jwtUtil;
@@ -93,7 +98,7 @@ public class AuthController {
 	public ResponseEntity<Map<String, String>> logout(HttpServletRequest req ){
 		String accessToken = extractAccessToken(req);
 		if (accessToken == null) {
-            throw new IllegalAccessError("?犿毃??access token???勲嫏?堧嫟.");
+            throw new IllegalAccessError("유효하지 않은 토큰입니다.");
         }
 
         Claims claims = jwtUtil.getClaims(accessToken);
@@ -106,7 +111,7 @@ public class AuthController {
 		
 		return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, expiredAccess.toString(), expiredRefresh.toString())
-                .body(Map.of("message", "搿滉犯?勳泝 ?橃叏?惦媹??"));
+                .body(Map.of("message", "로그아웃 되었습니다."));
 	}
 
     private String extractAccessToken(HttpServletRequest req) {
@@ -128,7 +133,7 @@ public class AuthController {
         long maxAgeSeconds = Math.max(1, (expiresAtMillis - System.currentTimeMillis()) / 1000);
         return ResponseCookie.from(name, value)
                 .httpOnly(httpOnly)
-                .secure(false) // TODO: 배포 환경에서는 true 로 전환
+                .secure(cookieSecure)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(Duration.ofSeconds(maxAgeSeconds))

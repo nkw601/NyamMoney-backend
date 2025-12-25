@@ -43,7 +43,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173", // 실제 Vue dev server
                 "http://localhost:5500", // ws-test.html 테스트용
-                "http://localhost:8080"  // (선택) 자기 자신
+                "http://localhost:8080"
         ));
 
         // 허용 메서드
@@ -110,8 +110,8 @@ public class SecurityConfig {
                         //.requestMatchers("/api/v1/users/**").authenticated()
 
                         // ✅ 그 외도 인증 필요
-                        //.anyRequest().authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
+//                        .anyRequest().permitAll()
                 )
                 // 🔹 기본 로그인 기능 비활성화 (JWT만 사용)
                 .httpBasic(h -> h.disable())

@@ -32,7 +32,7 @@ public class AiConfig {
                         .build();
 
         JedisPooled jedis = new JedisPooled(
-                new HostAndPort("localhost", 16379),
+                new HostAndPort("localhost", 6379),
                 config
         );
 
