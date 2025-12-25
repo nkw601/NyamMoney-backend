@@ -43,8 +43,15 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173", // 실제 Vue dev server
                 "http://localhost:5500", // ws-test.html 테스트용
-                "http://localhost:8080"
+                "http://localhost:8080",
+                "https://nyammoney.kr",
+                "https://www.nyammoney.kr",
+                "https://api.nyammoney.kr"
         ));
+        
+        config.setAllowedOriginPatterns(List.of(
+                "https://*.vercel.app"
+            ));
 
         // 허용 메서드
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

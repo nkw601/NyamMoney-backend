@@ -133,7 +133,7 @@ public class AuthController {
         long maxAgeSeconds = Math.max(1, (expiresAtMillis - System.currentTimeMillis()) / 1000);
         return ResponseCookie.from(name, value)
                 .httpOnly(httpOnly)
-                .secure(cookieSecure)
+                .secure(true)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(Duration.ofSeconds(maxAgeSeconds))
@@ -143,8 +143,8 @@ public class AuthController {
     private ResponseCookie expireCookie(String name) {
         return ResponseCookie.from(name, "")
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ZERO)
                 .build();
