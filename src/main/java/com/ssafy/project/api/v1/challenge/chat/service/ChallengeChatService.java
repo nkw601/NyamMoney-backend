@@ -1,6 +1,10 @@
 package com.ssafy.project.api.v1.challenge.chat.service;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 import org.springframework.stereotype.Service;
 
@@ -29,10 +33,29 @@ public class ChallengeChatService {
     	challengeChatMapper.insertMessage(message);
     }
 
-	public List<ChallengeChatMessage> getChatHistory(Long challengeId, Long userId) {
+	public List<ChallengeChatMessage> getChatHistory(Long challengeId, Long userId, String before, int size) {
 	    validateParticipant(challengeId, userId);
 
-	    return challengeChatMapper.findByChallengeId(challengeId);
+	    LocalDateTime beforeTime = parseBefore(before);
+	    if (beforeTime == null) {
+	    	beforeTime = LocalDateTime.now();
+	    }
+
+	    List<ChallengeChatMessage> descList =
+	        challengeChatMapper.findByChallengeIdBefore(challengeId, beforeTime, size);
+
+	    // 최신순으로 가져오므로 클라이언트 표시용으로 오름차순 정렬
+	    Collections.sort(descList, Comparator.comparing(ChallengeChatMessage::getSentAt));
+	    return descList;
+	}
+
+	private LocalDateTime parseBefore(String before) {
+		if (before == null || before.isBlank()) return null;
+		try {
+			return LocalDateTime.parse(before);
+		} catch (DateTimeParseException e) {
+			return null;
+		}
 	}
 
 }

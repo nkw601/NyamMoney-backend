@@ -12,7 +12,7 @@ import com.ssafy.project.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/challenges")
+@RequestMapping("/api/v1/challenges")
 public class ChallengeChatQueryController {
     private final ChallengeChatService challengeChatService;
     public ChallengeChatQueryController(ChallengeChatService challengeChatService) {
@@ -22,7 +22,9 @@ public class ChallengeChatQueryController {
 
     @GetMapping("/{challengeId}/chats")
     public List<ChallengeChatMessage> getChatHistory(
-            @PathVariable Long challengeId
+            @PathVariable Long challengeId,
+            @RequestParam(name = "before", required = false) String before,
+            @RequestParam(name = "size", defaultValue = "30") int size
     ) {
         UserPrincipal principal =
             (UserPrincipal) SecurityContextHolder
@@ -32,6 +34,6 @@ public class ChallengeChatQueryController {
 
         Long userId = principal.getUserId();
 
-        return challengeChatService.getChatHistory(challengeId, userId);
+        return challengeChatService.getChatHistory(challengeId, userId, before, size);
     }
 }
