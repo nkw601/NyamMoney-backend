@@ -53,7 +53,7 @@ public class ApiDataServiceImpl implements ApiDataService {
      * 시작 지점
      * =========================
      */
-    // @PostConstruct
+    @PostConstruct
     @Async
     public void init() {
         log.info("🔥 fetchDataAndStore START");

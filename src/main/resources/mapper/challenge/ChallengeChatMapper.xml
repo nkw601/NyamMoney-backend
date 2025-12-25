@@ -38,7 +38,7 @@
 
   <select id="findByChallengeIdBefore"
         resultType="com.ssafy.project.api.v1.challenge.chat.dto.ChallengeChatMessage">
-
+		<![CDATA[
 	    SELECT
 	        challenge_id     AS challengeId,
 	        sender_id        AS senderId,
@@ -50,7 +50,7 @@
 	      AND sent_at < #{before}
 	    ORDER BY sent_at DESC
 	    LIMIT #{size}
-	
+	  	]]>
 	</select>
   
 
